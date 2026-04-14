@@ -4502,9 +4502,9 @@ MonoBehaviour:
   CdY: 0.815
   CdZ: 0.7
   AddedMassX: 4
-  AddedMassY: 5
-  AddedMassZ: 5
-  AccelerationFilterTimeConstant: 0.05
+  AddedMassY: 35
+  AddedMassZ: 35
+  AccelerationFilterTimeConstant: 0.5
   MaxAddedMassForcePerAxis: 200
   DrawForces: 0
   AppliedDragForce: {x: 0, y: 0, z: 0}
@@ -6235,9 +6235,9 @@ MonoBehaviour:
   CdY: 1.212
   CdZ: 0.84
   AddedMassX: 0
-  AddedMassY: 2
-  AddedMassZ: 2
-  AccelerationFilterTimeConstant: 0.1
+  AddedMassY: 10
+  AddedMassZ: 10
+  AccelerationFilterTimeConstant: 0.5
   MaxAddedMassForcePerAxis: 200
   DrawForces: 0
   AppliedDragForce: {x: 0, y: 0, z: 0}
@@ -6565,9 +6565,9 @@ MonoBehaviour:
   CdY: 0.924
   CdZ: 0.804
   AddedMassX: 3
-  AddedMassY: 4
-  AddedMassZ: 4
-  AccelerationFilterTimeConstant: 0.1
+  AddedMassY: 20
+  AddedMassZ: 20
+  AccelerationFilterTimeConstant: 0.5
   MaxAddedMassForcePerAxis: 200
   DrawForces: 0
   AppliedDragForce: {x: 0, y: 0, z: 0}
@@ -11692,9 +11692,9 @@ MonoBehaviour:
   CdY: 0.994
   CdZ: 1.125
   AddedMassX: 0
-  AddedMassY: 2
-  AddedMassZ: 2
-  AccelerationFilterTimeConstant: 0.1
+  AddedMassY: 10
+  AddedMassZ: 10
+  AccelerationFilterTimeConstant: 0.5
   MaxAddedMassForcePerAxis: 200
   DrawForces: 0
   AppliedDragForce: {x: 0, y: 0, z: 0}
@@ -13235,7 +13235,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1947155835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13248,16 +13248,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b57b572a9dd0ba845a1838f949593174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PerlinTerrainGenerator
-  heightmapResolution: 1025
+  heightmapResolution: 513
   terrainWidth: 20
   terrainLength: 20
   terrainHeight: 0.1
-  noiseScaleX: 20
-  noiseScaleZ: 20
+  noiseScaleX: 100
+  noiseScaleZ: 100
   offsetX: 0
   offsetZ: 0
   centerAroundZero: 1
-  generateOnStart: 1
+  useOctaves: 0
+  octaves: 4
+  persistence: 0.5
+  lacunarity: 2
+  generateOnStart: 0
 --- !u!154 &1947155836
 TerrainCollider:
   m_ObjectHideFlags: 0

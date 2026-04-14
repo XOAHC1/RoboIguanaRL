@@ -23,6 +23,9 @@ public class JointAngleDebug : MonoBehaviour
     public ArticulationBody kneeRL;
     public ArticulationBody kneeRR;
 
+    
+    public ArticulationBody Spinejoint;
+
     [Tooltip("Print every N physics steps")]
     public int printEvery = 10;
 
@@ -34,6 +37,7 @@ public class JointAngleDebug : MonoBehaviour
         if (_counter % Mathf.Max(1, printEvery) != 0) return;
 
         Debug.Log(
+            $"Spine deg: Spine joint {Deg(Spinejoint):F2} | " +
             $"HIPyaw deg: FL {Deg(hipFLyaw):F2}, FR {Deg(hipFRyaw):F2}, RL {Deg(hipRLyaw):F2}, RR {Deg(hipRRyaw):F2} | " +
             $"HIP deg: FL {Deg(hipFL):F2}, FR {Deg(hipFR):F2}, RL {Deg(hipRL):F2}, RR {Deg(hipRR):F2} | " +
             $"SEA deg: FL {Deg(SEAFL):F2}, FR {Deg(SEAFR):F2}, RL {Deg(SEARL):F2}, RR {Deg(SEARR):F2} | " +

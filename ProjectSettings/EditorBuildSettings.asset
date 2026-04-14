@@ -5,9 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/AskoAlgae.unity
     guid: 8124e5870f4fd4c779e7a5f994e84ad1
+  - enabled: 1
+    path: Assets/Scenes/KTH Tank RoboIguana.unity
+    guid: 17bccd10618ff1c4b91b2cdbf818540a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 374e31f3a868fc84eb316601a44d8b57,
       type: 3}

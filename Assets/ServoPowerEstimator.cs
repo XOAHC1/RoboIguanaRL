@@ -4,34 +4,21 @@ using System.Collections.Generic;
 [RequireComponent(typeof(ArticulationBody))]
 public class ServoPowerEstimator : MonoBehaviour
 {
-    [Header("Motor parameters (output referred)")]
-    public float Kt = 0.83f;       // Nm/A
-    public float Ke = 0.98f;       // V·s/rad
-    public float R = 1.138f;       // Ohm
-    public float tauC = 0.1f;      // Coulomb friction Nm
-    public float viscousB = 0.02f; // Nm/(rad/s)
-
     [Header("Computed values (read only)")]
     public float driveTorqueNm;      // Estimated PD torque
-    public float solverTorqueNm;     // Unity drive torque
-    public float omegaRadPerSec;
-    public float currentA;
-    public float voltageV;
-    public float stiffness;
-    public float damping;
+    public float omegaRadPerSec;     // Joint angular velocity (rad/s)
+    public float mechanicalPowerW;   // Instantaneous mechanical power (W)
 
-    public float mechanicalPowerW;
-    public float resistiveLossW;
-    public float electricalPowerW;
-    public float electricalPowerConsumed;
+    [Header("Energy")]
+    public float mechanicalEnergyJ;  // Accumulated mechanical energy (J)
 
     public float jointAngleRad;
     public float targetAngleRad;
 
-    private ArticulationBody joint;
+    public float stiffness;
+    public float damping;
 
-    // REQUIRED for GetDriveForces
-    private List<float> driveForces = new List<float>(1);
+    private ArticulationBody joint;
 
     void Awake()
     {
@@ -49,13 +36,13 @@ public class ServoPowerEstimator : MonoBehaviour
         omegaRadPerSec = joint.jointVelocity[0];
 
         // -------------------------
-        // Convert target (degrees → radians)
+        // Convert target (deg → rad)
         // -------------------------
         targetAngleRad = drive.target * Mathf.Deg2Rad;
         float targetVelRad = drive.targetVelocity * Mathf.Deg2Rad;
 
         // -------------------------
-        // PD torque
+        // PD torque calculation
         // τ = Kp*error + Kd*vel_error
         // -------------------------
         float posError = targetAngleRad - jointAngleRad;
@@ -68,46 +55,27 @@ public class ServoPowerEstimator : MonoBehaviour
             drive.stiffness * posError +
             drive.damping * velError;
 
-        // Apply force limit
+        // Apply torque limit
         driveTorqueNm = Mathf.Clamp(
             driveTorqueNm,
             -drive.forceLimit,
             drive.forceLimit);
 
         // -------------------------
-        // Friction model
+        // Mechanical power
         // -------------------------
-        float frictionTorque =
-            tauC * Mathf.Sign(omegaRadPerSec) +
-            viscousB * omegaRadPerSec;
+        mechanicalPowerW = driveTorqueNm * omegaRadPerSec;
 
-        float totalMotorTorque = driveTorqueNm - frictionTorque;
+        // Only count positive power (motor consuming energy)
+        float consumedPower = Mathf.Max(0f, mechanicalPowerW);
 
-        // -------------------------
-        // Electrical model
-        // τ = Kt * I
-        // V = IR + Ke ω
-        // -------------------------
-        currentA = totalMotorTorque / Kt;
-        voltageV = currentA * R + Ke * omegaRadPerSec;
-
-        mechanicalPowerW = totalMotorTorque * omegaRadPerSec;
-        resistiveLossW = currentA * currentA * R;
-        electricalPowerW = voltageV * currentA;
-
-        // No regeneration
-        electricalPowerConsumed = Mathf.Max(0f, electricalPowerW);
+        // Integrate mechanical energy
+        mechanicalEnergyJ += consumedPower * Time.fixedDeltaTime;
     }
 
-    // Read real drive torque after physics step
-    void LateUpdate()
+    // Optional: Reset energy counter
+    public void ResetEnergy()
     {
-        driveForces.Clear();
-        joint.GetDriveForces(driveForces);
-
-        if (driveForces.Count > 0)
-            solverTorqueNm = driveForces[0];
-        else
-            solverTorqueNm = 0f;
+        mechanicalEnergyJ = 0f;
     }
 }

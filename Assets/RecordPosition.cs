@@ -1,58 +1,75 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.IO;
 using System.Collections;
+using SmarcGUI.KeyboardControllers;
 
 public class RecordPosition : MonoBehaviour
 {
     public Transform legBase;
     public Transform footTip;
 
+    public RoboIguanaIKController controller;
+
     private StreamWriter writer;
     private bool isRecording = false;
-    private Coroutine delayedStartRoutine;
 
     void Start()
     {
-        string path = Application.dataPath + "/positionrecord.csv";
+        // Automatically find controller if not assigned
+        if (controller == null)
+            controller = GetComponent<RoboIguanaIKController>();
+
+        float freq = 0f;
+        float phaseShift = 0f;
+        float spineAmp = 0f;
+        float spineStiff = 0f;
+
+        if (controller != null)
+        {
+            freq = controller.frequencyHz;
+            phaseShift = controller.PhaseShift;
+            spineAmp = controller.spineAmplitudeDeg;
+            spineStiff = controller.spineStiffness;
+        }
+
+        // ===================== NEW LOGIC =====================
+        string stiffLabel = "stiff_unknown";
+
+        if (controller != null && controller.spine_Link != null)
+        {
+            if (controller.spine_Link.jointType == ArticulationJointType.FixedJoint)
+            {
+                stiffLabel = "stiff_rigid";
+            }
+            else
+            {
+                stiffLabel = "stiff_" + spineStiff.ToString("F2");
+            }
+        }
+        // ====================================================
+
+        // Construct filename from experiment parameters
+        string fileName =
+            "position_f" + freq.ToString("F2") +
+            "_phase" + phaseShift.ToString("F1") +
+            "_amp" + spineAmp.ToString("F1") +
+            "_" + stiffLabel +
+            ".csv";
+
+        string path = Application.dataPath + "/" + fileName;
+
         writer = new StreamWriter(path);
         writer.WriteLine("time,x_rel,y_rel,z_rel");
 
-        Toggle[] toggles = FindObjectsByType<Toggle>(FindObjectsSortMode.None);
+        Debug.Log("Recording to: " + path);
 
-        foreach (Toggle t in toggles)
-        {
-            if (t.gameObject.name == "KeyboardToggle")
-            {
-                t.onValueChanged.AddListener(OnToggleChanged);
-                Debug.Log("Recording linked to KeyboardToggle");
-            }
-        }
-    }
-
-    void OnToggleChanged(bool isOn)
-    {
-        Debug.Log("Toggle state = " + isOn);
-
-        if (isOn)
-        {
-            // Start 2-second delayed recording
-            delayedStartRoutine = StartCoroutine(StartRecordingAfterDelay(2f));
-        }
-        else
-        {
-            // Stop recording immediately
-            if (delayedStartRoutine != null)
-                StopCoroutine(delayedStartRoutine);
-
-            isRecording = false;
-            Debug.Log("Recording stopped");
-        }
+        // Start recording automatically after delay
+        StartCoroutine(StartRecordingAfterDelay(5f));
     }
 
     IEnumerator StartRecordingAfterDelay(float delay)
     {
-        Debug.Log("Waiting 2 seconds before recording...");
+        Debug.Log("Waiting " + delay + " seconds before recording...");
         yield return new WaitForSeconds(delay);
 
         isRecording = true;
@@ -71,7 +88,8 @@ public class RecordPosition : MonoBehaviour
         }
 
         Vector3 pRel = legBase.InverseTransformPoint(footTip.position);
-        writer.WriteLine($"{Time.time},{pRel.x},{pRel.y},{pRel.z}");
+
+        writer.WriteLine($"{Time.fixedTime},{pRel.x},{pRel.y},{pRel.z}");
         writer.Flush();
     }
 

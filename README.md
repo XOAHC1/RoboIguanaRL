@@ -325,7 +325,7 @@ This script calculates:
 
 - mechanical power of one motor
 - total mechanical energy consumed by that motor
-！[Servo Power Estimator](images/servo_power_estimator.png) 
+![Servo Power Estimator](images/servo_power_estimator.png) 
 ### Usage
 
 Attach it to an **Articulation Body** with a **revolute joint**.

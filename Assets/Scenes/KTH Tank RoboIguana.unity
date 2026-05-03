@@ -2085,7 +2085,7 @@ MonoBehaviour:
   b: 0.09
   c: 0.172
   d: 0.2
-  centerRight: {x: -0.07, y: -0.18, z: -0.25}
+  centerRight: {x: 0.07, y: -0.18, z: -0.25}
   centerLeft: {x: 0.07, y: -0.18, z: -0.25}
   Rx: 0.08
   Ry: 0.04
@@ -2476,6 +2476,7 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
+  joint: {fileID: 0}
 --- !u!65 &397588908
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3295,7 +3296,6 @@ MonoBehaviour:
   AddedMassX: 4
   AddedMassY: 5
   AddedMassZ: 5
-  MaxAddedMassForcePerAxis: 200
 --- !u!4 &563475027 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
@@ -4368,7 +4368,6 @@ MonoBehaviour:
   AddedMassX: 0.94
   AddedMassY: 2.07
   AddedMassZ: 2.07
-  MaxAddedMassForcePerAxis: 200
 --- !u!1 &958262102
 GameObject:
   m_ObjectHideFlags: 0
@@ -4554,7 +4553,6 @@ MonoBehaviour:
   AddedMassX: 2.85
   AddedMassY: 3.776
   AddedMassZ: 3.776
-  MaxAddedMassForcePerAxis: 200
 --- !u!1 &1013230808
 GameObject:
   m_ObjectHideFlags: 0
@@ -7525,7 +7523,6 @@ MonoBehaviour:
   AddedMassX: 0.041
   AddedMassY: 1.96
   AddedMassZ: 1.96
-  MaxAddedMassForcePerAxis: 200
 --- !u!1 &1759722222
 GameObject:
   m_ObjectHideFlags: 0

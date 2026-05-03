@@ -87,7 +87,7 @@ namespace SmarcGUI.KeyboardControllers
         // =========================================================
 
         [Header("Foot trajectory")]
-        public Vector3 centerRight = new Vector3(-0.07f, -0.18f, -0.25f);
+        public Vector3 centerRight = new Vector3(0.07f, -0.18f, -0.25f);
         public Vector3 centerLeft = new Vector3(0.07f, -0.18f, -0.25f);
 
         public float Rx = 0.08f;

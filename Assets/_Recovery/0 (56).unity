@@ -1969,10 +1969,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 346296831}
+  - component: {fileID: 346296832}
   - component: {fileID: 346296833}
+  - component: {fileID: 346296834}
   - component: {fileID: 346296835}
-  - component: {fileID: 346296837}
-  - component: {fileID: 346296836}
   m_Layer: 0
   m_Name: RoboIguana
   m_TagString: robot
@@ -1989,14 +1989,14 @@ Transform:
   m_GameObject: {fileID: 346296830}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.2, y: -2.92, z: 0}
+  m_LocalPosition: {x: -0.2, y: -2.81, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1877632282}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &346296833
+--- !u!114 &346296832
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2005,51 +2005,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 346296830}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78924ac5b9b67d8428562e24a35d44b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 187337f4fe5d3534780defa36519e363, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RecordPosition
-  legBase: {fileID: 152723889}
-  footTip: {fileID: 1363190114}
-  controller: {fileID: 0}
---- !u!114 &346296835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 346296830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f28a868500a4be4ab77a761a13249ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TotalEnergyRecorder
-  controller: {fileID: 0}
-  startLoggingTime: 5
-  logInterval: 0.02
---- !u!114 &346296836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 346296830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6ccd65f769e3e342ac72a4c263c2035, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ExperimentRunner
---- !u!114 &346296837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 346296830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30f2e67d41651b446bc013f086d060ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SmarcGUI.KeyboardControllers.RoboIguanaIKController
+  m_EditorClassIdentifier: SMARC.SMARCAssets::SmarcGUI.KeyboardControllers.RoboIguanaKeyboardControl
   hyFL: {fileID: 173308367}
   hyFR: {fileID: 478301744}
   hyRL: {fileID: 1129640554}
@@ -2076,19 +2034,61 @@ MonoBehaviour:
   kRR_Link: {fileID: 1812005740}
   spine: {fileID: 1619266105}
   spine_Link: {fileID: 864638642}
-  PhaseShift: 0
+  PhaseShift: 1
   spineAmplitudeDeg: 0
-  spineStiffness: 500
-  frequencyHz: 0.5
+  spineStiffness: 1000
+  frequencyHz: 0.2
   startDelay: 5
   a: 0.116
   b: 0.09
   c: 0.172
   d: 0.2
-  centerRight: {x: -0.07, y: -0.18, z: -0.25}
+  centerRight: {x: 0.07, y: -0.18, z: -0.25}
   centerLeft: {x: 0.07, y: -0.18, z: -0.25}
   Rx: 0.08
   Ry: 0.04
+--- !u!114 &346296833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346296830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78924ac5b9b67d8428562e24a35d44b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RecordPosition
+  legBase: {fileID: 152723889}
+  footTip: {fileID: 1363190114}
+  controller: {fileID: 0}
+--- !u!114 &346296834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346296830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6ccd65f769e3e342ac72a4c263c2035, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+--- !u!114 &346296835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346296830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f28a868500a4be4ab77a761a13249ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TotalEnergyRecorder
+  controller: {fileID: 0}
+  startLoggingTime: 5
+  logInterval: 0.02
 --- !u!1 &363100052
 GameObject:
   m_ObjectHideFlags: 0
@@ -3296,6 +3296,10 @@ MonoBehaviour:
   AddedMassY: 5
   AddedMassZ: 5
   MaxAddedMassForcePerAxis: 200
+  DrawForces: 0
+  AppliedDragForce: {x: 0, y: 0, z: 0}
+  AppliedAddedMassForce: {x: 0, y: 0, z: 0}
+  RawLocalAcceleration: {x: 0, y: 0, z: 0}
 --- !u!4 &563475027 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
@@ -4369,6 +4373,10 @@ MonoBehaviour:
   AddedMassY: 2.07
   AddedMassZ: 2.07
   MaxAddedMassForcePerAxis: 200
+  DrawForces: 0
+  AppliedDragForce: {x: 0, y: 0, z: 0}
+  AppliedAddedMassForce: {x: 0, y: 0, z: 0}
+  RawLocalAcceleration: {x: 0, y: 0, z: 0}
 --- !u!1 &958262102
 GameObject:
   m_ObjectHideFlags: 0
@@ -4555,6 +4563,10 @@ MonoBehaviour:
   AddedMassY: 3.776
   AddedMassZ: 3.776
   MaxAddedMassForcePerAxis: 200
+  DrawForces: 0
+  AppliedDragForce: {x: 0, y: 0, z: 0}
+  AppliedAddedMassForce: {x: 0, y: 0, z: 0}
+  RawLocalAcceleration: {x: 0, y: 0, z: 0}
 --- !u!1 &1013230808
 GameObject:
   m_ObjectHideFlags: 0
@@ -7526,6 +7538,10 @@ MonoBehaviour:
   AddedMassY: 1.96
   AddedMassZ: 1.96
   MaxAddedMassForcePerAxis: 200
+  DrawForces: 0
+  AppliedDragForce: {x: 0, y: 0, z: 0}
+  AppliedAddedMassForce: {x: 0, y: 0, z: 0}
+  RawLocalAcceleration: {x: 0, y: 0, z: 0}
 --- !u!1 &1759722222
 GameObject:
   m_ObjectHideFlags: 0
@@ -8144,7 +8160,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1947155835
 MonoBehaviour:
   m_ObjectHideFlags: 0

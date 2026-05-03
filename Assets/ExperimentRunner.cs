@@ -18,10 +18,11 @@ public class ExperimentRunner : MonoBehaviour
         // Read parameters from command line
         // ==============================
 
-        float freq = GetArg("-frequency", 0.2f);
+        float freq = GetArg("-frequency", 0.4f);
         float phaseShift = GetArg("-phaseShift", 0f);
-        float spineAmp = GetArg("-spineAmp", 6f);
-        float spineStiff = GetArg("-spineStiff", 8.64f);
+        float spineAmp = GetArg("-spineAmp", 8f);
+        float spineStiff = GetArg("-spineStiff", 6.048f);
+
 
         // ==============================
         // Apply parameters to controller

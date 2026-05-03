@@ -139,7 +139,7 @@ RoboIguana is divided into multiple articulated segments.
 - A **flexible tail** is connected to the third torso.
 
 The base link acts as the reference body for the rest of the robot.
-[RoboIguana](images/RoboIguana.png) 
+![RoboIguana](images/RoboIguana.png) 
 ## Spine Joints
 
 The spine is modelled using revolute joints.
@@ -325,7 +325,7 @@ This script calculates:
 
 - mechanical power of one motor
 - total mechanical energy consumed by that motor
-！[Servo Power Estimator](images/servo_power_estimator.png) 
+![Servo Power Estimator](images/servo_power_estimator.png) 
 ### Usage
 
 Attach it to an **Articulation Body** with a **revolute joint**.

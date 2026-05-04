@@ -56,9 +56,16 @@ Before working on this project, read the documentation for:
 
 RoboIguana is built within the SMaRC Unity ecosystem.
 
-- Put the **RoboIguana** file at "the location where you put SMARCAssets\SMARCAssets\Runtime\Models"
+## Download and Setup Instructions
+### 1. Create a new folder in a suitable location on your computer.
 
-- Put the **ForcePointRoboIguana.cs**  and  **ForcePoint.cs**  at "the location where you put SMARCAssets\SMARCAssets\Runtime\Scripts\Force"
+### 2. In that folder, open terminal and run 
+```text
+git clone https://github.com/hyyakarere/RoboIguana
+git clone https://github.com/hyyakarere/SMARCAssets
+```so that there will be two folders there, **SMARCAssets** and **RoboIguana**.
+
+### 3. Open Unity hub, click **Add**. Select **Add project from disk**. Choose the **RoboIguana** folder. Open the project **RoboIguana** and wait for a while. Unity may take some time to import assets and compile scripts when opening the project for the first time. After the loading process is complete, the RoboIguana project should open successfully.
 
 ---
 

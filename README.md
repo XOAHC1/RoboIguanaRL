@@ -57,11 +57,8 @@ Before working on this project, read the documentation for:
 RoboIguana is built within the SMaRC Unity ecosystem.
 
 - Put the **RoboIguana** file at "the location where you put SMARCAssets\SMARCAssets\Runtime\Models"
-<<<<<<< HEAD
+
 - Put the **ForcePointRoboIguana.cs**  and  **ForcePoint.cs**  at "the location where you put SMARCAssets\SMARCAssets\Runtime\Scripts\Force"
-=======
-- Put the **ForcePointRoboIguana.cs** file at "the location where you put SMARCAssets\SMARCAssets\Runtime\Scripts\Force"
->>>>>>> e675e7038084a9147d1438f4fbc4d1c7b09bbbe1
 
 ---
 

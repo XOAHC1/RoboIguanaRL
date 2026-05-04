@@ -63,7 +63,8 @@ RoboIguana is built within the SMaRC Unity ecosystem.
 ```text
 git clone https://github.com/hyyakarere/RoboIguana
 git clone https://github.com/hyyakarere/SMARCAssets
-```so that there will be two folders there, **SMARCAssets** and **RoboIguana**.
+```
+so that there will be two folders there, **SMARCAssets** and **RoboIguana**.
 
 ### 3. Open Unity hub, click **Add**. Select **Add project from disk**. Choose the **RoboIguana** folder. Open the project **RoboIguana** and wait for a while. Unity may take some time to import assets and compile scripts when opening the project for the first time. After the loading process is complete, the RoboIguana project should open successfully.
 

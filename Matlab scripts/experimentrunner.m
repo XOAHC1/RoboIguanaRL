@@ -1,4 +1,4 @@
-exe = "D:\KTH Mechatronics\Degree Project\Unity\Executables\rigid spine executable\SMARCUnityHDRP2.exe";
+exe = "C:\Users\jo_dr\OneDrive\Documents\CogSci\8SoSe26\RobIguana\Simulation\SimExecutable\SMARCUnityHDRP2.exe";
 
 freqs = [0.2, 0.22, 0.25,0.27,0.3,0.32,0.35,0.37,0.4];
 phaseShift = 0;

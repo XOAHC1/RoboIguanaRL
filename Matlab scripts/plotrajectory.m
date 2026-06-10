@@ -9,7 +9,7 @@ spineAmpList=[0];
 spineStiffList={'rigid'};
 %spineAmpList = [0,1,2,3,4,5,6,7,8,9,10];
 %spineStiffList = {5.184,6.048,6.912,7.776, 8.64,9.504,10.36,11.232,12.096};
-basePath = 'D:\KTH Mechatronics\Degree Project\Unity\Executables\rigid spine executable\SMARCUnityHDRP2_Data\';
+basePath = "C:\Users\jo_dr\OneDrive\Documents\CogSci\8SoSe26\RobIguana\Simulation\SimExecutable\SMARCUnityHDRP2_Data";
 
 saveFigPath = fullfile(basePath, 'TrajectoryPlots');
 if ~exist(saveFigPath, 'dir')

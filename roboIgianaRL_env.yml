@@ -1,0 +1,12 @@
+name: roboIguanaRL
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.12
+  - pip
+  - pip:
+    - setuptools==68.2.2
+    - mlagents==1.1.0
+    - mlagents-envs==1.1.0
+    - torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121 

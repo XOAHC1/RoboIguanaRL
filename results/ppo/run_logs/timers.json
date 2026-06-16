@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1781607493",
+        "python_version": "3.10.12 | packaged by conda-forge | (main, Jun 23 2023, 22:34:57) [MSC v.1936 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\jo_dr\\.conda\\envs\\roboIguanaRL\\Scripts\\mlagents-learn",
+        "mlagents_version": "1.1.0",
+        "mlagents_envs_version": "1.1.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.2.2+cpu",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1781607516"
+    },
+    "total": 23.211252999986755,
+    "count": 1,
+    "self": 0.008587699965573847,
+    "children": {
+        "run_training.setup": {
+            "total": 0.11031920000095852,
+            "count": 1,
+            "self": 0.11031920000095852
+        },
+        "TrainerController.start_learning": {
+            "total": 23.092346100020222,
+            "count": 1,
+            "self": 0.0006826000462751836,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 23.091645999986213,
+                    "count": 1,
+                    "self": 23.091645999986213
+                },
+                "trainer_threads": {
+                    "total": 1.300009898841381e-06,
+                    "count": 1,
+                    "self": 1.300009898841381e-06
+                },
+                "TrainerController._save_models": {
+                    "total": 1.619997783564031e-05,
+                    "count": 1,
+                    "self": 1.619997783564031e-05
+                }
+            }
+        }
+    }
+}

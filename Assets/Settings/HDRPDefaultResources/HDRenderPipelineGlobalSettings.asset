@@ -154,6 +154,7 @@ MonoBehaviour:
       sssCustomDownsampleSteps: 0
       msaaMode: 1
       materialQuality: 0
+  m_Version: 14
   m_Settings:
     m_SettingsList:
       m_List:
@@ -195,30 +196,9 @@ MonoBehaviour:
       - rid: 8045578699034066946
       - rid: 8045578699034066947
       - rid: 8045578699034066948
+      - rid: 4584525095081082881
     m_RuntimeSettings:
-      m_List:
-      - rid: 311934289801117801
-      - rid: 311934289801117803
-      - rid: 311934289801117805
-      - rid: 311934289801117806
-      - rid: 311934289801117808
-      - rid: 311934289801117809
-      - rid: 311934289801117810
-      - rid: 311934289801117813
-      - rid: 311934289801117814
-      - rid: 311934289801117815
-      - rid: 311934289801117816
-      - rid: 311934289801117818
-      - rid: 311934289801117819
-      - rid: 311934289801117820
-      - rid: 311934289801117824
-      - rid: 311934289801117825
-      - rid: 311934289801117828
-      - rid: 311934289801117830
-      - rid: 311934289801117831
-      - rid: 311934289801117832
-      - rid: 8045578699034066946
-      - rid: 8045578699034066948
+      m_List: []
   renderingLayerNames:
   - Default
   lightLayerName0: 
@@ -244,7 +224,6 @@ MonoBehaviour:
     obsoleteHasProbeVolumes:
       m_Keys: []
       m_Values: 
-  m_Version: 14
   references:
     version: 2
     RefIds:
@@ -1164,6 +1143,23 @@ MonoBehaviour:
         m_setupCS: {fileID: 7200000, guid: 33be2e9a5506b2843bdb2bdff9cad5e1, type: 3}
         m_preTaaCS: {fileID: 7200000, guid: a679dba8ec4d9ce45884a270b0e22dda, type: 3}
         m_taaCS: {fileID: 7200000, guid: 3923900e2b41b5e47bc25bfdcbcdc9e6, type: 3}
+    - rid: 4584525095081082881
+      type: {class: WorldRenderPipelineResources, ns: UnityEngine.PathTracing.Core,
+        asm: Unity.PathTracing.Runtime}
+      data:
+        _version: 3
+        _blitCubemap: {fileID: 7200000, guid: 5a992812cb320d146a66cc600200cce7, type: 3}
+        _blitGrayScaleCookie: {fileID: 7200000, guid: 557fa399e33bf7647bda5697c5c158df,
+          type: 3}
+        _setAlphaChannelShader: {fileID: 7200000, guid: 5efaea0e81c66334aa9d062d6573e6fd,
+          type: 3}
+        _environmentImportanceSamplingBuild: {fileID: 7200000, guid: 5bb2534d2411d344cbc54f880232640f,
+          type: 3}
+        _skyBoxMesh: {fileID: 4300000, guid: 0529e6c5f6dea8c4a8c2835ed7de57cb, type: 2}
+        _sixFaceSkyBoxMesh: {fileID: 4300000, guid: a80925ceebd011741b42509226cefc74,
+          type: 2}
+        _buildLightGridShader: {fileID: 7200000, guid: 16e47c1641bd0104e92b624601457bb0,
+          type: 3}
     - rid: 8045578699034066944
       type: {class: RayTracingRenderPipelineResources, ns: UnityEngine.Rendering.UnifiedRayTracing,
         asm: Unity.UnifiedRayTracing.Runtime}

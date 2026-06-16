@@ -12,6 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/KTH Tank RoboIguana.unity
     guid: 17bccd10618ff1c4b91b2cdbf818540a
   m_configObjects:
+    com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f,
+      type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 374e31f3a868fc84eb316601a44d8b57,
       type: 3}
-  m_UseUCBPForAssetBundles: 0

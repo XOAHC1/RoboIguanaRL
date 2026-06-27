@@ -1,13 +1,21 @@
 using UnityEngine;
 
 public class ContactDetector : MonoBehaviour
+
+    public bool isInContact = false;
 {
     void OnCollisionEnter(Collision collision)
     {
-        foreach (ContactPoint contact in collision.contacts)
-        {
-            Debug.Log("Contact point: " + contact.point);
-            Debug.Log("Contact normal: " + contact.normal);
-        }
+        isInContact = true;        
+    }
+
+    void OnCollisionExit(Collision collision)
+    {
+        isInContact = false;
+    }
+
+    void Reset()
+    {
+        isInContact = false;
     }
 }

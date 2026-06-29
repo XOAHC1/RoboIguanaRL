@@ -100,6 +100,7 @@ public class RoboIguanaCPGController
     private float[] OrientationOffset;      // Orientation of the foot trajectory, Phi
     private float[] OrientationOffsetShifts; // Change in foot Trajectory orientation, Phi'  controlled via psy
 
+    private float convergence = 0.1f; // Convergence rate for amplitude shifts
 
 
     // =========================================================
@@ -116,13 +117,15 @@ public class RoboIguanaCPGController
     {
         // Reset the CPG parameters to their initial values
 
-        Phases = (float[])initialPhases.Clone();                    // Reset phases to initial values
-        PhaseShifts = new float[6] { 1f, 1f, 1f, 1f, 1f, 1f };      // Reset phase shifts to default values
-        Amplitudes = (float[])initialAmplitudes.Clone();            // Reset amplitudes to initial values
-        AmplitudeShifts = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };  // Reset amplitude shifts to default values
-        AmplitudeShifts2 = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f }; // Reset amplitude shifts to default values
+        Phases = (float[])initialPhases.Clone();                        // Reset phases to initial values
+        PhaseShifts = new float[6] { 1f, 1f, 1f, 1f, 1f, 1f };          // Reset phase shifts to default values
+        Amplitudes = (float[])initialAmplitudes.Clone();                // Reset amplitudes to initial values
+        AmplitudeShifts = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };      // Reset amplitude shifts to default values
+        AmplitudeShifts2 = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };     // Reset amplitude shifts to default values
         OrientationOffset = new float[4] { 0f, 0f, 0f, 0f };            // Reset foot rotations to default values
-        OrientationOffsetShifts = new float[4] { 0f, 0f, 0f, 0f };       // Reset foot rotation shifts to default values
+        OrientationOffsetShifts = new float[4] { 0f, 0f, 0f, 0f };      // Reset foot rotation shifts to default values
+
+        UpdatePose(); // Update the robot's pose based on the reset CPG parameters
 
     }
 
@@ -134,24 +137,31 @@ public class RoboIguanaCPGController
         AmplitudeShifts = AmplitudeShifts + AmplitudeShifts2 * TimeStep;                // Update amplitude shifts based on second derivative
         OrientationOffset = OrientationOffset + OrientationOffsetShifts * TimeStep;     // Update foot rotations based on rotation shifts
 
+        UpdatePose(); // Update the robot's pose based on the updated CPG parameters
+    }
+
+    public void UpdatePose()
+    {
         // update limb positions
         var yaws = new float[3];
         var hips = new float[3];
         var knees = new float[3];
 
-        for (int i = 0; i < 4; i++) {
+        // update limb positions
+        for (int i = 0; i < 4; i++)
+        {
             (float x, float y, float z) p = GetFootPosition(Phases[i], Amplitudes[i], OrientationOffset[i]);
-            (yaws[i], hips[i], knees[i]) = InverseKinematics(p); 
+            (yaws[i], hips[i], knees[i]) = InverseKinematics(p);
         }
         ApplyAngles(yaws, hips, knees)
 
         // update spine position
         var float[] spineAngles = new float[2];
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++)
+        {
             spineAngles[i] = GetSpineAngles(Phases[i + 4], Amplitudes[i + 4]);
         }
         ApplySpineAngle(spineAngles)
-
     }
 
     public void ApplyActions(ActionBuffer actions)
@@ -162,17 +172,22 @@ public class RoboIguanaCPGController
         // Assuming the action space is structured as follows:
         //      0-5: Phase shifts for each leg and spine
         //      6-11: Amplitude shifts for each leg and spine
-        //      12-15: Foot rotation shifts for each leg
+        //      12-15: trajectory rotation shifts for each leg
 
+        // update phase and amplitude for all joints
         for (int i = 0; i < 6; i++)
         {
-            PhaseShifts[i] = continuous[i];          // Update phase shifts
-            AmplitudeShifts[i] = continuous[i + 6];  // Update amplitude shifts
+            // adapt phase shifts
+            PhaseShifts[i] = continuous[i];
+
+            // adapt second derivative of amplitude 
+            AmplitudeShifts2[i] =  convergence * ((convergence / 4) * (continuous[i + 6] - Amplitudes[i]) - AmplitudeShifts[i]);
         }
 
+        // update trajectory rotation shifts for all legs
         for (int i = 0; i < 4; i++)
         {
-            OrientationOffsetShifts[i] = continuous[i + 12]; // Update foot rotation shifts
+            OrientationOffsetShifts[i] = continuous[i + 12]; // Update trajectory rotation shifts
         }
     }
 

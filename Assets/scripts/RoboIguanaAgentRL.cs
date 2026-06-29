@@ -2,6 +2,8 @@ using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
+using Force;
+using Unity.AppUI.UI;
 
 public class RoboIguanaAgentRL : Agent
 {
@@ -20,25 +22,17 @@ public class RoboIguanaAgentRL : Agent
         rb = GetComponent<Rigidbody>();
         CPG = GetComponent<RoboIguanaCPGController>();
         decisionRequester = GetComponent<DecisionRequester>();
-        TargetDirection = Vector3.forward;                              // Initialize target direction
-        TargetVelocity = 3f;                                            // Initialize target velocity
+
+        ResetTarget();
     }
 
 
     public override void OnEpisodeBegin()
     {
-        // Reset environment and agent state here
 
-        // Random horizontal direction (unit vector)
-        float DirectionRange = 1f; // Range for random direction
-        float randX = Random.Range(-DirectionRange, DirectionRange);
-        float randZ = Random.Range(-DirectionRange, DirectionRange);
-        TargetDirection = new Vector3(randX, 0f, randZ);
+        ResetTarget();
 
-        // Random target velocity in a reasonable range (meters per second)
-        TargetVelocity = Random.Range(0.1f, 5f);
-
-        CPG.reset();
+        CPG.Reset();
 
         Debug.Log($"New Episode: Target Direction = {TargetDirection}, Target Velocity = {TargetVelocity}");
     }
@@ -48,14 +42,14 @@ public class RoboIguanaAgentRL : Agent
         // position and velocity observations
         //sensor.AddObservation(transform.localPosition);       // 3D
         sensor.AddObservation(transform.forward - TargetDirection);  // 3D      Difference between agent's forward direction and target direction
-        sensor.AddObservation(rb.velocity / TargetVelocity);    // 3D
+        sensor.AddObservation(rb.linearVelocity / TargetVelocity);    // 3D
         sensor.AddObservation(rb.angularVelocity);              // 3D
 
         // Contact Booleans
-        sensor.AddObservation(footFR.IsTouchingGround);         // 1D
-        sensor.AddObservation(footFL.IsTouchingGround);         // 1D
-        sensor.AddObservation(footHL.IsTouchingGround);         // 1D
-        sensor.AddObservation(footHR.IsTouchingGround);         // 1D
+        //sensor.AddObservation(footFR.IsTouchingGround);         // 1D
+        //sensor.AddObservation(footFL.IsTouchingGround);         // 1D
+        //sensor.AddObservation(footHL.IsTouchingGround);         // 1D
+        //sensor.AddObservation(footHR.IsTouchingGround);         // 1D
 
         // internal state
         sensor.AddObservation(CPG.GetPhases());                 // 6D
@@ -68,7 +62,7 @@ public class RoboIguanaAgentRL : Agent
 
     }
 
-    public override void OnActionsReceived(ActionBuffers buffers)
+    public override void OnActionReceived(ActionBuffers buffers)
     {
         // Process actions and apply them to the agent
         // Possible actions are: 
@@ -80,9 +74,28 @@ public class RoboIguanaAgentRL : Agent
         //          change intrinsic frequency
         //          change amplitude
 
-        CPG.applyActions(buffers);
+        CPG.ApplyActions(buffers);
 
     }
 
+    // in optimal deployment would be called by independent agent or human
+    public void ResetTarget()
+    // Randomly set a new target direction and velocity
+    {
+        // turn on for training, turn off for testing
+        bool randomMode = false;
+        if (randomMode) { 
+            // Random horizontal direction (unit vector)
+            Vector2 direction = Random.insideUnitCircle;
+            TargetDirection = new Vector3(direction.x, 0f, direction.y);
+
+            // Random target velocity in a reasonable range (meters per second)
+            TargetVelocity = Random.Range(0.1f, 5f);
+        } else {
+            // Fixed target direction and velocity for testing
+            TargetDirection = Vector3.forward;          // Initialize target direction
+            TargetVelocity = 3f;                        // Initialize target velocity
+        }
+    }
 
 }

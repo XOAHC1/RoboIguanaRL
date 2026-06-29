@@ -580,12 +580,6 @@ Transform:
   - {fileID: 832185528}
   m_Father: {fileID: 190218840}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &152723889 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1101948116815116915, guid: 27e256403f48e4a4ab5838b7638bbc10,
-    type: 3}
-  m_PrefabInstance: {fileID: 6835108181693456969}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &169027589
 GameObject:
   m_ObjectHideFlags: 0
@@ -1387,6 +1381,7 @@ GameObject:
   - component: {fileID: 290818720}
   - component: {fileID: 290818719}
   - component: {fileID: 290818718}
+  - component: {fileID: 290818721}
   m_Layer: 0
   m_Name: leg_fr3
   m_TagString: Untagged
@@ -1425,7 +1420,7 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 1
@@ -1488,6 +1483,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 290818716}
   m_Mesh: {fileID: 495800859769120818, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
+--- !u!114 &290818721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290818716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  isInContact: 0
 --- !u!1 &299982753
 GameObject:
   m_ObjectHideFlags: 0
@@ -1937,10 +1945,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 346296831}
-  - component: {fileID: 346296833}
-  - component: {fileID: 346296835}
-  - component: {fileID: 346296837}
-  - component: {fileID: 346296836}
+  - component: {fileID: 346296840}
+  - component: {fileID: 346296841}
+  - component: {fileID: 346296844}
   m_Layer: 0
   m_Name: RoboIguana
   m_TagString: robot
@@ -1964,7 +1971,7 @@ Transform:
   - {fileID: 1877632282}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &346296833
+--- !u!114 &346296840
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1973,13 +1980,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 346296830}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78924ac5b9b67d8428562e24a35d44b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RecordPosition
-  legBase: {fileID: 152723889}
-  footTip: {fileID: 1363190114}
-  controller: {fileID: 0}
---- !u!114 &346296835
+  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
+  m_BrainParameters:
+    VectorObservationSize: 1
+    NumStackedVectorObservations: 1
+    m_ActionSpec:
+      m_NumContinuousActions: 0
+      BranchSizes: 01000000
+    VectorActionSize: 01000000
+    VectorActionDescriptions: []
+    VectorActionSpaceType: 0
+    hasUpgradedBrainParametersWithActionSpec: 1
+  m_Model: {fileID: 0}
+  m_InferenceDevice: 0
+  m_BehaviorType: 0
+  m_BehaviorName: My Behavior
+  TeamId: 0
+  m_UseChildSensors: 1
+  m_UseChildActuators: 1
+  m_DeterministicInference: 0
+  m_ObservableAttributeHandling: 0
+--- !u!114 &346296841
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1988,13 +2011,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 346296830}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f28a868500a4be4ab77a761a13249ce, type: 3}
+  m_Script: {fileID: 11500000, guid: 18892df27c6dad7428d3bec365f3aad3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TotalEnergyRecorder
-  controller: {fileID: 0}
-  startLoggingTime: 5
-  logInterval: 0.02
---- !u!114 &346296836
+  m_EditorClassIdentifier: '::'
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+  footFL: {fileID: 0}
+  footFR: {fileID: 0}
+  footHL: {fileID: 0}
+  footHR: {fileID: 0}
+--- !u!114 &346296844
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2003,21 +2031,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 346296830}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6ccd65f769e3e342ac72a4c263c2035, type: 3}
+  m_Script: {fileID: 11500000, guid: 9813b72e51c99644aa1ed2686ce0d525, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ExperimentRunner
---- !u!114 &346296837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 346296830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30f2e67d41651b446bc013f086d060ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SmarcGUI.KeyboardControllers.RoboIguanaIKController
+  m_EditorClassIdentifier: '::'
   hyFL: {fileID: 173308367}
   hyFR: {fileID: 478301744}
   hyRL: {fileID: 1129640554}
@@ -2030,37 +2046,46 @@ MonoBehaviour:
   kFR: {fileID: 1615696146}
   kRL: {fileID: 466311423}
   kRR: {fileID: 628073739}
+  spine: {fileID: 1619266105}
+  tail: {fileID: 1619266105}
   hyFL_Link: {fileID: 254129174}
   hyFR_Link: {fileID: 397588905}
   hyRL_Link: {fileID: 1536364197}
   hyRR_Link: {fileID: 363100057}
-  hpFL_Link: {fileID: 33440490}
-  hpFR_Link: {fileID: 190218841}
-  hpRL_Link: {fileID: 2117378567}
-  hpRR_Link: {fileID: 329841142}
+  hpFL_Link: {fileID: 173804096}
+  hpFR_Link: {fileID: 832185529}
+  hpRL_Link: {fileID: 967470254}
+  hpRR_Link: {fileID: 1295543293}
   kFL_Link: {fileID: 226582456}
   kFR_Link: {fileID: 1337741625}
   kRL_Link: {fileID: 1588934150}
   kRR_Link: {fileID: 1812005740}
-  spine: {fileID: 1619266105}
   spine_Link: {fileID: 864638642}
-  PhaseShift: 0
-  spineAmplitudeDeg: 0
-  spineStiffness: 500
-  frequencyHz: 0.5
-  startDelay: 5
+  tail_Link: {fileID: 387685261}
   a: 0.116
   b: 0.09
   c: 0.172
-  d: 0.2
-  h: 50
-  gC: 5
-  gP: 2
+  d: 0.64
   dStep: 10
-  centerRight: {x: 0.07, y: -0.18, z: -0.25}
-  centerLeft: {x: 0.07, y: -0.18, z: -0.25}
-  Rx: 0.08
-  Ry: 0.04
+  gC: 15
+  gP: 2
+  h: 50
+  spineRange: 20
+  initialPhases:
+  - 0
+  - 3.1415927
+  - 3.1415927
+  - 0
+  - 0
+  - 3.1415927
+  initialAmplitudes:
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  TimeStep: 0.01
 --- !u!1 &363100052
 GameObject:
   m_ObjectHideFlags: 0
@@ -3966,6 +3991,7 @@ GameObject:
   - component: {fileID: 847984832}
   - component: {fileID: 847984831}
   - component: {fileID: 847984830}
+  - component: {fileID: 847984833}
   m_Layer: 0
   m_Name: leg_fl3
   m_TagString: Untagged
@@ -4067,6 +4093,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 847984828}
   m_Mesh: {fileID: -7841069856262867852, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
+--- !u!114 &847984833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847984828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  isInContact: 0
 --- !u!1 &864638640
 GameObject:
   m_ObjectHideFlags: 0
@@ -7571,7 +7610,7 @@ Terrain:
   m_GameObject: {fileID: 1947155834}
   m_Enabled: 1
   serializedVersion: 6
-  m_TerrainData: {fileID: 15600000, guid: 30c174a89abc7d141abdb6b970f3629f, type: 2}
+  m_TerrainData: {fileID: 0}
   m_TreeDistance: 5000
   m_TreeBillboardDistance: 50
   m_TreeCrossFadeLength: 5
@@ -12442,6 +12481,7 @@ GameObject:
   - component: {fileID: 2574100077079031194}
   - component: {fileID: 8996771252012409028}
   - component: {fileID: 8996771252012409029}
+  - component: {fileID: 8996771252012409030}
   m_Layer: 0
   m_Name: leg_fl3
   m_TagString: Untagged
@@ -13193,12 +13233,25 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -7841069856262867852, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
+--- !u!114 &8996771252012409030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960074961740604720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  isInContact: 0
 --- !u!1 &9033934421327990250
 GameObject:
   m_ObjectHideFlags: 0
@@ -13263,6 +13316,7 @@ GameObject:
   - component: {fileID: 2837207139667043419}
   - component: {fileID: 2271379976639742405}
   - component: {fileID: 9201024205422987208}
+  - component: {fileID: 9201024205422987209}
   m_Layer: 0
   m_Name: leg_fr3
   m_TagString: Untagged
@@ -13286,12 +13340,25 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 495800859769120818, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
+--- !u!114 &9201024205422987209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9201024205422987207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  isInContact: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

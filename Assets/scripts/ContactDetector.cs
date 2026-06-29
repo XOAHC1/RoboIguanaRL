@@ -1,9 +1,9 @@
 using UnityEngine;
 
 public class ContactDetector : MonoBehaviour
-
-    public bool isInContact = false;
 {
+    public bool isInContact = false;
+
     void OnCollisionEnter(Collision collision)
     {
         isInContact = true;        

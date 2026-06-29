@@ -1,9 +1,13 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Hinge = VehicleComponents.Actuators.Hinge;
+using Unity.MLAgents;
+using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Sensors;
+using UnityEngine;
 
-public class RoboIguanaCPGController
+public class RoboIguanaCPGController: MonoBehaviour
 {
     // =========================================================
     // ACTUATORS
@@ -17,6 +21,12 @@ public class RoboIguanaCPGController
 
     [Header("Knee actuators")]
     public Hinge kFL, kFR, kRL, kRR;
+
+    [Header("Spine actuators")]
+    public Hinge spine;
+    public Hinge tail;
+
+
 
     // =========================================================
     // PHYSICAL JOINTS
@@ -44,10 +54,8 @@ public class RoboIguanaCPGController
     // SPINE
     // =========================================================
 
-    [Header("Spine link")]
+    [Header("Spine links")]
     public ArticulationBody spine_Link;
-
-    [Header("Tail link")]
     public ArticulationBody tail_Link;
 
     // =========================================================
@@ -70,14 +78,15 @@ public class RoboIguanaCPGController
     public float gP = 2f;
     public float h = 50f;
 
-    public float spineRange;
+    public float spineRange = 20f;
+    public float tailRange = 20f;
 
     // =========================================================
     // CPG PARAMETERS
     // =========================================================
 
     // Leg Order: FL, FR, RL, RR
-    [Header("CPG Parameters")]) 
+    [Header("CPG Parameters")] 
     public float[] initialPhases = new float[6] { 0f, Mathf.PI, Mathf.PI, 0f, 0f, Mathf.PI };       // Phases for each leg and spine
     public float[] initialAmplitudes = new float[6] { 1f, 1f, 1f, 1f, 1f, 1f };                      // Amplitudes for each leg and spine
 
@@ -100,11 +109,30 @@ public class RoboIguanaCPGController
     private float[] OrientationOffset;      // Orientation of the foot trajectory, Phi
     private float[] OrientationOffsetShifts; // Change in foot Trajectory orientation, Phi'  controlled via psy
 
-    private float convergence = 0.1f; // Convergence rate for amplitude shifts
+    private float convergence = 0.1f; // Convergence rate for amplitude shifts. in literature as a
+
+    // =========================================================
+    // Communication with RL Agent
+    // =========================================================
+
+    public float[] GetPhases()
+    {
+        return (float[])Phases.Clone();
+    }
+
+    public float[] GetAmplitudes()
+    {
+        return (float[])Amplitudes.Clone();
+    }
+
+    public float[] GetDirectionalOffsets()
+    {
+        return (float[])OrientationOffset.Clone();
+    }
 
 
     // =========================================================
-    // Functions
+    // Internal function
     // =========================================================
 
     public void Initialize()
@@ -132,39 +160,44 @@ public class RoboIguanaCPGController
     public void Update()
     {
         // update CPG
-        Phases = Phases + PhaseShifts * TimeStep;                                       // Update phases based on phase shifts
-        Amplitudes = Amplitudes + AmplitudeShifts * TimeStep;                           // Update amplitudes based on amplitude shifts
-        AmplitudeShifts = AmplitudeShifts + AmplitudeShifts2 * TimeStep;                // Update amplitude shifts based on second derivative
-        OrientationOffset = OrientationOffset + OrientationOffsetShifts * TimeStep;     // Update foot rotations based on rotation shifts
+        for (int i = 0; i < 6; i++)
+        {
+            Phases[i] = Phases[i] + PhaseShifts[i] * TimeStep;                          // Update phases based on phase shifts
+            Amplitudes[i] = Amplitudes[i] + AmplitudeShifts[i] * TimeStep;              // Update amplitudes based on amplitude shifts
+            AmplitudeShifts[i] = AmplitudeShifts[i] + AmplitudeShifts2[i] * TimeStep;   // Update amplitude shifts based on second derivative
+        }
+        // update Trajectory orientations
+        for (int i = 0; i < 4; i++)
+        {
+            OrientationOffset[i] = OrientationOffset[i] + OrientationOffsetShifts[i] * TimeStep; // Update foot rotations based on rotation shifts
+        }
 
-        UpdatePose(); // Update the robot's pose based on the updated CPG parameters
+            UpdatePose(); // Update the robot's pose based on the updated CPG parameters
     }
 
     public void UpdatePose()
     {
         // update limb positions
-        var yaws = new float[3];
-        var hips = new float[3];
-        var knees = new float[3];
+        var yaws = new float[4];
+        var hips = new float[4];
+        var knees = new float[4];
 
         // update limb positions
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             (float x, float y, float z) p = GetFootPosition(Phases[i], Amplitudes[i], OrientationOffset[i]);
             (yaws[i], hips[i], knees[i]) = InverseKinematics(p);
         }
-        ApplyAngles(yaws, hips, knees)
+        ApplyAngles(yaws, hips, knees);
 
         // update spine position
-        var float[] spineAngles = new float[2];
-        for (int i = 0; i < 2; i++)
-        {
+        float[] spineAngles = new float[2];
+        for (int i = 0; i < 2; i++) {
             spineAngles[i] = GetSpineAngles(Phases[i + 4], Amplitudes[i + 4]);
         }
-        ApplySpineAngle(spineAngles)
+        ApplySpineAngle(spineAngles);
     }
 
-    public void ApplyActions(ActionBuffer actions)
+    public void ApplyActions(ActionBuffers actions)
     {
         // Apply the actions received from the RL agent to the CPG parameters
         ActionSegment<float> continuous = actions.ContinuousActions;
@@ -214,16 +247,24 @@ public class RoboIguanaCPGController
 
 
     // =========================================================
-    // Inverse Kinematics
+    // Inverse Kinematics (Copied from original Project)
     // =========================================================
 
     // Get joint angles from Foot position
     (float yaw, float hip, float knee) InverseKinematics((float x, float y, float z) p)
     {
+        float yaw;
+        float hip;
+        float knee;
+
+        float x = p.x;
+        float y = p.y;
+        float z = p.z;
+
         float r2 = x * x + z * z;
         float Lmag = Mathf.Sqrt(Mathf.Max(0f, r2 - b * b));
 
-        theta1 = Mathf.Atan2(z, -x);
+        yaw = Mathf.Atan2(z, -x);
 
         float Xp = Lmag - a;
         float Yp = -y;
@@ -231,13 +272,13 @@ public class RoboIguanaCPGController
         float D = (Xp * Xp + Yp * Yp - c * c - d * d) / (2f * c * d);
         D = Mathf.Clamp(D, -1f, 1f);
 
-        theta4 = Mathf.Atan2(Mathf.Sqrt(1 - D * D), D);
+        knee = Mathf.Atan2(Mathf.Sqrt(1 - D * D), D);
 
-        theta3 = Mathf.Atan2(Yp, Xp) -
-                 Mathf.Atan2(d * Mathf.Sin(theta4),
-                             c + d * Mathf.Cos(theta4));
+        hip = Mathf.Atan2(Yp, Xp) -
+                 Mathf.Atan2(d * Mathf.Sin(knee),
+                             c + d * Mathf.Cos(knee));
 
-        return (theta1, theta3, theta4);
+        return (yaw, hip, knee);
     }
 
     // set limbs to new pose
@@ -264,7 +305,7 @@ public class RoboIguanaCPGController
     // set Spine and tail to new pose
     void ApplySpineAngle(float[] angles)
     {
-        spine_Link.SetAngle(angle[0]);
-        tail_Link.SetAngle(angles[1]);
+        spine.SetAngle(angles[0]);
+        tail.SetAngle(angles[1]);
     }
 }   

@@ -98,4 +98,14 @@ public class RoboIguanaAgentRL : Agent
         }
     }
 
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        // Provide manual control for testing purposes
+        var continuousActionsOut = actionsOut.ContinuousActions;
+        for (int i = 0; i < continuousActionsOut.Length; i++)
+        {
+            continuousActionsOut[i] = 0f; // Default to zero
+        }
+    }
+
 }

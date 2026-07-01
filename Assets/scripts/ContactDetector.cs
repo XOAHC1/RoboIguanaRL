@@ -2,20 +2,20 @@ using UnityEngine;
 
 public class ContactDetector : MonoBehaviour
 {
-    public bool isInContact = false;
+    public bool IsTouchingGround = false;
 
     void OnCollisionEnter(Collision collision)
     {
-        isInContact = true;        
+        IsTouchingGround = true;        
     }
 
     void OnCollisionExit(Collision collision)
     {
-        isInContact = false;
+        IsTouchingGround = false;
     }
 
     void Reset()
     {
-        isInContact = false;
+        IsTouchingGround = false;
     }
 }

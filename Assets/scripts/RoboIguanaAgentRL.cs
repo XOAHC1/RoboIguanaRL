@@ -8,33 +8,33 @@ using Unity.AppUI.UI;
 public class RoboIguanaAgentRL : Agent
 {
     [Header("Contact Sensors")]
-    public ContactDetector footFL, footFR, footHL, footHR;
+    public ContactDetector footFL, footFR, footRL, footRR;
 
     private Rigidbody rb;
     private RoboIguanaCPGController CPG;
     private DecisionRequester decisionRequester;
+
+    // Goal Parameters
     private Vector3 TargetDirection;
     private float TargetVelocity;
 
 
     public override void Initialize()
     {
+        Debug.Log("RoboIguanaAgentRL: Initialize");
         rb = GetComponent<Rigidbody>();
         CPG = GetComponent<RoboIguanaCPGController>();
         decisionRequester = GetComponent<DecisionRequester>();
 
+        CPG.InitializeCPG();
         ResetTarget();
-    }
 
+    }
 
     public override void OnEpisodeBegin()
     {
-
         ResetTarget();
-
         CPG.Reset();
-
-        Debug.Log($"New Episode: Target Direction = {TargetDirection}, Target Velocity = {TargetVelocity}");
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -46,10 +46,10 @@ public class RoboIguanaAgentRL : Agent
         sensor.AddObservation(rb.angularVelocity);              // 3D
 
         // Contact Booleans
-        //sensor.AddObservation(footFR.IsTouchingGround);         // 1D
-        //sensor.AddObservation(footFL.IsTouchingGround);         // 1D
-        //sensor.AddObservation(footHL.IsTouchingGround);         // 1D
-        //sensor.AddObservation(footHR.IsTouchingGround);         // 1D
+        sensor.AddObservation(footFR.IsTouchingGround);         // 1D
+        sensor.AddObservation(footFL.IsTouchingGround);         // 1D
+        sensor.AddObservation(footRL.IsTouchingGround);         // 1D
+        sensor.AddObservation(footRR.IsTouchingGround);         // 1D
 
         // internal state
         sensor.AddObservation(CPG.GetPhases());                 // 6D

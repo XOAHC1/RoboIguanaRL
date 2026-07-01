@@ -271,9 +271,9 @@ public class RoboIguanaCPGController: MonoBehaviour
     // get limb position from CPG State
     public (float x, float y, float z) GetFootPosition(float phase, float amplitude, float orientationOffset)
     {
-        float x = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset);
-        float y = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Cos(orientationOffset);
-        float z = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
+        float x = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Cos(orientationOffset);
+        float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
+        float z = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset);
 
         return (x, y, z);
     }

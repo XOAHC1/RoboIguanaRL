@@ -214,6 +214,25 @@ public class RoboIguanaCPGController: MonoBehaviour
 
     }
 
+    //public void FixedUpdate()
+    //{
+    //    // update CPG
+    //    for (int i = 0; i < 6; i++)
+    //    {
+    //        Phases[i] = Phases[i] + PhaseShifts[i] * TimeStep;                          // Update phases based on phase shifts
+    //        Amplitudes[i] = Amplitudes[i] + AmplitudeShifts[i] * TimeStep;              // Update amplitudes based on amplitude shifts
+    //        AmplitudeShifts[i] = AmplitudeShifts[i] + AmplitudeShifts2[i] * TimeStep;   // Update amplitude shifts based on second derivative
+    //    }
+
+    //    // update Trajectory orientations
+    //    for (int i = 0; i < 4; i++)
+    //    {
+    //        OrientationOffset[i] = OrientationOffset[i] + OrientationOffsetShifts[i] * TimeStep; // Update foot rotations based on rotation shifts
+    //    }
+
+    //    UpdatePose(); // Update the robot's pose based on the updated CPG parameters
+    //}
+
     public void UpdatePose()
     {
         // update limb positions

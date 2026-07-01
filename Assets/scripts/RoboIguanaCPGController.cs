@@ -73,43 +73,49 @@ public class RoboIguanaCPGController: MonoBehaviour
     // =========================================================
 
     [Header("Trajectory Parameters")]
-    public float dStep = 10f;
-    public float gC = 15f;
-    public float gP = 2f;
-    public float h = 50f;
+    public float dStep = 0.15f;         // Step length of the foot trajectory
+    public float gC = 0.04f;             // ground clearance
+    public float gP = 0.03f;            // ground penetration
+    public float h = 0.18f;             // height of the robot
 
     public float spineRange = 20f;
     public float tailRange = 20f;
 
-    // =========================================================
-    // CPG PARAMETERS
-    // =========================================================
+    [Header("Convergence Parameters")]
+    public float convergence = 0.1f;    // Convergence rate for amplitude shifts. in literature as a
+    public float TimeStep = 0.01f;      // Time step for CPG updates (seconds)
 
-    // Leg Order: FL, FR, RL, RR
-    [Header("CPG Parameters")] 
-    public float[] initialPhases = new float[6] { 0f, Mathf.PI, Mathf.PI, 0f, 0f, Mathf.PI };       // Phases for each leg and spine
-    public float[] initialAmplitudes = new float[6] { 1f, 1f, 1f, 1f, 1f, 1f };                      // Amplitudes for each leg and spine
+    // Initial foot positions for each leg (FL, FR, RL, RR)
+    private Vector3[] initialFootPositions = new Vector3[4] {
+        new Vector3(0.075f, -0.18f, 0.25f),   // FL
+        new Vector3(-0.075f, -0.18f, -0.25f), // FR
+        new Vector3(-0.075f, -0.18f, 0.25f),  // RL
+        new Vector3(0.075f, -0.18f, -0.25f)   // RR
+    };
 
     public float TimeStep = 0.01f; // Time step for CPG updates (seconds)
 
-    // internal CPG Parameters
-    // change in trajectory rotation ($\Phi$)
-    // phase speed
-    // amplitude increase
-    // amplitude 2nd derivative
-    //      Spine:
-    // amplitude 1st and second derivative
-    // phase 1st derivative
+    // =========================================================
+    // CPG PARAMETERS       Leg Order: FL, FR, RL, RR
+    // =========================================================
 
-    private float[] Phases;             // CPG Phases, Theta
-    private float[] PhaseShifts;        // CPG Phase shifts, Theta',                    controlled via omega
-    private float[] Amplitudes;         // intrinsic amplitudes, r
-    private float[] AmplitudeShifts;    // Shift in amplitude, r'
-    private float[] AmplitudeShifts2;   // Shift in amplitude Shifts, r''               controlled via mu
-    private float[] OrientationOffset;      // Orientation of the foot trajectory, Phi
-    private float[] OrientationOffsetShifts; // Change in foot Trajectory orientation, Phi'  controlled via psy
+    // initial Parameters to reset to. Current Values are set to match the initial foot positions from the original project
+    private float[] initialPhases = new float[6] { 0f, Mathf.PI, Mathf.PI, 0f, Mathf.PI * 3 / 2, Mathf.PI * 3 / 2};     // Phases for each leg and spine
+    private float[] initialPhaseShifts = new float[6] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };                           // Phase shifts for each leg and spine
+    private float[] initialAmplitudes = new float[6] { 2.740051f, 2.740051f, 2.740051f, 2.740051f, 0.1f, 0.1f };            // Amplitudes for each leg and spine
+    private float[] initialAmplitudeShifts = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };                                   // Amplitude shifts for each leg and spine
+    private float[] initialAmplitudeShifts2 = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };                                  // Amplitude shifts for each leg and spine
+    private float[] initialOrientationOffset = new float[4] { -1.862253f, -1.862253f, 1.862253f, 1.862253f };           // Orientation offsets for each leg
+    private float[] initialOrientationOffsetShifts = new float[4] { 0f, 0f, 0f, 0f };                                   // Orientation offset shifts for each leg
 
-    private float convergence = 0.1f; // Convergence rate for amplitude shifts. in literature as a
+    // CPG Parameters throughout
+    private float[] Phases;                     // CPG Phases, Theta
+    private float[] PhaseShifts;                // CPG Phase shifts, Theta',                    controlled via omega
+    private float[] Amplitudes;                 // intrinsic amplitudes, r
+    private float[] AmplitudeShifts;            // Shift in amplitude, r'
+    private float[] AmplitudeShifts2;           // Shift in amplitude Shifts, r''               controlled via mu
+    private float[] OrientationOffset;          // Orientation of the foot trajectory, Phi
+    private float[] OrientationOffsetShifts;    // Change in foot Trajectory orientation, Phi'  controlled via psy
 
     // =========================================================
     // Communication with RL Agent

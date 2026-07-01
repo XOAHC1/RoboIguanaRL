@@ -27,7 +27,6 @@ public class RoboIguanaCPGController: MonoBehaviour
     public Hinge tail;
 
 
-
     // =========================================================
     // PHYSICAL JOINTS
     // =========================================================
@@ -50,6 +49,7 @@ public class RoboIguanaCPGController: MonoBehaviour
     public ArticulationBody kRL_Link;
     public ArticulationBody kRR_Link;
 
+
     // =========================================================
     // SPINE
     // =========================================================
@@ -57,6 +57,7 @@ public class RoboIguanaCPGController: MonoBehaviour
     [Header("Spine links")]
     public ArticulationBody spine_Link;
     public ArticulationBody tail_Link;
+
 
     // =========================================================
     // LEG GEOMETRY
@@ -67,6 +68,7 @@ public class RoboIguanaCPGController: MonoBehaviour
     public float b = 0.09f;
     public float c = 0.172f;
     public float d = 0.2f;
+
 
     // =========================================================
     // Trajectory parameters
@@ -93,7 +95,6 @@ public class RoboIguanaCPGController: MonoBehaviour
         new Vector3(0.075f, -0.18f, -0.25f)   // RR
     };
 
-    public float TimeStep = 0.01f; // Time step for CPG updates (seconds)
 
     // =========================================================
     // CPG PARAMETERS       Leg Order: FL, FR, RL, RR
@@ -153,7 +154,7 @@ public class RoboIguanaCPGController: MonoBehaviour
     // Connect hinges and articulation bodies, set initial pose
     private void InitializeAllJoints()
     {
-        // Reset the CPG parameters to their initial values
+        Debug.Log("Initializing all joints to their starting positions...");
 
         // group joints for easier access
         ArticulationBody[] hipYawLinks = new ArticulationBody[4] { hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link };
@@ -176,17 +177,17 @@ public class RoboIguanaCPGController: MonoBehaviour
             InitialiseJoint(kneeLinks[i], kneeHinges[i], knee);
 
             //Debug.Log($"Initialized Leg {i}: Foot Position: ({p.x}, {p.y}, {p.z}), Yaw: {yaw}, Hip: {hip}, Knee: {knee}");
-    }
+        }
 
         // Spine and tail
         InitialiseJoint(spine_Link, spine, initialPhases[4] * initialAmplitudes[4]);
         InitialiseJoint(tail_Link, tail, initialPhases[5] * initialAmplitudes[5]);
 
-        }
+    }
 
     // Set joint to initial state (position + drive target) and link hinges and articulation bodies
     void InitialiseJoint(ArticulationBody ab, Hinge h, float angleRad)
-        {
+    {
         if (ab == null) return;
 
         ab.jointPosition = new ArticulationReducedSpace(angleRad);
@@ -196,7 +197,7 @@ public class RoboIguanaCPGController: MonoBehaviour
 
         if (h != null)
             h.SetAngle(angleRad);
-        }
+    }
 
     public void Reset()
     {
@@ -294,13 +295,15 @@ public class RoboIguanaCPGController: MonoBehaviour
         float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
         float z = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset);
 
+        Debug.Log($"Foot Position - Phase: {phase}, Amplitude: {amplitude}, OrientationOffset: {orientationOffset}, Position: ({x}, {y}, {z})");
+
         return (x, y, z);
     }
 
     // returns angels for spine and tail from CPG state
     public float GetSpineAngles(float phase, float amplitude)
     {
-        return MathF.Sin(phase) * amplitude * spineRange;
+        return MathF.Sin(phase) * amplitude / spineRange;
     }
 
 
@@ -371,4 +374,60 @@ public class RoboIguanaCPGController: MonoBehaviour
         spine.SetAngle(angles[0]);
         tail.SetAngle(angles[1]);
     }
+
+
+    // =========================================================
+    // Debugging functions for individual use
+    // =========================================================
+
+    // set CPG Parameters to match the initial foot positions based on Phases
+    private void FindStartingCPGState()
+    {
+        Debug.Log("Recovered Parameters after initialization:");
+
+        for (int i = 0; i < 4; i++)
+        {
+            (OrientationOffset[i], Amplitudes[i]) = RecoverParameters(initialFootPositions[i].x, initialFootPositions[i].z, initialPhases[i]);
+            Debug.Log($"Recovered Parameters for Foot {i}: OrientationOffset: {OrientationOffset[i]}, Amplitude: {Amplitudes[i]}");
+        }
+
+    }
+
+    // Get foot position from joint angles
+    Vector3 ForwardKinematics(float yaw, float hip, float knee)
+    {
+        // Position in the leg plane
+        float Xp =
+            a +
+            c * Mathf.Cos(hip) +
+            d * Mathf.Cos(hip + knee);
+
+        float Yp =
+            c * Mathf.Sin(hip) +
+            d * Mathf.Sin(hip + knee);
+
+        // Distance from yaw axis
+        float r = Mathf.Sqrt(Xp * Xp + b * b);
+
+        // relative coordinates
+        float x = -r * Mathf.Cos(yaw);
+        float y = -Yp;
+        float z = r * Mathf.Sin(yaw);
+
+        return new Vector3(x, y, z);
+    }
+
+    // Recover CPG parameters from foot position
+    public (float orientationOffset, float amplitude)
+    RecoverParameters(float x, float z, float phase)
+    {
+        float orientationOffset = MathF.Atan2(-z, -x);
+        float radius = MathF.Sqrt(x * x + z * z);
+        float amplitude = 1.0f + radius / (dStep * MathF.Abs(MathF.Cos(phase)));
+
+
+        return (orientationOffset, amplitude);
+    }
+
+
 }   

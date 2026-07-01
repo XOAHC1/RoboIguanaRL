@@ -141,44 +141,77 @@ public class RoboIguanaCPGController: MonoBehaviour
     // Internal function
     // =========================================================
 
-    public void Initialize()
+    public void InitializeCPG()
     {
         // set CPG parameters to their initial values
         Reset();
+
+        // Initialize all joints to their starting positions
+        InitializeAllJoints();
     }
+
+    // Connect hinges and articulation bodies, set initial pose
+    private void InitializeAllJoints()
+    {
+        // Reset the CPG parameters to their initial values
+
+        // group joints for easier access
+        ArticulationBody[] hipYawLinks = new ArticulationBody[4] { hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link };
+        Hinge[] hipYawHinges = new Hinge[4] { hyFL, hyFR, hyRL, hyRR };
+        ArticulationBody[] hipPitchLinks = new ArticulationBody[4] { hpFL_Link, hpFR_Link, hpRL_Link, hpRR_Link };
+        Hinge[] hipPitchHinges = new Hinge[4] { hpFL, hpFR, hpRL, hpRR };
+        ArticulationBody[] kneeLinks = new ArticulationBody[4] { kFL_Link, kFR_Link, kRL_Link, kRR_Link };
+        Hinge[] kneeHinges = new Hinge[4] { kFL, kFR, kRL, kRR };
+
+        // Initialize joint positions based on CPG parameters
+        for (int i = 0; i<4; i++)
+        {
+            (float x, float y, float z) p = GetFootPosition(initialPhases[i], initialAmplitudes[i], initialOrientationOffset[i]);
+            //Vector3 p = initialFootPositions[i];
+            Debug.Log($"Initial Foot position for Foot {i}: {p}");
+            (float yaw, float hip, float knee) = InverseKinematics(p);
+
+            InitialiseJoint(hipYawLinks[i], hipYawHinges[i], yaw);
+            InitialiseJoint(hipPitchLinks[i], hipPitchHinges[i], hip);
+            InitialiseJoint(kneeLinks[i], kneeHinges[i], knee);
+
+            //Debug.Log($"Initialized Leg {i}: Foot Position: ({p.x}, {p.y}, {p.z}), Yaw: {yaw}, Hip: {hip}, Knee: {knee}");
+    }
+
+        // Spine and tail
+        InitialiseJoint(spine_Link, spine, initialPhases[4] * initialAmplitudes[4]);
+        InitialiseJoint(tail_Link, tail, initialPhases[5] * initialAmplitudes[5]);
+
+        }
+
+    // Set joint to initial state (position + drive target) and link hinges and articulation bodies
+    void InitialiseJoint(ArticulationBody ab, Hinge h, float angleRad)
+        {
+        if (ab == null) return;
+
+        ab.jointPosition = new ArticulationReducedSpace(angleRad);
+        var drive = ab.xDrive;
+        drive.target = angleRad;
+        ab.xDrive = drive;
+
+        if (h != null)
+            h.SetAngle(angleRad);
+        }
 
     public void Reset()
     {
         // Reset the CPG parameters to their initial values
 
-        Phases = (float[])initialPhases.Clone();                        // Reset phases to initial values
-        PhaseShifts = new float[6] { 1f, 1f, 1f, 1f, 1f, 1f };          // Reset phase shifts to default values
-        Amplitudes = (float[])initialAmplitudes.Clone();                // Reset amplitudes to initial values
-        AmplitudeShifts = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };      // Reset amplitude shifts to default values
-        AmplitudeShifts2 = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };     // Reset amplitude shifts to default values
-        OrientationOffset = new float[4] { 0f, 0f, 0f, 0f };            // Reset foot rotations to default values
-        OrientationOffsetShifts = new float[4] { 0f, 0f, 0f, 0f };      // Reset foot rotation shifts to default values
+        Phases = (float[])initialPhases.Clone();                                        // Reset phases to initial values
+        PhaseShifts = (float[])initialPhaseShifts.Clone();                              // Reset phase shifts to default values
+        Amplitudes = (float[])initialAmplitudes.Clone();                                // Reset amplitudes to initial values
+        AmplitudeShifts = (float[])initialAmplitudeShifts.Clone();                      // Reset amplitude shifts to default values
+        AmplitudeShifts2 = (float[])initialAmplitudeShifts2.Clone();                    // Reset amplitude shifts to default values
+        OrientationOffset = (float[])initialOrientationOffset.Clone();                  // Reset foot rotations to default values
+        OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();      // Reset foot rotation shifts to default values
 
-        UpdatePose(); // Update the robot's pose based on the reset CPG parameters
+        //UpdatePose(); // Update the robot's pose based on the reset CPG parameters
 
-    }
-
-    public void Update()
-    {
-        // update CPG
-        for (int i = 0; i < 6; i++)
-        {
-            Phases[i] = Phases[i] + PhaseShifts[i] * TimeStep;                          // Update phases based on phase shifts
-            Amplitudes[i] = Amplitudes[i] + AmplitudeShifts[i] * TimeStep;              // Update amplitudes based on amplitude shifts
-            AmplitudeShifts[i] = AmplitudeShifts[i] + AmplitudeShifts2[i] * TimeStep;   // Update amplitude shifts based on second derivative
-        }
-        // update Trajectory orientations
-        for (int i = 0; i < 4; i++)
-        {
-            OrientationOffset[i] = OrientationOffset[i] + OrientationOffsetShifts[i] * TimeStep; // Update foot rotations based on rotation shifts
-        }
-
-            UpdatePose(); // Update the robot's pose based on the updated CPG parameters
     }
 
     public void UpdatePose()
@@ -255,6 +288,11 @@ public class RoboIguanaCPGController: MonoBehaviour
     // =========================================================
     // Inverse Kinematics (Copied from original Project)
     // =========================================================
+
+    (float yaw, float hip, float knee) InverseKinematics(Vector3 p)
+    {
+        return InverseKinematics((p.x, p.y, p.z));
+    }
 
     // Get joint angles from Foot position
     (float yaw, float hip, float knee) InverseKinematics((float x, float y, float z) p)

@@ -106,7 +106,8 @@ namespace RoboIguanaRL
             var continuousActionsOut = actionsOut.ContinuousActions;
             for (int i = 0; i < continuousActionsOut.Length; i++)
             {
-                continuousActionsOut[i] = 0f; // Default to zero
+                // Keep parameters constant for heuristic.
+                continuousActionsOut[i] = 0f;
             }
         }
 

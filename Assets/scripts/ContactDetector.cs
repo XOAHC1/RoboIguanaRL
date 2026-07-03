@@ -14,7 +14,7 @@ public class ContactDetector : MonoBehaviour
         IsTouchingGround = false;
     }
 
-    void Reset()
+    public void Reset()
     {
         IsTouchingGround = false;
     }

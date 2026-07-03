@@ -37,6 +37,12 @@ namespace RoboIguanaRL
         {
             ResetTarget();
             CPG.Reset();
+
+            // Reset contact detectors.
+            footFL.Reset();
+            footFR.Reset();
+            footRL.Reset();
+            footRR.Reset();
         }
 
         public override void CollectObservations(VectorSensor sensor)

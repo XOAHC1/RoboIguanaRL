@@ -113,7 +113,7 @@ namespace RoboIguanaRL
         private readonly float[] initialAmplitudes = {2.740051f, 2.740051f, 2.740051f, 2.740051f, 0.1f, 0.1f};            // Amplitudes for each leg and spine
         private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f};                                   // Amplitude shifts for each leg and spine
         private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f};                                  // Amplitude shifts for each leg and spine
-        private readonly float[] initialOrientationOffset = {-1.862253f, -1.862253f, 1.862253f, 1.862253f};           // Orientation offsets for each leg
+        private readonly float[] initialOrientationOffsets = {-1.862253f, -1.862253f, 1.862253f, 1.862253f};           // Orientation offsets for each leg
         private readonly float[] initialOrientationOffsetShifts = {0f, 0f, 0f, 0f};                                   // Orientation offset shifts for each leg
 
         // CPG Parameters throughout
@@ -122,7 +122,7 @@ namespace RoboIguanaRL
         private float[] Amplitudes;                 // intrinsic amplitudes, r
         private float[] AmplitudeShifts;            // Shift in amplitude, r'
         private float[] AmplitudeShifts2;           // Shift in amplitude Shifts, r''               controlled via mu
-        private float[] OrientationOffset;          // Orientation of the foot trajectory, Phi
+        private float[] OrientationOffsets;          // Orientation of the foot trajectory, Phi
         private float[] OrientationOffsetShifts;    // Change in foot Trajectory orientation, Phi'  controlled via psy
 
         // =========================================================
@@ -139,9 +139,9 @@ namespace RoboIguanaRL
             return (float[])Amplitudes.Clone();
         }
 
-        public float[] GetOrientationOffset()
+        public float[] GetOrientationOffsets()
         {
-            return (float[])OrientationOffset.Clone();
+            return (float[])OrientationOffsets.Clone();
         }
 
 
@@ -174,7 +174,7 @@ namespace RoboIguanaRL
             // Initialize joint positions based on CPG parameters
             for (int i = 0; i<4; i++)
             {
-                (float x, float y, float z) p = GetFootPosition(initialPhases[i], initialAmplitudes[i], initialOrientationOffset[i]);
+                (float x, float y, float z) p = GetFootPosition(initialPhases[i], initialAmplitudes[i], initialOrientationOffsets[i]);
                 // Debug.Log($"Initial Foot position for Foot {i}: {p}");
                 (float yaw, float hip, float knee) = InverseKinematics(p);
 
@@ -192,7 +192,7 @@ namespace RoboIguanaRL
         }
 
     // Set joint to initial state (position + drive target) and link hinges and articulation bodies
-   void InitialiseJoint(ArticulationBody ab, Hinge h, float angleRad)
+        private void InitialiseJoint(ArticulationBody ab, Hinge h, float angleRad)
         {
             if (ab == null) return;
 
@@ -214,7 +214,7 @@ namespace RoboIguanaRL
             Amplitudes = (float[])initialAmplitudes.Clone();                                // Reset amplitudes to initial values
             AmplitudeShifts = (float[])initialAmplitudeShifts.Clone();                      // Reset amplitude shifts to default values
             AmplitudeShifts2 = (float[])initialAmplitudeShifts2.Clone();                    // Reset amplitude shifts to default values
-            OrientationOffset = (float[])initialOrientationOffset.Clone();                  // Reset foot rotations to default values
+            OrientationOffsets = (float[])initialOrientationOffsets.Clone();                  // Reset foot rotations to default values
             OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();      // Reset foot rotation shifts to default values
 
             UpdatePose(); // Update the robot's pose based on the reset CPG parameters
@@ -234,7 +234,7 @@ namespace RoboIguanaRL
            // update Trajectory orientations
            for (int i = 0; i < 4; i++)
            {
-               OrientationOffset[i] = OrientationOffset[i] + OrientationOffsetShifts[i] * TimeStep; // Update foot rotations based on rotation shifts
+               OrientationOffsets[i] = OrientationOffsets[i] + OrientationOffsetShifts[i] * TimeStep; // Update foot rotations based on rotation shifts
            }
 
            UpdatePose(); // Update the robot's pose based on the updated CPG parameters
@@ -245,7 +245,7 @@ namespace RoboIguanaRL
             // Debug.Log("Updating Pose");
             // update limb positions
             for (int i = 0; i < 4; i++) {
-                (float x, float y, float z) p = GetFootPosition(Phases[i], Amplitudes[i], OrientationOffset[i]);
+                (float x, float y, float z) p = GetFootPosition(Phases[i], Amplitudes[i], OrientationOffsets[i]);
                 (yaws[i], hips[i], knees[i]) = InverseKinematics(p);
             }
             ApplyAngles(yaws, hips, knees);
@@ -291,7 +291,7 @@ namespace RoboIguanaRL
         // =========================================================
 
         // get limb position from CPG State
-        public (float x, float y, float z) GetFootPosition(float phase, float amplitude, float orientationOffset)
+        private (float x, float y, float z) GetFootPosition(float phase, float amplitude, float orientationOffset)
         {
             float x = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Cos(orientationOffset);
             float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
@@ -303,7 +303,7 @@ namespace RoboIguanaRL
         }
 
         // returns angels for spine and tail from CPG state
-        public float GetSpineAngles(float phase, float amplitude)
+        private float GetSpineAngles(float phase, float amplitude)
         {
             return MathF.Sin(phase) * amplitude / spineRange;
         }
@@ -313,13 +313,13 @@ namespace RoboIguanaRL
         // Inverse Kinematics (Copied from original Project)
         // =========================================================
 
-        (float yaw, float hip, float knee) InverseKinematics(Vector3 p)
+        private (float yaw, float hip, float knee) InverseKinematics(Vector3 p)
         {
             return InverseKinematics((p.x, p.y, p.z));
         }
 
         // Get joint angles from Foot position
-        (float yaw, float hip, float knee) InverseKinematics((float x, float y, float z) p)
+        private (float yaw, float hip, float knee) InverseKinematics((float x, float y, float z) p)
         {
             float yaw;
             float hip;
@@ -350,7 +350,7 @@ namespace RoboIguanaRL
         }
 
         // set limbs to new pose
-        void ApplyAngles(
+        private void ApplyAngles(
                 float[] yaw, float[] hip, float[] knee)
         {
             // Leg Order: FL, FR, RL, RR
@@ -371,7 +371,7 @@ namespace RoboIguanaRL
         }
 
         // set Spine and tail to new pose
-        void ApplySpineAngle(float[] angles)
+        private void ApplySpineAngle(float[] angles)
         {
             spine.SetAngle(angles[0]);
             tail.SetAngle(angles[1]);
@@ -389,14 +389,14 @@ namespace RoboIguanaRL
 
             for (int i = 0; i < 4; i++)
             {
-                (OrientationOffset[i], Amplitudes[i]) = RecoverParameters(initialFootPositions[i].x, initialFootPositions[i].z, initialPhases[i]);
-                Debug.Log($"Recovered Parameters for Foot {i}: OrientationOffset: {OrientationOffset[i]}, Amplitude: {Amplitudes[i]}");
+                (OrientationOffsets[i], Amplitudes[i]) = RecoverParameters(initialFootPositions[i].x, initialFootPositions[i].z, initialPhases[i]);
+                Debug.Log($"Recovered Parameters for Foot {i}: OrientationOffset: {OrientationOffsets[i]}, Amplitude: {Amplitudes[i]}");
             }
 
         }
 
         // Get foot position from joint angles
-        Vector3 ForwardKinematics(float yaw, float hip, float knee)
+        private Vector3 ForwardKinematics(float yaw, float hip, float knee)
         {
             // Position in the leg plane
             float Xp =
@@ -420,17 +420,14 @@ namespace RoboIguanaRL
         }
 
         // Recover CPG parameters from foot position
-        public (float orientationOffset, float amplitude)
-        RecoverParameters(float x, float z, float phase)
+        private (float OrientationOffsets, float amplitude) RecoverParameters(float x, float z, float phase)
         {
-            float orientationOffset = MathF.Atan2(-z, -x);
+            float OrientationOffsets = MathF.Atan2(-z, -x);
             float radius = MathF.Sqrt(x * x + z * z);
             float amplitude = 1.0f + radius / (dStep * MathF.Abs(MathF.Cos(phase)));
 
 
-            return (orientationOffset, amplitude);
+            return (OrientationOffsets, amplitude);
         }
-
-
     }   
 }

@@ -5,6 +5,7 @@ using Unity.MLAgents.Sensors;
 using Force;
 using Unity.AppUI.UI;
 using Unity.VisualScripting;
+using CoordinateSharp;
 
 namespace RoboIguanaRL
 {
@@ -13,9 +14,11 @@ namespace RoboIguanaRL
         [Header("Contact Sensors")]
         public ContactDetector footFL, footFR, footRL, footRR;
 
-        private Rigidbody rb;
+        [Header("Articulation Body")]
+        public ArticulationBody Body;
+
         private RoboIguanaCPGController CPG;
-        private DecisionRequester decisionRequester;
+        // private DecisionRequester decisionRequester;
 
         // Goal Parameters
         private Vector3 TargetDirection;
@@ -25,9 +28,8 @@ namespace RoboIguanaRL
         public override void Initialize()
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
-            rb = GetComponent<Rigidbody>();
             CPG = GetComponent<RoboIguanaCPGController>();
-            decisionRequester = GetComponent<DecisionRequester>();
+            // decisionRequester = GetComponent<DecisionRequester>();
 
             CPG.InitializeCPG();
             ResetTarget();
@@ -49,10 +51,9 @@ namespace RoboIguanaRL
         public override void CollectObservations(VectorSensor sensor)
         {
             // position and velocity observations
-            //sensor.AddObservation(transform.localPosition);       // 3D
-            sensor.AddObservation(transform.forward - TargetDirection);  // 3D      Difference between agent's forward direction and target direction
-            sensor.AddObservation(rb.linearVelocity / TargetVelocity);    // 3D
-            sensor.AddObservation(rb.angularVelocity);              // 3D
+            sensor.AddObservation(transform.forward - TargetDirection);     // 3D      Difference between agent's forward direction and target direction
+            sensor.AddObservation(Body.linearVelocity / TargetVelocity);    // 3D
+            sensor.AddObservation(Body.angularVelocity);                    // 3D
 
             // Contact Booleans
             sensor.AddObservation(footFR.IsTouchingGround);         // 1D
@@ -63,16 +64,12 @@ namespace RoboIguanaRL
             // internal state
             sensor.AddObservation(CPG.GetPhases());                 // 6D
             sensor.AddObservation(CPG.GetAmplitudes());             // 6D
-            sensor.AddObservation(CPG.GetOrientationOffset());     // 4D
+            sensor.AddObservation(CPG.GetOrientationOffsets());     // 4D
 
             // Target related input
             sensor.AddObservation(TargetDirection);                 // 3D
             sensor.AddObservation(TargetVelocity);                  // 1D
 
-            Debug.Log($"Movement Observations: \n Direction: {transform.forward - TargetDirection} \n Velocity: {rb.linearVelocity / TargetVelocity} \n AngularVel: {rb.angularVelocity}");
-            Debug.Log($"Contact Booleans: {footFL.IsTouchingGround}, {footFR.IsTouchingGround}, {footRL.IsTouchingGround}, {footRR.IsTouchingGround}");
-            Debug.Log($"State: \n {CPG.GetPhases()}, \n {CPG.GetAmplitudes()}, \n {CPG.GetOrientationOffset()}");
-            Debug.Log($"Target: \n {TargetDirection}, \n {TargetVelocity}");
         }
 
         public override void OnActionReceived(ActionBuffers buffers)
@@ -89,7 +86,7 @@ namespace RoboIguanaRL
 
             CPG.ApplyActions(buffers);
 
-            Debug.Log("Actions Received");
+            // Debug.Log("Actions Received");
 
         }
 
@@ -115,7 +112,6 @@ namespace RoboIguanaRL
 
         public override void Heuristic(in ActionBuffers actionsOut)
         {
-            Debug.Log("Heuristic called");
             // Provide manual control for testing purposes
             var continuousActionsOut = actionsOut.ContinuousActions;
             for (int i = 0; i < continuousActionsOut.Length; i++)

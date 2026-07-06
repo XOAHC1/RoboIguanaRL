@@ -6,7 +6,7 @@ public class ContactDetector : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        IsTouchingGround = true;        
+        IsTouchingGround = true; 
     }
 
     void OnCollisionExit(Collision collision)

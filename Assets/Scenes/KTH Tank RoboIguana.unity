@@ -995,6 +995,7 @@ GameObject:
   - component: {fileID: 226582455}
   - component: {fileID: 226582456}
   - component: {fileID: 226582459}
+  - component: {fileID: 226582460}
   m_Layer: 0
   m_Name: leg_fl_link3
   m_TagString: Untagged
@@ -1104,6 +1105,19 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
+--- !u!114 &226582460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 226582454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  IsTouchingGround: 0
 --- !u!1 &229087276
 GameObject:
   m_ObjectHideFlags: 0
@@ -1381,7 +1395,6 @@ GameObject:
   - component: {fileID: 290818720}
   - component: {fileID: 290818719}
   - component: {fileID: 290818718}
-  - component: {fileID: 290818721}
   m_Layer: 0
   m_Name: leg_rr3
   m_TagString: Untagged
@@ -1483,19 +1496,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 290818716}
   m_Mesh: {fileID: 495800859769120818, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
---- !u!114 &290818721
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290818716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
 --- !u!1 &299982753
 GameObject:
   m_ObjectHideFlags: 0
@@ -1949,7 +1949,6 @@ GameObject:
   - component: {fileID: 346296841}
   - component: {fileID: 346296844}
   - component: {fileID: 346296845}
-  - component: {fileID: 346296846}
   m_Layer: 0
   m_Name: RoboIguana
   m_TagString: robot
@@ -1989,9 +1988,9 @@ MonoBehaviour:
     VectorObservationSize: 33
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 33
+      m_NumContinuousActions: 16
       BranchSizes: 
-    VectorActionSize: 21000000
+    VectorActionSize: 10000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -2020,10 +2019,11 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 2000
-  footFL: {fileID: 8996771252012409030}
-  footFR: {fileID: 9201024205422987209}
-  footRL: {fileID: 847984833}
-  footRR: {fileID: 290818721}
+  footFL: {fileID: 226582460}
+  footFR: {fileID: 1337741628}
+  footRL: {fileID: 1588934152}
+  footRR: {fileID: 1812005742}
+  Body: {fileID: 33066898}
 --- !u!114 &346296844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2091,33 +2091,6 @@ MonoBehaviour:
   DecisionPeriod: 5
   DecisionStep: 0
   TakeActionsBetweenDecisions: 0
---- !u!54 &346296846
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 346296830}
-  serializedVersion: 5
-  m_Mass: 0.0000001
-  m_LinearDamping: 0
-  m_AngularDamping: 0
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &363100052
 GameObject:
   m_ObjectHideFlags: 0
@@ -4023,7 +3996,6 @@ GameObject:
   - component: {fileID: 847984832}
   - component: {fileID: 847984831}
   - component: {fileID: 847984830}
-  - component: {fileID: 847984833}
   m_Layer: 0
   m_Name: leg_rl3
   m_TagString: Untagged
@@ -4125,19 +4097,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 847984828}
   m_Mesh: {fileID: -7841069856262867852, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
---- !u!114 &847984833
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 847984828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
 --- !u!1 &864638640
 GameObject:
   m_ObjectHideFlags: 0
@@ -5426,6 +5385,7 @@ GameObject:
   - component: {fileID: 1337741624}
   - component: {fileID: 1337741625}
   - component: {fileID: 1337741627}
+  - component: {fileID: 1337741628}
   m_Layer: 0
   m_Name: leg_fr_link3
   m_TagString: Untagged
@@ -5536,6 +5496,19 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
+--- !u!114 &1337741628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337741623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  IsTouchingGround: 0
 --- !u!1 &1344569511
 GameObject:
   m_ObjectHideFlags: 0
@@ -6534,6 +6507,7 @@ GameObject:
   - component: {fileID: 1588934149}
   - component: {fileID: 1588934150}
   - component: {fileID: 1588934151}
+  - component: {fileID: 1588934152}
   m_Layer: 0
   m_Name: leg_rl_link3
   m_TagString: Untagged
@@ -6643,6 +6617,19 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
+--- !u!114 &1588934152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1588934148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  IsTouchingGround: 0
 --- !u!1 &1615696144
 GameObject:
   m_ObjectHideFlags: 0
@@ -7102,6 +7089,7 @@ GameObject:
   - component: {fileID: 1812005739}
   - component: {fileID: 1812005740}
   - component: {fileID: 1812005741}
+  - component: {fileID: 1812005742}
   m_Layer: 0
   m_Name: leg_rr_link3
   m_TagString: Untagged
@@ -7212,6 +7200,19 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
+--- !u!114 &1812005742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812005738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  IsTouchingGround: 0
 --- !u!1 &1826013491
 GameObject:
   m_ObjectHideFlags: 0
@@ -12448,10 +12449,25 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1454882707445159324, guid: 27e256403f48e4a4ab5838b7638bbc10,
         type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1454882707445159324, guid: 27e256403f48e4a4ab5838b7638bbc10,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1454882707445159324, guid: 27e256403f48e4a4ab5838b7638bbc10,
+        type: 3}
       propertyPath: m_Material
       value: 
       objectReference: {fileID: 13400000, guid: ba395e585607d2b4d9ea779ed0459330,
         type: 2}
+    - target: {fileID: 1454882707445159324, guid: 27e256403f48e4a4ab5838b7638bbc10,
+        type: 3}
+      propertyPath: m_ProvidesContacts
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3709962095503429357, guid: 27e256403f48e4a4ab5838b7638bbc10,
         type: 3}
       propertyPath: m_IsActive
@@ -12516,8 +12532,39 @@ PrefabInstance:
     m_RemovedGameObjects:
     - {fileID: 6634973226838364882, guid: 27e256403f48e4a4ab5838b7638bbc10, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1870962538280410621, guid: 27e256403f48e4a4ab5838b7638bbc10,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6835108181693456971}
   m_SourcePrefab: {fileID: 100100000, guid: 27e256403f48e4a4ab5838b7638bbc10, type: 3}
+--- !u!1 &6835108181693456970 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1870962538280410621, guid: 27e256403f48e4a4ab5838b7638bbc10,
+    type: 3}
+  m_PrefabInstance: {fileID: 6835108181693456969}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &6835108181693456971
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6835108181693456970}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 10, y: 1, z: 10}
+  m_Center: {x: 0, y: -0.5, z: 0}
 --- !u!4 &6861358310270406462
 Transform:
   m_ObjectHideFlags: 0
@@ -12568,7 +12615,6 @@ GameObject:
   - component: {fileID: 2574100077079031194}
   - component: {fileID: 8996771252012409028}
   - component: {fileID: 8996771252012409029}
-  - component: {fileID: 8996771252012409030}
   m_Layer: 0
   m_Name: leg_fl3
   m_TagString: Untagged
@@ -13326,19 +13372,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -7841069856262867852, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
---- !u!114 &8996771252012409030
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6960074961740604720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
 --- !u!1 &9033934421327990250
 GameObject:
   m_ObjectHideFlags: 0
@@ -13403,7 +13436,6 @@ GameObject:
   - component: {fileID: 2837207139667043419}
   - component: {fileID: 2271379976639742405}
   - component: {fileID: 9201024205422987208}
-  - component: {fileID: 9201024205422987209}
   m_Layer: 0
   m_Name: leg_fr3
   m_TagString: Untagged
@@ -13433,19 +13465,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 495800859769120818, guid: 1f7e274d580da84449535df38bb7ccd3, type: 3}
---- !u!114 &9201024205422987209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201024205422987207}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

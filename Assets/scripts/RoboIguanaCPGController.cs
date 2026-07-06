@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace RoboIguanaRL
 {
+    /// <summary>
+    /// CPG based controller for RoboIguana. This class is intended to be controlled by an instance of <code>RoboIguanaAgentRL</code>.
+    /// </summary>
     public class RoboIguanaCPGController: MonoBehaviour
     {
         // =========================================================
@@ -77,63 +80,158 @@ namespace RoboIguanaRL
         // =========================================================
 
         [Header("Trajectory Parameters")]
-        public float dStep = 0.15f;         // Step length of the foot trajectory
-        public float gC = 0.04f;             // ground clearance
-        public float gP = 0.03f;            // ground penetration
-        public float h = 0.18f;             // height of the robot
+        /// <summary>
+        /// Step length of the foot trajectory.
+        /// </summary>
+        public float dStep = 0.15f;
 
+        /// <summary>
+        /// Ground clearance during swing phase.
+        /// </summary>
+        public float gC = 0.04f;
+
+        /// <summary>
+        /// Ground penetration during stance phase.
+        /// </summary>
+        public float gP = 0.03f;
+
+        /// <summary>
+        /// Height of the robot body.
+        /// </summary>
+        public float h = 0.18f;
+
+        /// <summary>
+        /// Maximum rotation range for spine in degrees.
+        /// </summary>
         public float spineRange = 20f;
+
+        /// <summary>
+        /// Maximum rotation range for tail in degrees.
+        /// </summary>
         public float tailRange = 20f;
 
         [Header("Convergence Parameters")]
-        public float convergence = 0.1f;    // Convergence rate for amplitude shifts. in literature as a
-        public float TimeStep = 0.01f;      // Time step for CPG updates (seconds)
+        /// <summary>
+        /// Convergence rate for amplitude shifts (literature notation: a).
+        /// </summary>
+        public float convergence = 0.1f;
 
-        // Initial foot positions for each leg (FL, FR, RL, RR)
+        /// <summary>
+        /// Time step for CPG updates in seconds.
+        /// </summary>
+        public float TimeStep = 0.01f;
+
+        /// <summary>
+        /// Initial foot positions for each leg (FL, FR, RL, RR).
+        /// </summary>
         private readonly Vector3[] initialFootPositions = {
-            new Vector3(0.075f, -0.18f, 0.25f),   // FL
-            new Vector3(-0.075f, -0.18f, -0.25f), // FR
-            new Vector3(-0.075f, -0.18f, 0.25f),  // RL
-            new Vector3(0.075f, -0.18f, -0.25f)   // RR
+            new Vector3(0.075f, -0.18f, 0.25f),
+            new Vector3(-0.075f, -0.18f, -0.25f),
+            new Vector3(-0.075f, -0.18f, 0.25f),
+            new Vector3(0.075f, -0.18f, -0.25f)
         };
-
 
         // =========================================================
         // CPG PARAMETERS       Leg Order: FL, FR, RL, RR
         // =========================================================
 
-        // initial Parameters to reset to. Current Values are set to match the initial foot positions from the original project
-        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, Mathf.PI * 1.5f, Mathf.PI * 1.5f};     // Phases for each leg and spine
-        private readonly float[] initialPhaseShifts = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};                           // Phase shifts for each leg and spine
-        private readonly float[] initialAmplitudes = {2.740051f, 2.740051f, 2.740051f, 2.740051f, 0.1f, 0.1f};            // Amplitudes for each leg and spine
-        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f};                                   // Amplitude shifts for each leg and spine
-        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f};                                  // Amplitude shifts for each leg and spine
-        private readonly float[] initialOrientationOffsets = {-1.862253f, -1.862253f, 1.862253f, 1.862253f};           // Orientation offsets for each leg
-        private readonly float[] initialOrientationOffsetShifts = {0f, 0f, 0f, 0f};                                   // Orientation offset shifts for each leg
+        /// <summary>
+        /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine, Tail.
+        /// </summary>
+        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, Mathf.PI * 1.5f, Mathf.PI * 1.5f};
 
-        // CPG Parameters throughout
-        private float[] Phases;                     // CPG Phases, Theta
-        private float[] PhaseShifts;                // CPG Phase shifts, Theta',                    controlled via omega
-        private float[] Amplitudes;                 // intrinsic amplitudes, r
-        private float[] AmplitudeShifts;            // Shift in amplitude, r'
-        private float[] AmplitudeShifts2;           // Shift in amplitude Shifts, r''               controlled via mu
-        private float[] OrientationOffsets;          // Orientation of the foot trajectory, Phi
-        private float[] OrientationOffsetShifts;    // Change in foot Trajectory orientation, Phi'  controlled via psy
+        /// <summary>
+        /// Initial phase shift rates for legs and spine.
+        /// </summary>
+        private readonly float[] initialPhaseShifts = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+
+        /// <summary>
+        /// Initial amplitude values for legs and spine.
+        /// </summary>
+        private readonly float[] initialAmplitudes = {2.740051f, 2.740051f, 2.740051f, 2.740051f, 0.1f, 0.1f};
+
+        /// <summary>
+        /// Initial amplitude shift rates for legs and spine.
+        /// </summary>
+        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f};
+
+        /// <summary>
+        /// Initial second derivative of amplitude shifts for legs and spine.
+        /// </summary>
+        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f};
+
+        /// <summary>
+        /// Initial orientation offsets for foot trajectories (Phi). Leg order: FL, FR, RL, RR.
+        /// </summary>
+        private readonly float[] initialOrientationOffsets = {-1.862253f, -1.862253f, 1.862253f, 1.862253f};
+
+        /// <summary>
+        /// Initial orientation offset shift rates for legs. Controlled via psy.
+        /// </summary>
+        private readonly float[] initialOrientationOffsetShifts = {0f, 0f, 0f, 0f};
+
+        /// <summary>
+        /// Current CPG phases (Theta).
+        /// </summary>
+        private float[] Phases;
+
+        /// <summary>
+        /// Current CPG phase shift rates (Theta'). Controlled via omega.
+        /// </summary>
+        private float[] PhaseShifts;
+
+        /// <summary>
+        /// Current intrinsic amplitudes (r).
+        /// </summary>
+        private float[] Amplitudes;
+
+        /// <summary>
+        /// Current amplitude shift rates (r').
+        /// </summary>
+        private float[] AmplitudeShifts;
+
+        /// <summary>
+        /// Current second derivative of amplitude shifts (r''). Controlled via mu.
+        /// </summary>
+        private float[] AmplitudeShifts2;
+
+        /// <summary>
+        /// Current orientation offsets for foot trajectories (Phi).
+        /// </summary>
+        private float[] OrientationOffsets;
+
+        /// <summary>
+        /// Current orientation offset shift rates (Phi'). Controlled via psy.
+        /// </summary>
+        private float[] OrientationOffsetShifts;
+
 
         // =========================================================
         // Communication with RL Agent
         // =========================================================
 
+        /// <summary>
+        /// Gets a copy of the current CPG phases.
+        /// </summary>
+        /// <returns>A copy of the Phases array.</returns>
         public float[] GetPhases()
         {
             return (float[])Phases.Clone();
         }
 
+        /// <summary>
+        /// Gets a copy of the current CPG amplitudes.
+        /// </summary>
+        /// <returns>A copy of the Amplitudes array.</returns>
         public float[] GetAmplitudes()
         {
             return (float[])Amplitudes.Clone();
         }
 
+        /// <summary>
+        /// Gets a copy of the current orientation offsets.
+        /// </summary>
+        /// <returns>A copy of the OrientationOffsets array.</returns>
         public float[] GetOrientationOffsets()
         {
             return (float[])OrientationOffsets.Clone();
@@ -144,6 +242,9 @@ namespace RoboIguanaRL
         // Internal function
         // =========================================================
 
+        /// <summary>
+        /// Initializes the CPG controller by reseting all parameters and initializing all joints.
+        /// </summary>
         public void InitializeCPG()
         {
             // set CPG parameters to their initial values
@@ -153,7 +254,9 @@ namespace RoboIguanaRL
             InitializeAllJoints();
         }
 
-        // Connect hinges and articulation bodies, set initial pose
+        /// <summary>
+        /// Connects articulation bodies and hinges. Sets all joints to their initial pose.
+        /// </summary>
         private void InitializeAllJoints()
         {
             Debug.Log("Initializing all joints to their starting positions...");
@@ -170,14 +273,11 @@ namespace RoboIguanaRL
             for (int i = 0; i<4; i++)
             {
                 (float x, float y, float z) p = GetFootPosition(initialPhases[i], initialAmplitudes[i], initialOrientationOffsets[i]);
-                // Debug.Log($"Initial Foot position for Foot {i}: {p}");
                 (float yaw, float hip, float knee) = InverseKinematics(p);
 
                 InitialiseJoint(hipYawLinks[i], hipYawHinges[i], yaw);
                 InitialiseJoint(hipPitchLinks[i], hipPitchHinges[i], hip);
                 InitialiseJoint(kneeLinks[i], kneeHinges[i], knee);
-
-                //Debug.Log($"Initialized Leg {i}: Foot Position: ({p.x}, {p.y}, {p.z}), Yaw: {yaw}, Hip: {hip}, Knee: {knee}");
             }
 
             // Spine and tail
@@ -186,7 +286,12 @@ namespace RoboIguanaRL
 
         }
 
-    // Set joint to initial state (position + drive target) and link hinges and articulation bodies
+        /// <summary>
+        /// Connects articulation body and hinge. Sets Jont to given pose.
+        /// </summary>
+        /// <param name="ab"></param>
+        /// <param name="h"></param>
+        /// <param name="angleRad"></param> <summary>
         private void InitialiseJoint(ArticulationBody ab, Hinge h, float angleRad)
         {
             if (ab == null) return;
@@ -200,44 +305,49 @@ namespace RoboIguanaRL
                 h.SetAngle(angleRad);
         }
 
+        /// <summary>
+        /// Sets all CPG parameters to their initial values. Updates pose to apply new parameters.
+        /// </summary>
         public void Reset()
         {
-            // Reset the CPG parameters to their initial values
+            Phases = (float[])initialPhases.Clone();
+            PhaseShifts = (float[])initialPhaseShifts.Clone();
+            Amplitudes = (float[])initialAmplitudes.Clone();
+            AmplitudeShifts = (float[])initialAmplitudeShifts.Clone();
+            AmplitudeShifts2 = (float[])initialAmplitudeShifts2.Clone();
+            OrientationOffsets = (float[])initialOrientationOffsets.Clone();
+            OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();
 
-            Phases = (float[])initialPhases.Clone();                                        // Reset phases to initial values
-            PhaseShifts = (float[])initialPhaseShifts.Clone();                              // Reset phase shifts to default values
-            Amplitudes = (float[])initialAmplitudes.Clone();                                // Reset amplitudes to initial values
-            AmplitudeShifts = (float[])initialAmplitudeShifts.Clone();                      // Reset amplitude shifts to default values
-            AmplitudeShifts2 = (float[])initialAmplitudeShifts2.Clone();                    // Reset amplitude shifts to default values
-            OrientationOffsets = (float[])initialOrientationOffsets.Clone();                  // Reset foot rotations to default values
-            OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();      // Reset foot rotation shifts to default values
-
-            UpdatePose(); // Update the robot's pose based on the reset CPG parameters
-
+            UpdatePose();
         }
 
+        /// <summary>
+        /// Update for each time step. Handles CPG oscillations and calls pose update.
+        /// </summary>
         public void FixedUpdate()
         {
-           // update CPG
-           for (int i = 0; i < 6; i++)
-           {
-               Phases[i] += PhaseShifts[i] * TimeStep;                          // Update phases based on phase shifts
-               Amplitudes[i] += AmplitudeShifts[i] * TimeStep;              // Update amplitudes based on amplitude shifts
-               AmplitudeShifts[i] += AmplitudeShifts2[i] * TimeStep;   // Update amplitude shifts based on second derivative
-           }
+            // update CPG
+            for (int i = 0; i < 6; i++)
+            {
+                Phases[i] += PhaseShifts[i] * TimeStep;
+                Amplitudes[i] += AmplitudeShifts[i] * TimeStep;
+                AmplitudeShifts[i] += AmplitudeShifts2[i] * TimeStep;
+            }
 
-           // update Trajectory orientations
-           for (int i = 0; i < 4; i++)
-           {
-               OrientationOffsets[i] = OrientationOffsets[i] + OrientationOffsetShifts[i] * TimeStep; // Update foot rotations based on rotation shifts
-           }
-
-           UpdatePose(); // Update the robot's pose based on the updated CPG parameters
+            // update Trajectory orientations
+            for (int i = 0; i < 4; i++)
+            {
+                OrientationOffsets[i] = OrientationOffsets[i] + OrientationOffsetShifts[i] * TimeStep; // Update foot rotations based on rotation shifts
+            }
+            // Update the robot's pose based on the updated CPG parameters
+            UpdatePose();
         }
 
+        /// <summary>
+        /// Apply current CPG parameters to robot pose.
+        /// </summary>
         public void UpdatePose()
         {
-            // Debug.Log("Updating Pose");
             // update limb positions
             for (int i = 0; i < 4; i++) {
                 (float x, float y, float z) p = GetFootPosition(Phases[i], Amplitudes[i], OrientationOffsets[i]);
@@ -253,15 +363,20 @@ namespace RoboIguanaRL
             ApplySpineAngle(spineAngles);
         }
 
+        /// <summary>
+        /// Applies actions received from the RL agent to the CPG parameters.
+        /// <remark>
+        ///     Assuming the action space is structured as follows:
+        ///         0-5: Phase shifts for each leg and spine
+        ///         6-11: Amplitude shifts for each leg and spine
+        ///         12-15: trajectory rotation shifts for each leg
+        /// </remark>
+        /// </summary>
+        /// <param name="actions">Action buffers containing continuous actions for phase shifts, amplitude shifts, and orientation offsets.</param>
         public void ApplyActions(ActionBuffers actions)
         {
             // Apply the actions received from the RL agent to the CPG parameters
             ActionSegment<float> continuous = actions.ContinuousActions;
-
-            // Assuming the action space is structured as follows:
-            //      0-5: Phase shifts for each leg and spine
-            //      6-11: Amplitude shifts for each leg and spine
-            //      12-15: trajectory rotation shifts for each leg
 
             // update phase and amplitude for all joints
             for (int i = 0; i < 6; i++)
@@ -273,10 +388,10 @@ namespace RoboIguanaRL
                 AmplitudeShifts2[i] =  convergence * ((convergence / 4) * (continuous[i + 6] - Amplitudes[i]) - AmplitudeShifts[i]);
             }
 
-            // update trajectory rotation shifts for all legs
+            // update trajectory rotation shifts
             for (int i = 0; i < 4; i++)
             {
-                OrientationOffsetShifts[i] = continuous[i + 12]; // Update trajectory rotation shifts
+                OrientationOffsetShifts[i] = continuous[i + 12];
             }
         }
 
@@ -285,19 +400,28 @@ namespace RoboIguanaRL
         // CPG translation
         // =========================================================
 
-        // get limb position from CPG State
+        /// <summary>
+        /// Calculates the foot position based on CPG state parameters.
+        /// </summary>
+        /// <param name="phase">The current phase of the CPG oscillator.</param>
+        /// <param name="amplitude">The amplitude of the foot trajectory.</param>
+        /// <param name="orientationOffset">The orientation offset for the foot trajectory.</param>
+        /// <returns>A tuple containing the x, y, z coordinates of the foot position.</returns>
         private (float x, float y, float z) GetFootPosition(float phase, float amplitude, float orientationOffset)
         {
             float x = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Cos(orientationOffset);
             float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
             float z = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset);
 
-            // Debug.Log($"Foot Position - Phase: {phase}, Amplitude: {amplitude}, OrientationOffset: {orientationOffset}, Position: ({x}, {y}, {z})");
-
             return (x, y, z);
         }
 
-        // returns angels for spine and tail from CPG state
+        /// <summary>
+        /// Calculates spine and tail angles based on CPG state parameters.
+        /// </summary>
+        /// <param name="phase">The current phase of the CPG oscillator.</param>
+        /// <param name="amplitude">The amplitude of the spine trajectory.</param>
+        /// <returns>The angle for the spine/tail joint.</returns>
         private float GetSpineAngles(float phase, float amplitude)
         {
             return MathF.Sin(phase) * amplitude / spineRange;
@@ -308,12 +432,21 @@ namespace RoboIguanaRL
         // Inverse Kinematics (Copied from original Project)
         // =========================================================
 
+        /// <summary>
+        /// Calculates joint angles from a foot position given as a Vector3.
+        /// </summary>
+        /// <param name="p">The foot position as a Vector3.</param>
+        /// <returns>A tuple containing yaw, hip, and knee angles.</returns>
         private (float yaw, float hip, float knee) InverseKinematics(Vector3 p)
         {
             return InverseKinematics((p.x, p.y, p.z));
         }
 
-        // Get joint angles from Foot position
+        /// <summary>
+        /// Calculates joint angles from a foot position given as x, y, z coordinates.
+        /// </summary>
+        /// <param name="p">A tuple containing the x, y, z coordinates of the foot position.</param>
+        /// <returns>A tuple containing yaw, hip, and knee angles.</returns>
         private (float yaw, float hip, float knee) InverseKinematics((float x, float y, float z) p)
         {
             float yaw;
@@ -344,7 +477,12 @@ namespace RoboIguanaRL
             return (yaw, hip, knee);
         }
 
-        // set limbs to new pose
+        /// <summary>
+        /// Applies the calculated joint angles to all limbs.
+        /// </summary>
+        /// <param name="yaw">Array of yaw angles for each leg (FL, FR, RL, RR).</param>
+        /// <param name="hip">Array of hip angles for each leg (FL, FR, RL, RR).</param>
+        /// <param name="knee">Array of knee angles for each leg (FL, FR, RL, RR).</param>
         private void ApplyAngles(
                 float[] yaw, float[] hip, float[] knee)
         {
@@ -365,7 +503,10 @@ namespace RoboIguanaRL
             kRR.SetAngle(knee[3]);
         }
 
-        // set Spine and tail to new pose
+        /// <summary>
+        /// Applies the calculated angles to the spine and tail.
+        /// </summary>
+        /// <param name="angles">Array containing spine and tail angles.</param>
         private void ApplySpineAngle(float[] angles)
         {
             spine.SetAngle(angles[0]);
@@ -377,7 +518,9 @@ namespace RoboIguanaRL
         // Debugging functions for individual use
         // =========================================================
 
-        // set CPG Parameters to match the initial foot positions based on Phases
+        /// <summary>
+        /// Recovers CPG parameters to match the initial foot positions based on initial phases.
+        /// </summary>
         private void FindStartingCPGState()
         {
             Debug.Log("Recovered Parameters after initialization:");
@@ -390,7 +533,13 @@ namespace RoboIguanaRL
 
         }
 
-        // Get foot position from joint angles
+        /// <summary>
+        /// Calculates the foot position from joint angles using forward kinematics.
+        /// </summary>
+        /// <param name="yaw">The yaw angle of the leg.</param>
+        /// <param name="hip">The hip angle of the leg.</param>
+        /// <param name="knee">The knee angle of the leg.</param>
+        /// <returns>The foot position as a Vector3.</returns>
         private Vector3 ForwardKinematics(float yaw, float hip, float knee)
         {
             // Position in the leg plane
@@ -414,7 +563,13 @@ namespace RoboIguanaRL
             return new Vector3(x, y, z);
         }
 
-        // Recover CPG parameters from foot position
+        /// <summary>
+        /// Recovers CPG parameters (orientation offset and amplitude) from a foot position.
+        /// </summary>
+        /// <param name="x">The x-coordinate of the foot position.</param>
+        /// <param name="z">The z-coordinate of the foot position.</param>
+        /// <param name="phase">The current phase of the CPG oscillator.</param>
+        /// <returns>A tuple containing the orientation offset and amplitude.</returns>
         private (float OrientationOffsets, float amplitude) RecoverParameters(float x, float z, float phase)
         {
             float OrientationOffsets = MathF.Atan2(-z, -x);

@@ -139,7 +139,7 @@ namespace RoboIguanaRL
             return (float[])Amplitudes.Clone();
         }
 
-        public float[] GetDirectionalOffsets()
+        public float[] GetOrientationOffset()
         {
             return (float[])OrientationOffset.Clone();
         }
@@ -175,8 +175,7 @@ namespace RoboIguanaRL
             for (int i = 0; i<4; i++)
             {
                 (float x, float y, float z) p = GetFootPosition(initialPhases[i], initialAmplitudes[i], initialOrientationOffset[i]);
-                //Vector3 p = initialFootPositions[i];
-                Debug.Log($"Initial Foot position for Foot {i}: {p}");
+                // Debug.Log($"Initial Foot position for Foot {i}: {p}");
                 (float yaw, float hip, float knee) = InverseKinematics(p);
 
                 InitialiseJoint(hipYawLinks[i], hipYawHinges[i], yaw);
@@ -243,7 +242,7 @@ namespace RoboIguanaRL
 
         public void UpdatePose()
         {
-            Debug.Log("Updating Pose");
+            // Debug.Log("Updating Pose");
             // update limb positions
             for (int i = 0; i < 4; i++) {
                 (float x, float y, float z) p = GetFootPosition(Phases[i], Amplitudes[i], OrientationOffset[i]);
@@ -298,7 +297,7 @@ namespace RoboIguanaRL
             float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
             float z = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset);
 
-            Debug.Log($"Foot Position - Phase: {phase}, Amplitude: {amplitude}, OrientationOffset: {orientationOffset}, Position: ({x}, {y}, {z})");
+            // Debug.Log($"Foot Position - Phase: {phase}, Amplitude: {amplitude}, OrientationOffset: {orientationOffset}, Position: ({x}, {y}, {z})");
 
             return (x, y, z);
         }

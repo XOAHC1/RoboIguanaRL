@@ -4,6 +4,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using Force;
 using Unity.AppUI.UI;
+using Unity.VisualScripting;
 
 namespace RoboIguanaRL
 {
@@ -62,12 +63,16 @@ namespace RoboIguanaRL
             // internal state
             sensor.AddObservation(CPG.GetPhases());                 // 6D
             sensor.AddObservation(CPG.GetAmplitudes());             // 6D
-            sensor.AddObservation(CPG.GetDirectionalOffsets());     // 4D
+            sensor.AddObservation(CPG.GetOrientationOffset());     // 4D
 
             // Target related input
             sensor.AddObservation(TargetDirection);                 // 3D
             sensor.AddObservation(TargetVelocity);                  // 1D
 
+            Debug.Log($"Movement Observations: \n Direction: {transform.forward - TargetDirection} \n Velocity: {rb.linearVelocity / TargetVelocity} \n AngularVel: {rb.angularVelocity}");
+            Debug.Log($"Contact Booleans: {footFL.IsTouchingGround}, {footFR.IsTouchingGround}, {footRL.IsTouchingGround}, {footRR.IsTouchingGround}");
+            Debug.Log($"State: \n {CPG.GetPhases()}, \n {CPG.GetAmplitudes()}, \n {CPG.GetOrientationOffset()}");
+            Debug.Log($"Target: \n {TargetDirection}, \n {TargetVelocity}");
         }
 
         public override void OnActionReceived(ActionBuffers buffers)
@@ -83,6 +88,8 @@ namespace RoboIguanaRL
             //          change amplitude
 
             CPG.ApplyActions(buffers);
+
+            Debug.Log("Actions Received");
 
         }
 
@@ -108,6 +115,7 @@ namespace RoboIguanaRL
 
         public override void Heuristic(in ActionBuffers actionsOut)
         {
+            Debug.Log("Heuristic called");
             // Provide manual control for testing purposes
             var continuousActionsOut = actionsOut.ContinuousActions;
             for (int i = 0; i < continuousActionsOut.Length; i++)

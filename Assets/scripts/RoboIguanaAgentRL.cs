@@ -14,9 +14,15 @@ namespace RoboIguanaRL
         /// <summary>Contact detectors for the four feet (Front-Left, Front-Right, Rear-Left, Rear-Right).</summary>
         public ContactDetector footFL, footFR, footRL, footRR;
 
+        /// <summary>
+        /// Contact detector for the back of the robot, to abort training in unsolvable postions.
+        /// </summary> 
+        public ContactDetector Back;
+
         [Header("Articulation Body")]
         /// <summary>The main articulation body representing the robot's physical body.</summary>
         public ArticulationBody Body;
+        public Transform BodyPositon;
 
         /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
         private RoboIguanaCPGController CPG;
@@ -26,6 +32,9 @@ namespace RoboIguanaRL
         /// <summary>Target velocity in meters per second.</summary>
         private float TargetVelocity;
 
+        private Vector3 StartingPosition;
+        private Quaternion StartingOrientation;
+
 
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
@@ -33,26 +42,46 @@ namespace RoboIguanaRL
         public override void Initialize()
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
-            CPG = GetComponent<RoboIguanaCPGController>();
 
+            //  Save Starting Position
+            BodyPositon.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
+
+            CPG = GetComponent<RoboIguanaCPGController>();
+            
             CPG.InitializeCPG();
             ResetTarget();
-
         }
 
         /// <summary>
-        /// Called at the beginning of each episode to reset the agent's state, target, CPG, and contact detectors.
+        /// Resets the agent's state, CPG and robot position.
         /// </summary>
-        public override void OnEpisodeBegin()
-        {
-            ResetTarget();
-            CPG.Reset();
-
-            // Reset contact detectors.
+        public void Reset()
+        {            
+            SetReward(0f);
+            // Reset foot contact booleans
             footFL.Reset();
             footFR.Reset();
             footRL.Reset();
             footRR.Reset();
+
+            // Reset Back contact
+            Back.Reset();
+
+            // Reset CPG
+            CPG.Reset();
+            
+            // Reset Position and Rotation
+            BodyPositon.SetPositionAndRotation(StartingPosition, StartingOrientation);
+        }
+
+        /// <summary>
+        /// Called at the beginning of each episode to reset the agent's state, and target.
+        /// </summary>
+        public override void OnEpisodeBegin()
+        {
+            Debug.Log("Starting new Epsode");
+            ResetTarget();
+            Reset();
         }
 
         /// <summary>
@@ -61,7 +90,7 @@ namespace RoboIguanaRL
         /// Observed are:
         ///     World State:
         ///         Direction deviation from target 3D
-        ///         Velocity deviation from target  3D
+        ///         Velocity deviation from target  1D
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:

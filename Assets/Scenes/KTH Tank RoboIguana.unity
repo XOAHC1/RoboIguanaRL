@@ -163,6 +163,7 @@ GameObject:
   - component: {fileID: 33066898}
   - component: {fileID: 33066899}
   - component: {fileID: 33066900}
+  - component: {fileID: 33066901}
   m_Layer: 0
   m_Name: base_link
   m_TagString: Untagged
@@ -310,6 +311,19 @@ MonoBehaviour:
   kneeRR: {fileID: 1812005740}
   Spinejoint: {fileID: 864638642}
   printEvery: 10
+--- !u!114 &33066901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33066896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
+  IsTouchingGround: 0
 --- !u!1 &33440488
 GameObject:
   m_ObjectHideFlags: 0
@@ -1985,7 +1999,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 29
+    VectorObservationSize: 27
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 16
@@ -1994,10 +2008,10 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: bc514ba8046f69649b4d2a53719aa0ce, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: My Behavior
+  m_BehaviorName: Submerged Walking
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -2023,7 +2037,9 @@ MonoBehaviour:
   footFR: {fileID: 1337741628}
   footRL: {fileID: 1588934152}
   footRR: {fileID: 1812005742}
+  Back: {fileID: 33066901}
   Body: {fileID: 33066898}
+  BodyPositon: {fileID: 33066897}
 --- !u!114 &346296844
 MonoBehaviour:
   m_ObjectHideFlags: 0

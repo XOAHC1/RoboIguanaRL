@@ -106,10 +106,10 @@ namespace RoboIguanaRL
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:
-        ///         Phases                          6D
-        ///         Amplitudes                      6D
+        ///         Phases                          7D
+        ///         Amplitudes                      7D
         ///         Orientation Offsets             4D
-        /// For a total of 29 input dimensions.
+        /// For a total of 31 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
@@ -141,9 +141,9 @@ namespace RoboIguanaRL
         ///         change amplitude            4D
         ///         change orientation          4D
         ///     for spine and tail:
-        ///         change intrinsic frequency  2D
-        ///         change amplitude            2D
-        /// For a total of 16 action dimensions.
+        ///         change intrinsic frequency  3D
+        ///         change amplitude            3D
+        /// For a total of 18 action dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>
@@ -287,7 +287,8 @@ namespace RoboIguanaRL
         {
             // Provide manual control for testing purposes
             var continuousActionsOut = actionsOut.ContinuousActions;
-            for (int i = 0; i < continuousActionsOut.Length; i++)
+            for (int i = 0; i<7; i++) continuousActionsOut[i] = 0.2f;
+            for (int i = 7; i < continuousActionsOut.Length; i++)
             {
                 // Keep parameters constant for heuristic.
                 continuousActionsOut[i] = 0f;

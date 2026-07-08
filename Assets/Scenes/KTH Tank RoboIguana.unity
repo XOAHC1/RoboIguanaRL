@@ -2000,12 +2000,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 27
+    VectorObservationSize: 31
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 16
+      m_NumContinuousActions: 18
       BranchSizes: 
-    VectorActionSize: 10000000
+    VectorActionSize: 12000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -2033,7 +2033,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 2000
+  MaxStep: 5000
   footFL: {fileID: 226582460}
   footFR: {fileID: 1337741628}
   footRL: {fileID: 1588934152}
@@ -2065,7 +2065,8 @@ MonoBehaviour:
   kFR: {fileID: 1615696146}
   kRL: {fileID: 466311423}
   kRR: {fileID: 628073739}
-  spine: {fileID: 1619266105}
+  spinePitch: {fileID: 966578276}
+  spineYaw: {fileID: 1619266105}
   tail: {fileID: 1500446555}
   hyFL_Link: {fileID: 254129174}
   hyFR_Link: {fileID: 397588905}
@@ -2079,7 +2080,8 @@ MonoBehaviour:
   kFR_Link: {fileID: 1337741625}
   kRL_Link: {fileID: 1588934150}
   kRR_Link: {fileID: 1812005740}
-  spine_Link: {fileID: 864638642}
+  spine_link_pitch: {fileID: 486339488}
+  spine_link_yaw: {fileID: 864638642}
   tail_Link: {fileID: 387685261}
   a: 0.116
   b: 0.09
@@ -2089,10 +2091,10 @@ MonoBehaviour:
   gC: 0.04
   gP: 0.03
   h: 0.18
-  spineRange: 20
+  spineRangePitch: 15
+  spineRangeYaw: 10
   tailRange: 20
-  convergence: 0.1
-  TimeStep: 0.01
+  convergence: 1
 --- !u!114 &346296845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3178,6 +3180,7 @@ GameObject:
   - component: {fileID: 486339487}
   - component: {fileID: 486339488}
   - component: {fileID: 486339489}
+  - component: {fileID: 486339490}
   m_Layer: 0
   m_Name: torso2_link
   m_TagString: Untagged
@@ -3224,10 +3227,10 @@ ArticulationBody:
   m_LinearZ: 2
   m_SwingY: 2
   m_SwingZ: 2
-  m_Twist: 2
+  m_Twist: 1
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -15
+    upperLimit: 15
     stiffness: 4.32
     damping: 0
     forceLimit: 5
@@ -3292,6 +3295,26 @@ CapsuleCollider:
   m_Height: 0.25
   m_Direction: 2
   m_Center: {x: 0.375, y: 0.05, z: 0}
+--- !u!114 &486339490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 486339486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19c4f01bf09c0a245b722fcbdad65e33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ServoPowerEstimator
+  driveTorqueNm: 0
+  omegaRadPerSec: 0
+  mechanicalPowerW: 0
+  mechanicalEnergyJ: 0
+  jointAngleRad: 0
+  targetAngleRad: 0
+  stiffness: 0
+  damping: 0
 --- !u!1 &532248541 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5935641589257227575, guid: 3a014debc3b3e05449edaee2fa65ba19,
@@ -4336,6 +4359,60 @@ Transform:
   - {fileID: 363100053}
   m_Father: {fileID: 864638641}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &966578274
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 966578275}
+  - component: {fileID: 966578276}
+  m_Layer: 0
+  m_Name: Spine_joint_pitch
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &966578275
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966578274}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1401984514}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &966578276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966578274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e920cbbf408fbfb6d98fe04d68f7a8b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SMARC.SMARCAssets::VehicleComponents.Actuators.Hinge
+  linkName: torso2_link
+  retryUntilSuccess: 1
+  rotateForROSCamera: 0
+  roll: 0
+  pitch: 0
+  yaw: 0
+  FixedRotation: 0
+  angle: 0
+  AngleMax: 3
+  reverse: 0
 --- !u!1 &967470251
 GameObject:
   m_ObjectHideFlags: 0
@@ -5757,6 +5834,7 @@ Transform:
   - {fileID: 466311422}
   - {fileID: 1615696145}
   - {fileID: 628073740}
+  - {fileID: 966578275}
   - {fileID: 1619266104}
   - {fileID: 1500446554}
   m_Father: {fileID: 1877632282}
@@ -6758,7 +6836,7 @@ GameObject:
   - component: {fileID: 1619266104}
   - component: {fileID: 1619266105}
   m_Layer: 0
-  m_Name: Spine_joint
+  m_Name: Spine_joint_yaw
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

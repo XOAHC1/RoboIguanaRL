@@ -104,8 +104,8 @@ namespace RoboIguanaRL
         public override void CollectObservations(VectorSensor sensor)
         {
             // position and velocity observations
-            sensor.AddObservation(transform.forward - TargetDirection);
-            sensor.AddObservation(Body.linearVelocity / TargetVelocity);
+            sensor.AddObservation(TargetDirection - transform.forward);
+            sensor.AddObservation(TargetVelocity - Body.linearVelocity.magnitude);
             sensor.AddObservation(Body.angularVelocity);
 
             // Contact Booleans
@@ -118,7 +118,6 @@ namespace RoboIguanaRL
             sensor.AddObservation(CPG.GetPhases());
             sensor.AddObservation(CPG.GetAmplitudes());
             sensor.AddObservation(CPG.GetOrientationOffsets());
-
         }
 
         /// <summary>
@@ -148,10 +147,10 @@ namespace RoboIguanaRL
         /// For training, uses random values; for testing, uses fixed values.
         /// </remark>
         /// </summary>
-        public void ResetTarget()
+        private void ResetTarget()
         {
             // turn on for training, turn off for testing
-            bool randomMode = false;
+            bool randomMode = true;
             if (randomMode) { 
                 // Random horizontal direction (unit vector)
                 Vector2 direction = Random.insideUnitCircle;
@@ -164,6 +163,105 @@ namespace RoboIguanaRL
                 TargetDirection = Vector3.forward;
                 TargetVelocity = 3f;
             }
+        }
+
+        /// <summary>
+        /// Terminates Episode in unsalvagable situations. Applies reward.
+        /// </summary>
+        public void FixedUpdate()
+        {
+            TerminateIfNecessary();
+            GiveReward();
+        }
+
+        /// <summary>
+        /// Checks termination condtions and terminates the episode if appropriate.
+        /// </summary>
+        private void TerminateIfNecessary()
+        {
+            if (Back.IsTouchingGround)
+            {
+                Debug.Log("Back is on the ground!");
+                EndEpisode();
+            }
+        }
+
+        // Factors (immutable tuning parameters)
+        private readonly float VelocityFactor = -1f;
+        private readonly float DirectionFactor = -1f;
+        private readonly float PitchFactor = -1f;
+        private readonly float RollFactor = -1f;
+        private readonly float GroundContactFactor = 1f;
+        private readonly float WorkFactor = -1f;
+        
+        /// <summary>
+        /// Computes the reward from multiple components and applies it to the agent.
+        /// </summary>
+        /// <remarks>
+        /// <list type="table">
+        ///   <listheader>
+        ///     <term>Parameter</term>
+        ///     <description>Description</description>
+        ///   </listheader>
+        ///   <item>
+        ///     <term>VelocityError</term>
+        ///     <description>Penalizes deviation from target speed.</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>DirectionError</term>
+        ///     <description>Penalizes deviation from the target heading.</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>PitchPenalty</term>
+        ///     <description>Penalizes excessive pitch angular velocity.</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>RollPenalty</term>
+        ///     <description>Penalizes excessive roll angular velocity.</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>GroundContact</term>
+        ///     <description>Rewards contact of one or more feet with ground.</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Work</term>
+        ///     <description>Penalizes energy usage.</description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        private void GiveReward()
+        {
+            // linear velocity
+            float VelocityError = TargetVelocity - Body.linearVelocity.magnitude;
+
+            // Direction
+            Vector3 DirectionDifference = TargetDirection - transform.forward;
+            float DirectionError = Mathf.Abs(DirectionDifference.magnitude);
+
+            // undesired pitch and roll
+            float PitchPenalty = Mathf.Abs(Body.angularVelocity[0]) * Mathf.Abs(Body.angularVelocity[0]);
+            float RollPenalty = Mathf.Abs(Body.angularVelocity[2]) * Mathf.Abs(Body.angularVelocity[2]);
+            
+            // Any foot touching the ground?
+            float GroundContact = (footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround) ? 1f : -1f;
+
+            // Work
+            float Work = 0;
+
+            // Apply Rewards
+            float totalReward = 0f;
+            totalReward += VelocityError * VelocityFactor;
+            totalReward += DirectionError * DirectionFactor;
+            totalReward += PitchPenalty * PitchFactor;
+            totalReward += RollPenalty * RollFactor;
+            totalReward += GroundContact * GroundContactFactor;
+            totalReward += Work * WorkFactor;
+
+            AddReward(totalReward);
+
+            // Debug.Log($"Step Reward: {totalReward}, Cumulative Reward: {GetCumulativeReward()}");
+            Debug.Log($"Reward Details:\n Velocity: {VelocityError * VelocityFactor}\n Direction: {DirectionError * DirectionFactor}\n Pitch: {PitchPenalty * PitchFactor}\n Roll: {RollPenalty * RollFactor}\n GroundContact: {GroundContact * GroundContactFactor}\n Work: {Work * WorkFactor}\n Total: {totalReward}");
+            
         }
 
         /// <summary>

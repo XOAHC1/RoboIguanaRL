@@ -41,7 +41,7 @@ namespace RoboIguanaRL
         /// <summary>Target direction for locomotion.</summary>
         private Vector3 TargetDirection;
         /// <summary>Target velocity in meters per second.</summary>
-        private float TargetVelocity;
+        private Vector3 TargetVelocity;
 
         private Vector3 StartingPosition;
         private Quaternion StartingOrientation;
@@ -102,7 +102,7 @@ namespace RoboIguanaRL
         /// Observed are:
         ///     World State:
         ///         Direction deviation from target 3D
-        ///         Velocity deviation from target  1D
+        ///         Velocity deviation from target  3D
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:
@@ -117,7 +117,7 @@ namespace RoboIguanaRL
         {
             // position and velocity observations
             sensor.AddObservation(TargetDirection - transform.forward);
-            sensor.AddObservation(TargetVelocity - Body.linearVelocity.magnitude);
+            sensor.AddObservation(TargetVelocity - Body.linearVelocity);
             sensor.AddObservation(Body.angularVelocity);
 
             // Contact Booleans
@@ -169,11 +169,11 @@ namespace RoboIguanaRL
                 TargetDirection = new Vector3(direction.x, 0f, direction.y);
 
                 // Random target velocity in a reasonable range (meters per second)
-                TargetVelocity = Random.Range(0.1f, 5f);
+                TargetVelocity = Random.Range(0.5f, 5f) * TargetDirection;
             } else {
                 // Fixed target direction and velocity for testing
                 TargetDirection = Vector3.forward;
-                TargetVelocity = 3f;
+                TargetVelocity = 3f * TargetDirection;
             }
         }
 
@@ -242,11 +242,12 @@ namespace RoboIguanaRL
         private void GiveReward()
         {
             // linear velocity
-            float VelocityError = TargetVelocity - Body.linearVelocity.magnitude;
+            Vector3 VelError = TargetVelocity - Body.linearVelocity;
+            (float VelocityErrorX, float VelocityErrorY, float VelocityErrorZ) = (VelError.x, VelError.y, VelError.z);
 
             // Direction
             Vector3 DirectionDifference = TargetDirection - transform.forward;
-            float DirectionError = Mathf.Abs(DirectionDifference.magnitude);
+            (float DirectionDifferenceX, float DirectionDifferenceY, float DirectionDifferenceZ) = (DirectionDifference.x, DirectionDifference.y, DirectionDifference.z);
 
             // undesired pitch and roll
             float PitchPenalty = Mathf.Abs(Body.angularVelocity[0]) * Mathf.Abs(Body.angularVelocity[0]);
@@ -260,8 +261,12 @@ namespace RoboIguanaRL
 
             // Apply Rewards
             float stepReward = 0f;
-            stepReward += VelocityError * VelocityWeight;
-            stepReward += DirectionError * DirectionWeight;
+            stepReward += VelocityErrorX * VelocityWeight;
+            stepReward += VelocityErrorY * VelocityWeight;
+            stepReward += VelocityErrorZ * VelocityWeight;
+            stepReward += DirectionDifferenceX * DirectionWeight;
+            stepReward += DirectionDifferenceY * DirectionWeight;
+            stepReward += DirectionDifferenceZ * DirectionWeight;
             stepReward += PitchPenalty * PitchWeight;
             stepReward += RollPenalty * RollWeight;
             stepReward += GroundContact * GroundContactWeight;
@@ -270,7 +275,7 @@ namespace RoboIguanaRL
             AddReward(stepReward);
 
             // Debug.Log($"Step Reward: {stepReward}, Cumulative Reward: {GetCumulativeReward()}");
-            Debug.Log($"Reward Details:\n Velocity: {VelocityError * VelocityWeight}\n Direction: {DirectionError * DirectionWeight}\n Pitch: {PitchPenalty * PitchWeight}\n Roll: {RollPenalty * RollWeight}\n GroundContact: {GroundContact * GroundContactWeight}\n EnergyConsumption: {EnergyConsumption * EnergyConsumptionWeight}\n Total: {stepReward}");
+            // Debug.Log($"Reward Details:\n Velocity: {VelocityError * VelocityWeight}\n Direction: {DirectionError * DirectionWeight}\n Pitch: {PitchPenalty * PitchWeight}\n Roll: {RollPenalty * RollWeight}\n GroundContact: {GroundContact * GroundContactWeight}\n EnergyConsumption: {EnergyConsumption * EnergyConsumptionWeight}\n Total: {stepReward}");
             
         }
 

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
+/// <summary>
+/// Estimates power consumption of a single joint.
+/// </summary>
 [RequireComponent(typeof(ArticulationBody))]
 public class ServoPowerEstimator : MonoBehaviour
 {
@@ -70,7 +72,7 @@ public class ServoPowerEstimator : MonoBehaviour
         float consumedPower = Mathf.Max(0f, mechanicalPowerW);
 
         // Integrate mechanical energy
-        mechanicalEnergyJ += consumedPower * Time.fixedDeltaTime;
+        mechanicalEnergyJ = consumedPower * Time.fixedDeltaTime;
     }
 
     // Optional: Reset energy counter

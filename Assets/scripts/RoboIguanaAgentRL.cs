@@ -24,8 +24,19 @@ namespace RoboIguanaRL
         public ArticulationBody Body;
         public Transform BodyPositon;
 
+        [Header("Reward Weights")]
+        /// <summary> Weights for reward calculation.</summary>
+        private readonly float VelocityWeight = -1f;
+        private readonly float DirectionWeight = -1f;
+        private readonly float PitchWeight = -1f;
+        private readonly float RollWeight = -1f;
+        private readonly float GroundContactWeight = 1f;
+        private readonly float EnergyConsumptionWeight = -1f;
+
         /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
         private RoboIguanaCPGController CPG;
+
+        private RobotEnergyEstimator EnergyEstimator;
 
         /// <summary>Target direction for locomotion.</summary>
         private Vector3 TargetDirection;
@@ -47,6 +58,7 @@ namespace RoboIguanaRL
             BodyPositon.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
 
             CPG = GetComponent<RoboIguanaCPGController>();
+            EnergyEstimator = GetComponent<RobotEnergyEstimator>();
             
             CPG.InitializeCPG();
             ResetTarget();
@@ -182,17 +194,15 @@ namespace RoboIguanaRL
             if (Back.IsTouchingGround)
             {
                 Debug.Log("Back is on the ground!");
-                EndEpisode();
+                Terminate();
             }
         }
 
-        // Factors (immutable tuning parameters)
-        private readonly float VelocityFactor = -1f;
-        private readonly float DirectionFactor = -1f;
-        private readonly float PitchFactor = -1f;
-        private readonly float RollFactor = -1f;
-        private readonly float GroundContactFactor = 1f;
-        private readonly float WorkFactor = -1f;
+        private void Terminate()
+        {
+            Debug.Log($"Terminating Agent. \n Traveled distance: {BodyPositon.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
+            EndEpisode();
+        }
         
         /// <summary>
         /// Computes the reward from multiple components and applies it to the agent.
@@ -224,7 +234,7 @@ namespace RoboIguanaRL
         ///     <description>Rewards contact of one or more feet with ground.</description>
         ///   </item>
         ///   <item>
-        ///     <term>Work</term>
+        ///     <term>EnergyConsumption</term>
         ///     <description>Penalizes energy usage.</description>
         ///   </item>
         /// </list>
@@ -245,22 +255,22 @@ namespace RoboIguanaRL
             // Any foot touching the ground?
             float GroundContact = (footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround) ? 1f : -1f;
 
-            // Work
-            float Work = 0;
+            // EnergyConsumption
+            float EnergyConsumption = EnergyEstimator.CurrentEnergy;
 
             // Apply Rewards
-            float totalReward = 0f;
-            totalReward += VelocityError * VelocityFactor;
-            totalReward += DirectionError * DirectionFactor;
-            totalReward += PitchPenalty * PitchFactor;
-            totalReward += RollPenalty * RollFactor;
-            totalReward += GroundContact * GroundContactFactor;
-            totalReward += Work * WorkFactor;
+            float stepReward = 0f;
+            stepReward += VelocityError * VelocityWeight;
+            stepReward += DirectionError * DirectionWeight;
+            stepReward += PitchPenalty * PitchWeight;
+            stepReward += RollPenalty * RollWeight;
+            stepReward += GroundContact * GroundContactWeight;
+            stepReward += EnergyConsumption * EnergyConsumptionWeight;
 
-            AddReward(totalReward);
+            AddReward(stepReward);
 
-            // Debug.Log($"Step Reward: {totalReward}, Cumulative Reward: {GetCumulativeReward()}");
-            Debug.Log($"Reward Details:\n Velocity: {VelocityError * VelocityFactor}\n Direction: {DirectionError * DirectionFactor}\n Pitch: {PitchPenalty * PitchFactor}\n Roll: {RollPenalty * RollFactor}\n GroundContact: {GroundContact * GroundContactFactor}\n Work: {Work * WorkFactor}\n Total: {totalReward}");
+            // Debug.Log($"Step Reward: {stepReward}, Cumulative Reward: {GetCumulativeReward()}");
+            Debug.Log($"Reward Details:\n Velocity: {VelocityError * VelocityWeight}\n Direction: {DirectionError * DirectionWeight}\n Pitch: {PitchPenalty * PitchWeight}\n Roll: {RollPenalty * RollWeight}\n GroundContact: {GroundContact * GroundContactWeight}\n EnergyConsumption: {EnergyConsumption * EnergyConsumptionWeight}\n Total: {stepReward}");
             
         }
 

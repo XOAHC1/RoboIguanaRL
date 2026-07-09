@@ -18,7 +18,7 @@ public class ContactDetector : MonoBehaviour
     /// <param name="collision">The collision information.</param>
     void OnCollisionEnter(Collision collision)
     {
-        IsTouchingGround = true; 
+        if (collision.collider.gameObject.name == "Floor") IsTouchingGround = true; 
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ public class ContactDetector : MonoBehaviour
     /// <param name="collision">The collision information.</param>
     void OnCollisionExit(Collision collision)
     {
-        IsTouchingGround = false;
+        if (collision.collider.gameObject.name == "Floor") IsTouchingGround = false;
     }
 
     /// <summary>

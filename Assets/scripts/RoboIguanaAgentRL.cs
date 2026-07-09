@@ -22,6 +22,7 @@ namespace RoboIguanaRL
         [Header("Articulation Body")]
         /// <summary>The main articulation body representing the robot's physical body.</summary>
         public ArticulationBody Body;
+        private Transform MainBody;
         public Transform BodyPositon;
 
         [Header("Reward Weights")]
@@ -47,6 +48,7 @@ namespace RoboIguanaRL
         private Quaternion StartingOrientation;
 
 
+
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
         /// </summary>
@@ -54,12 +56,12 @@ namespace RoboIguanaRL
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
 
-            //  Save Starting Position
-            BodyPositon.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
-
             CPG = GetComponent<RoboIguanaCPGController>();
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
+            MainBody = GetComponent<Transform>();
             
+            MainBody.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
+
             CPG.InitializeCPG();
             ResetTarget();
         }
@@ -68,22 +70,28 @@ namespace RoboIguanaRL
         /// Resets the agent's state, CPG and robot position.
         /// </summary>
         public void Reset()
-        {            
-            SetReward(0f);
+        {   
+            // Debug.Log("Reset Called!");  
+
+            // Reset Robot Position
+            Body.TeleportRoot(StartingPosition, StartingOrientation);
+            foreach (ArticulationBody ab in GetComponentsInChildren<ArticulationBody>())
+            {
+                ab.linearVelocity = Vector3.zero;
+                ab.angularVelocity = Vector3.zero;
+            }
+
+            CPG.Reset();
+
             // Reset foot contact booleans
             footFL.Reset();
             footFR.Reset();
             footRL.Reset();
             footRR.Reset();
-
-            // Reset Back contact
             Back.Reset();
 
-            // Reset CPG
-            CPG.Reset();
-            
-            // Reset Position and Rotation
-            BodyPositon.SetPositionAndRotation(StartingPosition, StartingOrientation);
+            SetReward(0f);
+
         }
 
         /// <summary>

@@ -139,6 +139,9 @@ namespace RoboIguanaRL
 
         /// <summary>
         /// Initial foot positions for each leg (FL, FR, RL, RR).
+        /// <remarks>
+        /// Only needed for retreiving initial CPG states.
+        /// </remarks>
         /// </summary>
         private readonly Vector3[] initialFootPositions = {
             new Vector3(0.075f, -0.18f, 0f),
@@ -261,7 +264,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initializes the CPG controller by reseting all parameters and initializing all joints.
         /// </summary>
-        public void InitializeCPG()
+        public void Initialize()
         {
             // set CPG parameters to their initial values
             Reset();

@@ -22,8 +22,6 @@ namespace RoboIguanaRL
         [Header("Articulation Body")]
         /// <summary>The main articulation body representing the robot's physical body.</summary>
         public ArticulationBody Body;
-        private Transform MainBody;
-        public Transform BodyPositon;
 
         [Header("Reward Weights")]
         /// <summary> Weights for reward calculation.</summary>
@@ -48,7 +46,6 @@ namespace RoboIguanaRL
         private Quaternion StartingOrientation;
 
 
-
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
         /// </summary>
@@ -58,21 +55,18 @@ namespace RoboIguanaRL
 
             CPG = GetComponent<RoboIguanaCPGController>();
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
-            MainBody = GetComponent<Transform>();
             
-            MainBody.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
+            transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
 
-            CPG.InitializeCPG();
-            ResetTarget();
+            CPG.Initialize();
+
         }
 
         /// <summary>
-        /// Resets the agent's state, CPG and robot position.
+        /// Resets the Robots Positon, CPG and Sensors.
         /// </summary>
-        public void Reset()
-        {   
-            // Debug.Log("Reset Called!");  
-
+        public void ResetRobot()
+        {
             // Reset Robot Position
             Body.TeleportRoot(StartingPosition, StartingOrientation);
             foreach (ArticulationBody ab in GetComponentsInChildren<ArticulationBody>())
@@ -83,15 +77,12 @@ namespace RoboIguanaRL
 
             CPG.Reset();
 
-            // Reset foot contact booleans
+            // Reset foot contact sensors
             footFL.Reset();
             footFR.Reset();
             footRL.Reset();
             footRR.Reset();
             Back.Reset();
-
-            SetReward(0f);
-
         }
 
         /// <summary>
@@ -100,8 +91,11 @@ namespace RoboIguanaRL
         public override void OnEpisodeBegin()
         {
             Debug.Log("Starting new Epsode");
+
+            ResetRobot();
+            
+            SetReward(0f);
             ResetTarget();
-            Reset();
         }
 
         /// <summary>
@@ -173,11 +167,11 @@ namespace RoboIguanaRL
             bool randomMode = true;
             if (randomMode) { 
                 // Random horizontal direction (unit vector)
-                Vector2 direction = Random.insideUnitCircle;
+                Vector2 direction = Random.onUnitCircle;
                 TargetDirection = new Vector3(direction.x, 0f, direction.y);
 
                 // Random target velocity in a reasonable range (meters per second)
-                TargetVelocity = Random.Range(0.5f, 5f) * TargetDirection;
+                TargetVelocity = Random.Range(0.1f, 3f) * TargetDirection;
             } else {
                 // Fixed target direction and velocity for testing
                 TargetDirection = Vector3.forward;
@@ -208,7 +202,7 @@ namespace RoboIguanaRL
 
         private void Terminate()
         {
-            Debug.Log($"Terminating Agent. \n Traveled distance: {BodyPositon.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
+            Debug.Log($"Terminating Agent. \n Traveled distance: {transform.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
             EndEpisode();
         }
         

@@ -154,7 +154,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine pitch, Spine yaw, Tail.
         /// </summary>
-        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0, Mathf.PI * 1.5f, Mathf.PI * 1.5f};
+        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial phase shift rates for legs and spine.
@@ -164,7 +164,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial amplitude values for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0.1f, 0.3f, 0.3f};
+        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f, 0f};
 
         /// <summary>
         /// Initial amplitude shift rates for legs and spine.

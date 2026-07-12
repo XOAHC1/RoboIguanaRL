@@ -279,8 +279,6 @@ namespace RoboIguanaRL
         /// </summary>
         private void InitializeAllJoints()
         {
-            Debug.Log("Initializing all joints to their starting positions...");
-
             // group joints for easier access
             hipYawLinks = new ArticulationBody[] {hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link};
             hipYawHinges = new Hinge[] {hyFL, hyFR, hyRL, hyRR};
@@ -462,7 +460,7 @@ namespace RoboIguanaRL
         // =========================================================
 
         /// <summary>
-        /// Calculates joint angles from a foot position given as a Vector3.
+        /// Wrapper for <c>InverseKinematics((float x, float y, float z) p)</c> to handle <c>Vector3</c> inputs.
         /// </summary>
         /// <param name="p">The foot position as a Vector3.</param>
         /// <returns>A tuple containing yaw, hip, and knee angles.</returns>

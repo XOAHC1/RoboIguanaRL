@@ -44,6 +44,7 @@ namespace RoboIguanaRL
 
         private Vector3 StartingPosition;
         private Quaternion StartingOrientation;
+        private ArticulationBody[] ComponentABs;
 
 
         /// <summary>
@@ -55,6 +56,7 @@ namespace RoboIguanaRL
 
             CPG = GetComponent<RoboIguanaCPGController>();
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
+            ComponentABs = GetComponentsInChildren<ArticulationBody>();
             
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
 
@@ -69,7 +71,7 @@ namespace RoboIguanaRL
         {
             // Reset Robot Position
             Body.TeleportRoot(StartingPosition, StartingOrientation);
-            foreach (ArticulationBody ab in GetComponentsInChildren<ArticulationBody>())
+            foreach (ArticulationBody ab in ComponentABs)
             {
                 ab.linearVelocity = Vector3.zero;
                 ab.angularVelocity = Vector3.zero;
@@ -108,10 +110,10 @@ namespace RoboIguanaRL
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:
-        ///         Phases                          7D
-        ///         Amplitudes                      7D
+        ///         Phases                          6D
+        ///         Amplitudes                      6D
         ///         Orientation Offsets             4D
-        /// For a total of 31 input dimensions.
+        /// For a total of 29 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
@@ -143,9 +145,9 @@ namespace RoboIguanaRL
         ///         change amplitude            4D
         ///         change orientation          4D
         ///     for spine and tail:
-        ///         change intrinsic frequency  3D
-        ///         change amplitude            3D
-        /// For a total of 18 action dimensions.
+        ///         change intrinsic frequency  2D
+        ///         change amplitude            2D
+        /// For a total of 16 action dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>
@@ -289,12 +291,10 @@ namespace RoboIguanaRL
         {
             // Provide manual control for testing purposes
             var continuousActionsOut = actionsOut.ContinuousActions;
-            for (int i = 0; i<7; i++) continuousActionsOut[i] = 0.2f;
-            for (int i = 7; i < continuousActionsOut.Length; i++)
-            {
-                // Keep parameters constant for heuristic.
-                continuousActionsOut[i] = 0f;
-            }
+            // Phase shifts
+            for (int i = 0; i < 6; i++)                             continuousActionsOut[i] = 0.2f;
+            // everything else
+            for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
         }
     }
 }

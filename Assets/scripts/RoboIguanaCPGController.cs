@@ -26,7 +26,6 @@ namespace RoboIguanaRL
         [Header("Spine actuators")]
         public Hinge spinePitch;
         public Hinge spineYaw;
-        public Hinge tail;
 
 
         // =========================================================
@@ -60,7 +59,6 @@ namespace RoboIguanaRL
         // public ArticulationBody spine_link1;
         public ArticulationBody spine_link_pitch;
         public ArticulationBody spine_link_yaw;
-        public ArticulationBody tail_Link;
 
 
         // =========================================================
@@ -119,9 +117,10 @@ namespace RoboIguanaRL
         public float spineRangeYaw = 10f;
 
         /// <summary>
-        /// Maximum rotation range for tail in degrees.
+        /// Maximum range for sway and yaw of the tail in degrees.
         /// </summary>
-        public float tailRange = 20f;
+        public float tailSwayRange = 20f;
+        public float tailYawRange = 40f;
 
         private float[] spineRanges;
 
@@ -156,27 +155,27 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine pitch, Spine yaw, Tail.
         /// </summary>
-        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f, 0f};
+        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial phase shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial amplitude values for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f, 0f};
+        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f};
 
         /// <summary>
         /// Initial amplitude shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial second derivative of amplitude shifts for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial orientation offsets for foot trajectories (Phi). Leg order: FL, FR, RL, RR.
@@ -265,11 +264,24 @@ namespace RoboIguanaRL
         /// </summary>
         public void Initialize()
         {
-            // set CPG parameters to their initial values
-            Reset();
+            // group joints for easier access.
+            hipYawLinks = new ArticulationBody[] {hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link};
+            hipYawHinges = new Hinge[] {hyFL, hyFR, hyRL, hyRR};
+            hipPitchLinks = new ArticulationBody[] {hpFL_Link, hpFR_Link, hpRL_Link, hpRR_Link};
+            hipPitchHinges = new Hinge[] {hpFL, hpFR, hpRL, hpRR};
+            kneeLinks = new ArticulationBody[] {kFL_Link, kFR_Link, kRL_Link, kRR_Link};
+            kneeHinges = new Hinge[] {kFL, kFR, kRL, kRR};
 
-            // Initialize all joints to their starting positions
+            spineLinks = new ArticulationBody[] {spine_link_pitch, spine_link_yaw};
+            spineHinges = new Hinge[] {spinePitch, spineYaw};
+
+            spineRanges = new float[] {spineRangePitch, spineRangeYaw};
+
+            // Initialize all joints to their starting positions.
             InitializeAllJoints();
+
+            // copy initial states to running CPG state.
+            ResetCPG();
 
             TimeStep = Time.fixedDeltaTime;
         }
@@ -279,19 +291,6 @@ namespace RoboIguanaRL
         /// </summary>
         private void InitializeAllJoints()
         {
-            // group joints for easier access
-            hipYawLinks = new ArticulationBody[] {hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link};
-            hipYawHinges = new Hinge[] {hyFL, hyFR, hyRL, hyRR};
-            hipPitchLinks = new ArticulationBody[] {hpFL_Link, hpFR_Link, hpRL_Link, hpRR_Link};
-            hipPitchHinges = new Hinge[] {hpFL, hpFR, hpRL, hpRR};
-            kneeLinks = new ArticulationBody[] {kFL_Link, kFR_Link, kRL_Link, kRR_Link};
-            kneeHinges = new Hinge[] {kFL, kFR, kRL, kRR};
-
-            spineLinks = new ArticulationBody[] {spine_link_pitch, spine_link_yaw, tail_Link};
-            spineHinges = new Hinge[] {spinePitch, spineYaw, tail};
-
-            spineRanges = new float[] {spineRangePitch, spineRangeYaw, tailRange};
-
             // Initialize joint positions based on CPG parameters
             for (int i = 0; i<4; i++)
             {
@@ -305,9 +304,9 @@ namespace RoboIguanaRL
             }
 
             // Spine and tail
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < spineRanges.Length; i++)
             {
-                InitialiseJoint(spineLinks[i], spineHinges[i], GetSpineAngle(Phases[i+4], Amplitudes[i+4]) * spineRanges[i]);
+                InitialiseJoint(spineLinks[i], spineHinges[i], GetSpineAngle(initialPhases[i+4], initialAmplitudes[i+4]) * spineRanges[i]);
             }
         }
 
@@ -335,6 +334,15 @@ namespace RoboIguanaRL
         /// </summary>
         public void Reset()
         {
+            ResetCPG();
+            UpdatePose();
+        }
+
+        /// <summary>
+        /// Resets CPG-related arrays to their initial values.
+        /// </summary>
+        private void ResetCPG()
+        {
             Phases = (float[])initialPhases.Clone();
             PhaseShifts = (float[])initialPhaseShifts.Clone();
             Amplitudes = (float[])initialAmplitudes.Clone();
@@ -342,8 +350,6 @@ namespace RoboIguanaRL
             AmplitudeShifts2 = (float[])initialAmplitudeShifts2.Clone();
             OrientationOffsets = (float[])initialOrientationOffsets.Clone();
             OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();
-
-            UpdatePose();
         }
 
         /// <summary>
@@ -360,7 +366,7 @@ namespace RoboIguanaRL
             }
 
             // update Trajectory orientations
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < OrientationOffsets.Length; i++)
             {
                 OrientationOffsets[i] = (OrientationOffsets[i] + OrientationOffsetShifts[i] * TimeStep) % (2 * Mathf.PI);
             }
@@ -375,16 +381,16 @@ namespace RoboIguanaRL
         {
             // update limb positions
             for (int i = 0; i < 4; i++) {
-                int left = (i %2 == 0) ? 1: -1;
+                // Apply an offset to the foot position based on the side of the foot.
+                int left = (i % 2 == 0) ? 1: -1;
                 (float x, float y, float z) p = GetFootPosition(Phases[i], Amplitudes[i], OrientationOffsets[i], left);
                 (yaws[i], hips[i], knees[i]) = InverseKinematics(p);
-                // if (i==0) Debug.Log($"Position 0: {p}");
             }
             ApplyAngles(yaws, hips, knees);
 
             // update spine position
-            float[] spineAngles = new float[3];
-            for (int i = 0; i < 3; i++) {
+            float[] spineAngles = new float[2];
+            for (int i = 0; i < 2; i++) {
                 spineAngles[i] = GetSpineAngle(Phases[i + 4], Amplitudes[i + 4]);
             }
             ApplySpineAngle(spineAngles);
@@ -412,13 +418,13 @@ namespace RoboIguanaRL
                 PhaseShifts[i] = continuous[i];
 
                 // adapt second derivative of amplitude 
-                AmplitudeShifts2[i] =  convergence * ((convergence / 4) * (continuous[i + 7] - Amplitudes[i]) - AmplitudeShifts[i]);
+                AmplitudeShifts2[i] =  convergence * ((convergence / 4) * (continuous[i + PhaseShifts.Length] - Amplitudes[i]) - AmplitudeShifts[i]);
             }
 
             // update trajectory rotation shifts
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < OrientationOffsetShifts.Length; i++)
             {
-                OrientationOffsetShifts[i] = continuous[i + 14];
+                OrientationOffsetShifts[i] = continuous[i + PhaseShifts.Length + AmplitudeShifts2.Length];
             }
         }
 
@@ -531,14 +537,14 @@ namespace RoboIguanaRL
         }
 
         /// <summary>
-        /// Applies the calculated angles to the spine and tail.
+        /// Applies the calculated angles to all spine joints.
         /// </summary>
-        /// <param name="angles">Array containing spine and tail angles.</param>
+        /// <param name="angles">Array containing spine angles.</param>
         private void ApplySpineAngle(float[] angles)
         {
-            spinePitch.SetAngle(angles[0] * spineRangePitch);
-            spineYaw.SetAngle(angles[1] * spineRangeYaw);
-            tail.SetAngle(angles[2] * tailRange);
+            for (int i = 0; i < angles.Length; i++) spineHinges[i].SetAngle(angles[i] * spineRanges[i]);
+            // spinePitch.SetAngle(angles[0] * spineRangePitch);
+            // spineYaw.SetAngle(angles[1] * spineRangeYaw);
         }
 
 

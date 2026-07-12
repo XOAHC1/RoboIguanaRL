@@ -2000,18 +2000,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 31
+    VectorObservationSize: 29
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 18
+      m_NumContinuousActions: 16
       BranchSizes: 
-    VectorActionSize: 12000000
+    VectorActionSize: 10000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: cc213f1d5a1ec4e41aba87158189245a, type: 3}
   m_InferenceDevice: 0
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Submerged Walking
   TeamId: 0
   m_UseChildSensors: 1
@@ -2066,7 +2066,6 @@ MonoBehaviour:
   kRR: {fileID: 628073739}
   spinePitch: {fileID: 966578276}
   spineYaw: {fileID: 1619266105}
-  tail: {fileID: 1500446555}
   hyFL_Link: {fileID: 254129174}
   hyFR_Link: {fileID: 397588905}
   hyRL_Link: {fileID: 1536364197}
@@ -2081,7 +2080,6 @@ MonoBehaviour:
   kRR_Link: {fileID: 1812005740}
   spine_link_pitch: {fileID: 486339488}
   spine_link_yaw: {fileID: 864638642}
-  tail_Link: {fileID: 387685261}
   a: 0.116
   b: 0.09
   c: 0.172
@@ -2092,7 +2090,8 @@ MonoBehaviour:
   h: 0.18
   spineRangePitch: 15
   spineRangeYaw: 10
-  tailRange: 20
+  tailSwayRange: 20
+  tailYawRange: 40
   convergence: 1
 --- !u!114 &346296845
 MonoBehaviour:

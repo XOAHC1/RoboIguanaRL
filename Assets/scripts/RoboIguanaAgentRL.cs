@@ -132,8 +132,11 @@ namespace RoboIguanaRL
 
             // internal state
             sensor.AddObservation(CPG.GetPhases());
+            sensor.AddObservation(CPG.GetPhaseShifts());
             sensor.AddObservation(CPG.GetAmplitudes());
+            sensor.AddObservation(CPG.GetAmplitudeShifts());
             sensor.AddObservation(CPG.GetOrientationOffsets());
+            sensor.AddObservation(CPG.GetOrientationOffsetShifts());
         }
 
         /// <summary>

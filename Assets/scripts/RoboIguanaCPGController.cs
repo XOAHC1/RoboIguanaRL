@@ -238,28 +238,29 @@ namespace RoboIguanaRL
         /// Gets a copy of the current CPG phases.
         /// </summary>
         /// <returns>A copy of the Phases array.</returns>
-        public float[] GetPhases()
-        {
-            return (float[])Phases.Clone();
-        }
+        public float[] GetPhases() { return (float[])Phases.Clone();}
+        public float[] GetPhaseShifts() {return (float[])PhaseShifts.Clone();}
 
         /// <summary>
         /// Gets a copy of the current CPG amplitudes.
         /// </summary>
         /// <returns>A copy of the Amplitudes array.</returns>
-        public float[] GetAmplitudes()
-        {
-            return (float[])Amplitudes.Clone();
-        }
+        public float[] GetAmplitudes() { return (float[])Amplitudes.Clone();}
+        public float[] GetAmplitudeShifts() { return (float[])AmplitudeShifts.Clone();}
 
         /// <summary>
         /// Gets a copy of the current orientation offsets.
         /// </summary>
         /// <returns>A copy of the OrientationOffsets array.</returns>
-        public float[] GetOrientationOffsets()
-        {
-            return (float[])OrientationOffsets.Clone();
-        }
+        public float[] GetOrientationOffsets() { return (float[])OrientationOffsets.Clone();}
+        public float[] GetOrientationOffsetShifts() { return (float[])OrientationOffsetShifts.Clone();}
+
+        /// <summary>
+        /// Gets a copy of the current tail phase lag.
+        /// </summary>
+        /// <returns>The phase lag in the tail.</returns>
+        public float GetTailPhaseLag() { return TailPhaseLag;}
+        public float GetTailPhaseLagShift() {return TailPhaseLagShift;}
 
 
         // =========================================================

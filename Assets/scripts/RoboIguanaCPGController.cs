@@ -50,16 +50,19 @@ namespace RoboIguanaRL
         public ArticulationBody kRL_Link;
         public ArticulationBody kRR_Link;
 
-
-        // =========================================================
-        // SPINE
-        // =========================================================
-
         [Header("Spine links")]
-        // public ArticulationBody spine_link1;
         public ArticulationBody spine_link_pitch;
         public ArticulationBody spine_link_yaw;
 
+
+        // =========================================================
+        // Helper Modules
+        // =========================================================
+
+        /// <summary>
+        /// Helper object to manage the robot's tail.
+        /// </summary>
+        private TailManager Tail;
 
         // =========================================================
         // LEG GEOMETRY
@@ -70,20 +73,6 @@ namespace RoboIguanaRL
         public float b = 0.09f;
         public float c = 0.172f;
         public float d = 0.2f;
-
-        private float[] yaws = new float[4];
-        private float[] hips = new float[4];
-        private float[] knees = new float[4];
-
-        private ArticulationBody[] hipYawLinks;
-        private Hinge[] hipYawHinges;
-        private ArticulationBody[] hipPitchLinks;
-        private Hinge[] hipPitchHinges;
-        private ArticulationBody[] kneeLinks;
-        private Hinge[] kneeHinges;
-        private ArticulationBody[] spineLinks;
-        private Hinge[] spineHinges;
-
 
         // =========================================================
         // Trajectory parameters
@@ -122,9 +111,7 @@ namespace RoboIguanaRL
         public float tailSwayRange = 20f;
         public float tailYawRange = 40f;
 
-        private float[] spineRanges;
-
-        [Header("Convergence Parameters")]
+        [Header("Training parameters")]
         /// <summary>
         /// Convergence rate for amplitude shifts (literature notation: a).
         /// </summary>
@@ -147,6 +134,26 @@ namespace RoboIguanaRL
             new Vector3(-0.075f, -0.18f, 0f),
             new Vector3(0.075f, -0.18f, -0f)
         };
+
+
+        // =========================================================
+        // Arrays for collecticve Access
+        // =========================================================
+
+        private float[] yaws = new float[4];
+        private float[] hips = new float[4];
+        private float[] knees = new float[4];
+
+        private ArticulationBody[] hipYawLinks;
+        private Hinge[] hipYawHinges;
+        private ArticulationBody[] hipPitchLinks;
+        private Hinge[] hipPitchHinges;
+        private ArticulationBody[] kneeLinks;
+        private Hinge[] kneeHinges;
+        private ArticulationBody[] spineLinks;
+        private Hinge[] spineHinges;
+        private float[] spineRanges;
+
 
         // =========================================================
         // CPG PARAMETERS       Leg Order: FL, FR, RL, RR

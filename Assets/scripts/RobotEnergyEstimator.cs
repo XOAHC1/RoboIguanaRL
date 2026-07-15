@@ -1,3 +1,4 @@
+using RoboIguanaRL;
 using UnityEngine;
 
 /// <summary>
@@ -10,6 +11,11 @@ public class RobotEnergyEstimator : MonoBehaviour
     /// Array of power estimators. Contains estimators for all joints of the robot.
     /// </summary>
     private ServoPowerEstimator[] Estimators;
+
+    /// <summary>
+    /// Tail manager of the Robot.
+    /// </summary>
+    private TailManager Tail;
 
     /// <summary>
     /// Energy consumption of the robot in the las FixedUpdate step.
@@ -27,6 +33,7 @@ public class RobotEnergyEstimator : MonoBehaviour
     void Start()
     {
         Estimators = GetComponentsInChildren<ServoPowerEstimator>();
+        Tail = GetComponent<TailManager>();
         Reset();
 
         Debug.Log($"Started Energy Estimator for {Estimators.Length} joints");
@@ -66,6 +73,8 @@ public class RobotEnergyEstimator : MonoBehaviour
         {
             CurrentEnergy += est.mechanicalEnergyJ;
         }
+
+        CurrentEnergy += Tail.EnergyConsumption;
     }
 
 }

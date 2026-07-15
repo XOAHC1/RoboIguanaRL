@@ -2,6 +2,9 @@ using System;
 using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
+using Force;
+using System.Linq;
+using Unity.VisualScripting;
 
 namespace RoboIguanaRL
 {
@@ -26,6 +29,9 @@ namespace RoboIguanaRL
         [Header("Spine actuators")]
         public Hinge spinePitch;
         public Hinge spineYaw;
+
+        [Header("Tail Force Point")]
+        public ForcePointRoboIguana tailThrust;
 
 
         // =========================================================
@@ -64,6 +70,7 @@ namespace RoboIguanaRL
         /// </summary>
         private TailManager Tail;
 
+
         // =========================================================
         // LEG GEOMETRY
         // =========================================================
@@ -73,6 +80,7 @@ namespace RoboIguanaRL
         public float b = 0.09f;
         public float c = 0.172f;
         public float d = 0.2f;
+
 
         // =========================================================
         // Trajectory parameters
@@ -160,45 +168,46 @@ namespace RoboIguanaRL
         // =========================================================
 
         /// <summary>
-        /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine pitch, Spine yaw, Tail.
+        /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine pitch, Spine yaw, tail phase.
         /// </summary>
-        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f};
+        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f, 0f};
+        /// <summary>
+        /// Initial phase shift rates for legs, spine and tail.
+        /// </summary>
+        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
-        /// Initial phase shift rates for legs and spine.
+        /// Initial amplitude values for legs (4) spine (2) and Tail (2).
         /// </summary>
-        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f};
-
-        /// <summary>
-        /// Initial amplitude values for legs and spine.
-        /// </summary>
-        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f};
-
+        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f, 0f, 0f};
         /// <summary>
         /// Initial amplitude shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f};
-
+        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f};
         /// <summary>
         /// Initial second derivative of amplitude shifts for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial orientation offsets for foot trajectories (Phi). Leg order: FL, FR, RL, RR.
         /// </summary>
         private readonly float[] initialOrientationOffsets = {0f, 0f, 0f, 0f};
-
         /// <summary>
         /// Initial orientation offset shift rates for legs. Controlled via psy.
         /// </summary>
         private readonly float[] initialOrientationOffsetShifts = {0f, 0f, 0f, 0f};
 
         /// <summary>
+        /// Phase difference and Amplitudes.
+        /// </summary>
+        private readonly float initialTailPhaseLag = 0f;
+        private readonly float initialTailPhaseLagShift = 0f;
+
+        /// <summary>
         /// Current CPG phases (Theta).
         /// </summary>
         private float[] Phases;
-
         /// <summary>
         /// Current CPG phase shift rates (Theta'). Controlled via omega.
         /// </summary>
@@ -208,12 +217,10 @@ namespace RoboIguanaRL
         /// Current intrinsic amplitudes (r).
         /// </summary>
         private float[] Amplitudes;
-
         /// <summary>
         /// Current amplitude shift rates (r').
         /// </summary>
         private float[] AmplitudeShifts;
-
         /// <summary>
         /// Current second derivative of amplitude shifts (r''). Controlled via mu.
         /// </summary>
@@ -223,11 +230,19 @@ namespace RoboIguanaRL
         /// Current orientation offsets for foot trajectories (Phi).
         /// </summary>
         private float[] OrientationOffsets;
-
         /// <summary>
         /// Current orientation offset shift rates (Phi'). Controlled via psy.
         /// </summary>
         private float[] OrientationOffsetShifts;
+
+        /// <summary>
+        /// Phase lag from sway to yaw in the tail.
+        /// </summary>
+        private float TailPhaseLag;
+        /// <summary>
+        /// Change in <c>TailPhaseLag</c> per time step.
+        /// </summary>
+        private float TailPhaseLagShift;
 
 
         // =========================================================
@@ -272,6 +287,8 @@ namespace RoboIguanaRL
         /// </summary>
         public void Initialize()
         {
+            Debug.Log("Initialze CPG");
+            Tail = GetComponent<TailManager>();
             // group joints for easier access.
             hipYawLinks = new ArticulationBody[] {hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link};
             hipYawHinges = new Hinge[] {hyFL, hyFR, hyRL, hyRR};
@@ -290,8 +307,10 @@ namespace RoboIguanaRL
 
             // copy initial states to running CPG state.
             ResetCPG();
+            ResetTailParameters();
 
             TimeStep = Time.fixedDeltaTime;
+            // Debug.Log("CPG Ready");
         }
 
         /// <summary>
@@ -342,6 +361,7 @@ namespace RoboIguanaRL
         /// </summary>
         public void Reset()
         {
+            ResetTailParameters();
             ResetCPG();
             UpdatePose();
         }
@@ -361,31 +381,53 @@ namespace RoboIguanaRL
         }
 
         /// <summary>
+        /// Resets tail control parameters to initial values.
+        /// </summary>
+        private void ResetTailParameters()
+        {
+            TailPhaseLag = initialTailPhaseLag;
+            TailPhaseLagShift = initialTailPhaseLagShift;
+        }
+
+        /// <summary>
         /// Update for each time step. Handles CPG oscillations and calls pose update.
         /// </summary>
         public void FixedUpdate()
         {
-            // update CPG
+            // Debug.Log("Fixed Update CPG");
+            UpdateCPG();
+            UpdatePose();
+            UpdateTail();
+        }
+
+        /// <summary>
+        /// Progress CPG by one step.
+        /// </summary>
+        private void UpdateCPG()
+        {
             for (int i = 0; i < Phases.Length; i++)
             {
                 Phases[i] = (Phases[i] + PhaseShifts[i] * TimeStep) % (2 * Mathf.PI);
+            }
+
+            for (int i = 0; i < AmplitudeShifts2.Length; i++)
+            {
                 Amplitudes[i] += AmplitudeShifts[i] * TimeStep;
                 AmplitudeShifts[i] += AmplitudeShifts2[i] * TimeStep;
             }
 
-            // update Trajectory orientations
             for (int i = 0; i < OrientationOffsets.Length; i++)
             {
                 OrientationOffsets[i] = (OrientationOffsets[i] + OrientationOffsetShifts[i] * TimeStep) % (2 * Mathf.PI);
-            }
-            // Update the robot's pose based on the updated CPG parameters
-            UpdatePose();
+            }    
+
+            TailPhaseLag = (TailPhaseLag + TailPhaseLagShift * TimeStep) % (2 * Mathf.PI);        
         }
 
         /// <summary>
         /// Apply current CPG parameters to robot pose.
         /// </summary>
-        public void UpdatePose()
+        private void UpdatePose()
         {
             // update limb positions
             for (int i = 0; i < 4; i++) {
@@ -408,14 +450,16 @@ namespace RoboIguanaRL
         /// Applies actions received from the RL agent to the CPG parameters.
         /// <remark>
         ///     Assuming the action space is structured as follows:
-        ///         0-5: Phase shifts for each leg and spine
-        ///         6-11: Amplitude shifts for each leg and spine
-        ///         12-15: trajectory rotation shifts for each leg
+        ///         0-6: Phase shifts (legs: 4, spine: 2, tail: 1).
+        ///        7-15: Amplitude shifts (legs: 4, spine: 2, tail: 2).
+        ///       16-18: trajectory rotation shifts (legs: 4).
+        ///          19: Phase lag shift for the tail. 
         /// </remark>
         /// </summary>
         /// <param name="actions">Action buffers containing continuous actions for phase shifts, amplitude shifts, and orientation offsets.</param>
         public void ApplyActions(ActionBuffers actions)
         {
+            // Debug.Log("Applying Actions");
             // Apply the actions received from the RL agent to the CPG parameters
             ActionSegment<float> continuous = actions.ContinuousActions;
 
@@ -434,6 +478,27 @@ namespace RoboIguanaRL
             {
                 OrientationOffsetShifts[i] = continuous[i + PhaseShifts.Length + AmplitudeShifts2.Length];
             }
+
+            // Tail Parameters
+            TailPhaseLagShift += continuous.Last();
+        }
+
+        /// <summary>
+        /// Set tail parameters to current control values.
+        /// </summary>
+        private void UpdateTail()
+        {
+            Tail.UpdateTail(
+                Phases.Last(),
+                PhaseShifts.Last() / (2*Mathf.PI),    // get Freq in Hz
+                Amplitudes[Amplitudes.Length -1],
+                Amplitudes.Last(),
+                TailPhaseLag       
+            );
+
+            tailThrust.AddedMassX = Tail.Forces[0];
+            tailThrust.AddedMassY = Tail.Forces[1];
+            tailThrust.AddedMassZ = Tail.Forces[2];
         }
 
 
@@ -467,7 +532,6 @@ namespace RoboIguanaRL
         {
             return MathF.Sin(phase) * amplitude;
         }
-
 
         // =========================================================
         // Inverse Kinematics (Copied from original Project)
@@ -527,6 +591,7 @@ namespace RoboIguanaRL
         private void ApplyAngles(
                 float[] yaw, float[] hip, float[] knee)
         {
+            // Debug.Log("Applying Angles");
             // Leg Order: FL, FR, RL, RR
             hyFL.SetAngle(yaw[0]);
             hyFR.SetAngle(yaw[1]);

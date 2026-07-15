@@ -60,6 +60,7 @@ namespace RoboIguanaRL
             
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
 
+
             CPG.Initialize();
 
         }
@@ -95,7 +96,6 @@ namespace RoboIguanaRL
             Debug.Log("Starting new Epsode");
 
             ResetRobot();
-            
             SetReward(0f);
             ResetTarget();
         }
@@ -110,15 +110,21 @@ namespace RoboIguanaRL
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:
-        ///         Phases                          6D
-        ///         Amplitudes                      6D
-        ///         Orientation Offsets             4D
-        /// For a total of 29 input dimensions.
+        ///         Phases                          7D
+        ///         Phase shifts                    7D
+        ///         Amplitudes                      8D
+        ///         Ampltude shifts                 8D
+        ///         Orientation offsets             4D
+        ///         Orientation offset shifts       4D
+        ///         TailPhaseLag                    1D
+        /// For a total of 52 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
         {
+
+            // Debug.Log("Collecting Observations");
             // position and velocity observations
             sensor.AddObservation(TargetDirection - transform.forward);
             sensor.AddObservation(TargetVelocity - Body.linearVelocity);
@@ -137,6 +143,9 @@ namespace RoboIguanaRL
             sensor.AddObservation(CPG.GetAmplitudeShifts());
             sensor.AddObservation(CPG.GetOrientationOffsets());
             sensor.AddObservation(CPG.GetOrientationOffsetShifts());
+
+            // Tail State
+            sensor.AddObservation(CPG.GetTailPhaseLag());
         }
 
         /// <summary>
@@ -147,10 +156,14 @@ namespace RoboIguanaRL
         ///         change intrinsic frequency  4D
         ///         change amplitude            4D
         ///         change orientation          4D
-        ///     for spine and tail:
+        ///     for the spine:
         ///         change intrinsic frequency  2D
         ///         change amplitude            2D
-        /// For a total of 16 action dimensions.
+        ///     for the Tail:
+        ///         change frequency            1D
+        ///         change amplitudes           2D
+        ///         change phase lag            1D
+        /// For a total of 20 action dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>
@@ -189,6 +202,7 @@ namespace RoboIguanaRL
         /// </summary>
         public void FixedUpdate()
         {
+            // Debug.Log("Fixed Update Agent");
             TerminateIfNecessary();
             GiveReward();
         }

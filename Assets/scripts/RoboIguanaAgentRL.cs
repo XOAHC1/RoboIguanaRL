@@ -31,6 +31,7 @@ namespace RoboIguanaRL
         private readonly float RollWeight = -1f;
         private readonly float GroundContactWeight = 1f;
         private readonly float EnergyConsumptionWeight = -1f;
+        private readonly float TailWhileWalkingWeight = -1f;
 
         /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
         private RoboIguanaCPGController CPG;
@@ -60,9 +61,7 @@ namespace RoboIguanaRL
             
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
 
-
             CPG.Initialize();
-
         }
 
         /// <summary>
@@ -275,7 +274,10 @@ namespace RoboIguanaRL
             float RollPenalty = Mathf.Abs(Body.angularVelocity[2]) * Mathf.Abs(Body.angularVelocity[2]);
             
             // Any foot touching the ground?
-            float GroundContact = (footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround) ? 1f : -1f;
+            bool groundContact = footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround;
+            float GroundContact = groundContact ? 1f : -1f;
+            
+            float TailMovementWhenWalking = groundContact ? CPG.GetAmplitudes().Last() : 0;
 
             // EnergyConsumption
             float EnergyConsumption = EnergyEstimator.CurrentEnergy;
@@ -291,6 +293,7 @@ namespace RoboIguanaRL
             stepReward += PitchPenalty * PitchWeight;
             stepReward += RollPenalty * RollWeight;
             stepReward += GroundContact * GroundContactWeight;
+            stepReward += TailMovementWhenWalking * TailWhileWalkingWeight;
             stepReward += EnergyConsumption * EnergyConsumptionWeight;
 
             AddReward(stepReward);

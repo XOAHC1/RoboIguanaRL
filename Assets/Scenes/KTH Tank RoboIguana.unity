@@ -1949,7 +1949,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1753375313}
-  - {fileID: 1697401553}
   m_Father: {fileID: 387685260}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &339924525
@@ -2094,7 +2093,6 @@ MonoBehaviour:
   kRR: {fileID: 628073739}
   spinePitch: {fileID: 966578276}
   spineYaw: {fileID: 1619266105}
-  tailThrust: {fileID: 1697401555}
   hyFL_Link: {fileID: 254129174}
   hyFR_Link: {fileID: 397588905}
   hyRL_Link: {fileID: 1536364197}
@@ -2176,10 +2174,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b44aa9999b05f674c90c9cd40b5e47dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoboIguanaRL.TailManager
-  Forces:
-  - 0
-  - 0
-  - 0
+  forcePoint: {fileID: 1093116977}
+  Force: {x: 0, y: 0, z: 0}
   EnergyConsumption: 0
 --- !u!1 &363100052
 GameObject:
@@ -4245,6 +4241,7 @@ Transform:
   - {fileID: 1995166906}
   - {fileID: 958262103}
   - {fileID: 1978982515}
+  - {fileID: 1093116976}
   m_Father: {fileID: 610211882}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!171741748 &864638642
@@ -4831,6 +4828,51 @@ MonoBehaviour:
       data1: 0
       data2: 0
   defaultFrameSettings: 0
+--- !u!1 &1093116975
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1093116976}
+  - component: {fileID: 1093116977}
+  m_Layer: 0
+  m_Name: Tail Thrust Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1093116976
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093116975}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.06100011, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 864638641}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1093116977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093116975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 874f501d7e87b4247a23c4eb77b7d5a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoboIguanaAgentRL.ForcePointTailThrust
+  body: {fileID: 864638642}
 --- !u!1001 &1093537211
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7022,209 +7064,6 @@ Transform:
   - {fileID: 3010713103015310936}
   m_Father: {fileID: 397588904}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1697401552
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 339924524}
-    m_Modifications:
-    - target: {fileID: 1654396177699399019, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: radius
-      value: 0.03
-      objectReference: {fileID: 0}
-    - target: {fileID: 1654396177699399019, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.002
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: Volume
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: AirDrag
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: VolumeObject
-      value: 
-      objectReference: {fileID: 515608868862784017}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: WaterDensity
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: CustomForce.y
-      value: -2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: AirAngularDrag
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: UnderwaterDrag
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: ApplyCustomForce
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: MaxBuoyancyForce
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: WaterQueryFrequency
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: DepthBeforeSubmerged
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: UnderwaterAngularDrag
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: AppliedBuoyancyForce.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5935641589257227573, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: ConnectedArticulationBody
-      value: 
-      objectReference: {fileID: 387685261}
-    - target: {fileID: 5935641589257227575, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_Name
-      value: Tail Thrust Point
-      objectReference: {fileID: 0}
-    - target: {fileID: 6667090093105115773, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6667090093105115773, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      propertyPath: m_Center.x
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5935641589257227575, guid: 3a014debc3b3e05449edaee2fa65ba19,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1697401555}
-  m_SourcePrefab: {fileID: 100100000, guid: 3a014debc3b3e05449edaee2fa65ba19, type: 3}
---- !u!4 &1697401553 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
-    type: 3}
-  m_PrefabInstance: {fileID: 1697401552}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1697401554 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5935641589257227575, guid: 3a014debc3b3e05449edaee2fa65ba19,
-    type: 3}
-  m_PrefabInstance: {fileID: 1697401552}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1697401555
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697401554}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 413f246b858bf4b4a9afbeee144b55b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: SMARC.SMARCAssets::Force.ForcePointRoboIguana
-  ConnectedArticulationBody: {fileID: 387685261}
-  ConnectedRigidbody: {fileID: 0}
-  WaterDensity: 0
-  AreaX: 0
-  AreaY: 0
-  AreaZ: 0
-  CdX: 0
-  CdY: 0
-  CdZ: 0
-  AddedMassX: 0
-  AddedMassY: 0
-  AddedMassZ: 0
 --- !u!1 &1698235743
 GameObject:
   m_ObjectHideFlags: 0

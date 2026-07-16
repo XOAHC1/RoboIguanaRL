@@ -2,9 +2,7 @@ using System;
 using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
-using Force;
 using System.Linq;
-using Unity.VisualScripting;
 
 namespace RoboIguanaRL
 {
@@ -29,9 +27,6 @@ namespace RoboIguanaRL
         [Header("Spine actuators")]
         public Hinge spinePitch;
         public Hinge spineYaw;
-
-        [Header("Tail Force Point")]
-        public ForcePointRoboIguana tailThrust;
 
 
         // =========================================================
@@ -495,10 +490,6 @@ namespace RoboIguanaRL
                 Amplitudes.Last(),
                 TailPhaseLag       
             );
-
-            tailThrust.AddedMassX = Tail.Forces[0];
-            tailThrust.AddedMassY = Tail.Forces[1];
-            tailThrust.AddedMassZ = Tail.Forces[2];
         }
 
 

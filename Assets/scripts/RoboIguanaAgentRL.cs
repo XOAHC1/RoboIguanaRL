@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
+using System.Linq;
 
 namespace RoboIguanaRL
 {
@@ -115,8 +116,9 @@ namespace RoboIguanaRL
         ///         Ampltude shifts                 8D
         ///         Orientation offsets             4D
         ///         Orientation offset shifts       4D
-        ///         TailPhaseLag                    1D
-        /// For a total of 52 input dimensions.
+        ///         TailPhaseLag                    2D
+        ///         Buoyancy                        2D
+        /// For a total of 55 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
@@ -145,6 +147,11 @@ namespace RoboIguanaRL
 
             // Tail State
             sensor.AddObservation(CPG.GetTailPhaseLag());
+            sensor.AddObservation(CPG.GetTailPhaseLagShift());
+
+            // Buoyancy
+            sensor.AddObservation(CPG.GetBuoyancy());
+            sensor.AddObservation(CPG.GetBuoyancyShift());
         }
 
         /// <summary>
@@ -162,7 +169,8 @@ namespace RoboIguanaRL
         ///         change frequency            1D
         ///         change amplitudes           2D
         ///         change phase lag            1D
-        /// For a total of 20 action dimensions.
+        ///         change buoyancy shft        1D
+        /// For a total of 21 action dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>

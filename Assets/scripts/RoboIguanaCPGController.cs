@@ -239,6 +239,19 @@ namespace RoboIguanaRL
         /// </summary>
         private float TailPhaseLagShift;
 
+        private float Buoyancy;
+        private float BuoyancyShift;
+
+
+        // =====================================
+        // Action indices
+        // =====================================
+
+        private int ActionIdxAmp;
+        private int ActionIdxOrientation;
+        private int ActionIdxTail;
+        private int ActionIdxBuoyancy;
+
 
         // =========================================================
         // Communication with RL Agent
@@ -271,6 +284,13 @@ namespace RoboIguanaRL
         /// <returns>The phase lag in the tail.</returns>
         public float GetTailPhaseLag() { return TailPhaseLag;}
         public float GetTailPhaseLagShift() {return TailPhaseLagShift;}
+
+        /// <summary>
+        /// Get current force added by the buoyancy module.
+        /// </summary>
+        /// <returns></returns>
+        public float GetBuoyancy() {return Buoyancy;}
+        public float GetBuoyancyShift() {return BuoyancyShift;} 
 
 
         // =========================================================
@@ -305,6 +325,12 @@ namespace RoboIguanaRL
             ResetTailParameters();
 
             TimeStep = Time.fixedDeltaTime;
+
+            ActionIdxAmp = Phases.Length;
+            ActionIdxOrientation = ActionIdxAmp + Amplitudes.Length;
+            ActionIdxTail = ActionIdxOrientation + OrientationOffsets.Length;
+            ActionIdxBuoyancy = ActionIdxTail + 1;
+
             // Debug.Log("CPG Ready");
         }
 
@@ -393,6 +419,7 @@ namespace RoboIguanaRL
             UpdateCPG();
             UpdatePose();
             UpdateTail();
+            UpdateBuoyancy();
         }
 
         /// <summary>
@@ -463,19 +490,22 @@ namespace RoboIguanaRL
             {
                 // adapt phase shifts
                 PhaseShifts[i] = continuous[i];
+            }
+
+            for (int i = 0; i < Amplitudes.Length; i++) {
 
                 // adapt second derivative of amplitude 
-                AmplitudeShifts2[i] =  convergence * ((convergence / 4) * (continuous[i + PhaseShifts.Length] - Amplitudes[i]) - AmplitudeShifts[i]);
+                AmplitudeShifts2[i] =  convergence * ((convergence / 4) * (continuous[i + ActionIdxAmp] - Amplitudes[i]) - AmplitudeShifts[i]);
             }
 
             // update trajectory rotation shifts
             for (int i = 0; i < OrientationOffsetShifts.Length; i++)
             {
-                OrientationOffsetShifts[i] = continuous[i + PhaseShifts.Length + AmplitudeShifts2.Length];
+                OrientationOffsetShifts[i] = continuous[i + ActionIdxOrientation];
             }
 
             // Tail Parameters
-            TailPhaseLagShift += continuous.Last();
+            TailPhaseLagShift += continuous[ActionIdxTail];
         }
 
         /// <summary>
@@ -492,6 +522,10 @@ namespace RoboIguanaRL
             );
         }
 
+        private void UpdateBuoyancy()
+        {
+            Buoyancy += BuoyancyShift * TimeStep;
+        }
 
         // =========================================================
         // CPG translation

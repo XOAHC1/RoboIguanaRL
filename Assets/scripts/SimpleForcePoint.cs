@@ -4,7 +4,7 @@ namespace RoboIguanaAgentRL {
     /// <summary>
     /// Simple Force point to apply forces to an <c>ArticulationBody</c>.
     /// </summary>
-    public class ForcePointTailThrust : MonoBehaviour
+    public class SimpleForcePoint : MonoBehaviour
     {
         [Header("ArticulationBody")]
         public ArticulationBody body;
@@ -15,10 +15,15 @@ namespace RoboIguanaAgentRL {
         /// Applies a force to the <c>ArticulationBody</c> in the position of the gameObject.
         /// </summary>
         /// <param name="localForce"></param>
-        public void ApplyForce (Vector3 localForce) 
+        public void ApplyLocalForce (Vector3 localForce) 
+        {
+            Vector3 worldForce = transform.TransformDirection(localForce);
+            ApplyWorldForce(worldForce);
+        }
+
+        public void ApplyWorldForce(Vector3 worldForce)
         {
             worldPostion = transform.position;
-            Vector3 worldForce = transform.TransformDirection(localForce);
             body.AddForceAtPosition(worldPostion, worldForce);
         }
 

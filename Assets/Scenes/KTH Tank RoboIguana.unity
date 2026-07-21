@@ -2027,12 +2027,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 52
+    VectorObservationSize: 55
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 20
+      m_NumContinuousActions: 21
       BranchSizes: 
-    VectorActionSize: 14000000
+    VectorActionSize: 15000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -2093,6 +2093,7 @@ MonoBehaviour:
   kRR: {fileID: 628073739}
   spinePitch: {fileID: 966578276}
   spineYaw: {fileID: 1619266105}
+  BuoyancyForcePoint: {fileID: 661005042}
   hyFL_Link: {fileID: 254129174}
   hyFR_Link: {fileID: 397588905}
   hyRL_Link: {fileID: 1536364197}
@@ -2119,6 +2120,9 @@ MonoBehaviour:
   spineRangeYaw: 10
   tailSwayRange: 20
   tailYawRange: 40
+  maxBuoyancy: 3
+  maxNegativeBuoyancy: -3
+  maxBuoyancyShift: 0.3
   convergence: 1
 --- !u!114 &346296845
 MonoBehaviour:
@@ -3620,6 +3624,51 @@ Transform:
   - {fileID: 4679691967352957058}
   m_Father: {fileID: 1698235744}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &661005040
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 661005041}
+  - component: {fileID: 661005042}
+  m_Layer: 0
+  m_Name: BuoyancyModule
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &661005041
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 661005040}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.665, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1731859856}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &661005042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 661005040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ef46babf1f25e1479b5f96cc40f9e13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoboIguanaAgentRL.ForcePointTailThrust
+  body: {fileID: 33066898}
 --- !u!1 &664245351
 GameObject:
   m_ObjectHideFlags: 0
@@ -4869,7 +4918,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1093116975}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 874f501d7e87b4247a23c4eb77b7d5a9, type: 3}
+  m_Script: {fileID: 11500000, guid: 5ef46babf1f25e1479b5f96cc40f9e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoboIguanaAgentRL.ForcePointTailThrust
   body: {fileID: 864638642}
@@ -7158,6 +7207,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 406386227}
+  - {fileID: 661005041}
   m_Father: {fileID: 33066897}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1737546213

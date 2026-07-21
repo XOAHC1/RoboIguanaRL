@@ -3,6 +3,7 @@ using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
 using System.Linq;
+using RoboIguanaAgentRL;
 
 namespace RoboIguanaRL
 {
@@ -27,6 +28,9 @@ namespace RoboIguanaRL
         [Header("Spine actuators")]
         public Hinge spinePitch;
         public Hinge spineYaw;
+
+        [Header("Buoyancy Module")]
+        public SimpleForcePoint BuoyancyForcePoint;
 
 
         // =========================================================
@@ -71,10 +75,10 @@ namespace RoboIguanaRL
         // =========================================================
 
         [Header("Leg geometry (meters)")]
-        public float a = 0.116f;
-        public float b = 0.09f;
-        public float c = 0.172f;
-        public float d = 0.2f;
+        public float a; // 0.116f;
+        public float b; // 0.09f;
+        public float c; // 0.172f;
+        public float d; // 0.2f;
 
 
         // =========================================================
@@ -85,40 +89,45 @@ namespace RoboIguanaRL
         /// <summary>
         /// Step length of the foot trajectory.
         /// </summary>
-        public float dStep = 0.15f;
+        public float dStep; // 0.15f;
 
         /// <summary>
         /// Ground clearance during swing phase.
         /// </summary>
-        public float gC = 0.04f;
+        public float gC; // 0.04f;
 
         /// <summary>
         /// Ground penetration during stance phase.
         /// </summary>
-        public float gP = 0.03f;
+        public float gP; // 0.03f;
 
         /// <summary>
         /// Height of the robot body.
         /// </summary>
-        public float h = 0.18f;
+        public float h; // 0.18f;
 
         /// <summary>
         /// Maximum rotation range for spine in degrees.
         /// </summary>
-        public float spineRangePitch = 15;
-        public float spineRangeYaw = 10f;
+        public float spineRangePitch; // 15;
+        public float spineRangeYaw; // 10f;
 
         /// <summary>
         /// Maximum range for sway and yaw of the tail in degrees.
         /// </summary>
-        public float tailSwayRange = 20f;
-        public float tailYawRange = 40f;
+        public float tailSwayRange; // 20f;
+        public float tailYawRange; // 40f;
+
+        [Header("Buoyancy Module Limits")]
+        public float maxBuoyancy; // 3f [N]
+        public float maxNegativeBuoyancy; // 3f [N]
+        public float maxBuoyancyShift; // 0.3 [N/dt]
 
         [Header("Training parameters")]
         /// <summary>
         /// Convergence rate for amplitude shifts (literature notation: a).
         /// </summary>
-        public float convergence = 1f;
+        public float convergence; // 1f;
 
         /// <summary>
         /// Time step for CPG updates in seconds.
@@ -239,7 +248,7 @@ namespace RoboIguanaRL
         /// </summary>
         private float TailPhaseLagShift;
 
-        private float Buoyancy;
+        private Vector3 Buoyancy;
         private float BuoyancyShift;
 
 
@@ -289,7 +298,7 @@ namespace RoboIguanaRL
         /// Get current force added by the buoyancy module.
         /// </summary>
         /// <returns></returns>
-        public float GetBuoyancy() {return Buoyancy;}
+        public float GetBuoyancy() {return Buoyancy.y;}
         public float GetBuoyancyShift() {return BuoyancyShift;} 
 
 
@@ -322,7 +331,7 @@ namespace RoboIguanaRL
 
             // copy initial states to running CPG state.
             ResetCPG();
-            ResetTailParameters();
+            ResetNonPhasicParameters();
 
             TimeStep = Time.fixedDeltaTime;
 
@@ -382,7 +391,7 @@ namespace RoboIguanaRL
         /// </summary>
         public void Reset()
         {
-            ResetTailParameters();
+            ResetNonPhasicParameters();
             ResetCPG();
             UpdatePose();
         }
@@ -404,10 +413,15 @@ namespace RoboIguanaRL
         /// <summary>
         /// Resets tail control parameters to initial values.
         /// </summary>
-        private void ResetTailParameters()
+        private void ResetNonPhasicParameters()
         {
+            // Tail
             TailPhaseLag = initialTailPhaseLag;
             TailPhaseLagShift = initialTailPhaseLagShift;
+            // Buoyancy
+            Buoyancy = new Vector3(0f, 0f, 0f);
+            BuoyancyShift = 0f;
+
         }
 
         /// <summary>
@@ -506,6 +520,9 @@ namespace RoboIguanaRL
 
             // Tail Parameters
             TailPhaseLagShift += continuous[ActionIdxTail];
+
+            // Buoyancy Module
+            BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift;
         }
 
         /// <summary>
@@ -516,7 +533,7 @@ namespace RoboIguanaRL
             Tail.UpdateTail(
                 Phases.Last(),
                 PhaseShifts.Last() / (2*Mathf.PI),    // get Freq in Hz
-                Amplitudes[Amplitudes.Length -1],
+                Amplitudes[^2],
                 Amplitudes.Last(),
                 TailPhaseLag       
             );
@@ -524,7 +541,9 @@ namespace RoboIguanaRL
 
         private void UpdateBuoyancy()
         {
-            Buoyancy += BuoyancyShift * TimeStep;
+            Buoyancy.y = Mathf.Clamp(Buoyancy.y + BuoyancyShift * TimeStep, maxNegativeBuoyancy, maxBuoyancy);
+
+            BuoyancyForcePoint.ApplyWorldForce(Buoyancy);
         }
 
         // =========================================================

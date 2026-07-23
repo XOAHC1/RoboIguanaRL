@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace RoboIguanaAgentRL {
+namespace RoboIguanaRL {
 
     /// <summary>
     /// Simple Force point to apply forces to an <c>ArticulationBody</c>.

@@ -2,7 +2,6 @@ using System;
 using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
-using RoboIguanaAgentRL;
 
 namespace RoboIguanaRL
 {

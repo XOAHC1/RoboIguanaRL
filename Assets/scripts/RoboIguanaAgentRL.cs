@@ -11,8 +11,8 @@ namespace RoboIguanaRL
     /// </summary>
     public class RoboIguanaAgentRL : Agent
     {
+        /// <summary>Contact detector for the foot.</summary>
         [Header("Contact Sensors")]
-        /// <summary>Contact detectors for the four feet (Front-Left, Front-Right, Rear-Left, Rear-Right).</summary>
         public ContactDetector footFL, footFR, footRL, footRR;
 
         /// <summary>
@@ -20,34 +20,49 @@ namespace RoboIguanaRL
         /// </summary> 
         public ContactDetector Back;
 
-        [Header("Articulation Body")]
         /// <summary>The main articulation body representing the robot's physical body.</summary>
+        [Header("Articulation Body")]
         public ArticulationBody Body;
 
+        /// <summary> Weight for reward calculation.</summary>
         [Header("Reward Weights")]
-        /// <summary> Weights for reward calculation.</summary>
-        private readonly float VelocityWeight = -1f;
-        private readonly float DirectionWeight = -1f;
-        private readonly float PitchWeight = -1f;
-        private readonly float RollWeight = -1f;
-        private readonly float GroundContactWeight = 1f;
-        private readonly float EnergyConsumptionWeight = -1f;
-        private readonly float TailWhileWalkingWeight = -1f;
+        private readonly float
+            VelocityWeight = -1f,
+            DirectionWeight = -1f,
+            PitchWeight = -1f,
+            RollWeight = -1f,
+            GroundContactWeight = 1f,
+            EnergyConsumptionWeight = -1f,
+            TailWhileWalkingWeight = -1f;
 
         /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
         private RoboIguanaCPGController CPG;
 
+        /// <summary>
+        /// Estimates the energy consumption of the robot.
+        /// </summary>
         private RobotEnergyEstimator EnergyEstimator;
 
         /// <summary>Target direction for locomotion.</summary>
         private Vector3 TargetDirection;
+
         /// <summary>Target velocity in meters per second.</summary>
         private Vector3 TargetVelocity;
 
+        /// <summary>
+        /// Initial positon of the robot.
+        /// </summary>
         private Vector3 StartingPosition;
-        private Quaternion StartingOrientation;
-        private ArticulationBody[] ComponentABs;
 
+        /// <summary>
+        /// Initial orientation of the robot.
+        /// </summary>
+        private Quaternion StartingOrientation;
+
+        /// <summary>
+        /// Contains <c>ArticulationBody</c> elements of all components of the robot.
+        /// </summary>
+        private ArticulationBody[] ComponentABs;
 
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.

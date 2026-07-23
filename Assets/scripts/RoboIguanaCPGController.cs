@@ -2,12 +2,7 @@ using System;
 using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
-using System.Linq;
 using RoboIguanaAgentRL;
-using Unity.VisualScripting;
-using MQTTnet.Client;
-using NUnit.Framework.Constraints;
-using UnityEditor;
 
 namespace RoboIguanaRL
 {
@@ -20,19 +15,33 @@ namespace RoboIguanaRL
         // ACTUATORS
         // =========================================================
 
+        /// <summary>
+        /// Hinge for hip yaw movement.
+        /// </summary>
         [Header("Hip yaw actuators")]
         public Hinge hyFL, hyFR, hyRL, hyRR;
 
+        /// <summary>
+        /// Hinge for hip pith movement.
+        /// </summary>
         [Header("Hip pitch actuators")]
         public Hinge hpFL, hpFR, hpRL, hpRR;
 
+        /// <summary>
+        /// Hinge for knee movement.
+        /// </summary>
         [Header("Knee actuators")]
         public Hinge kFL, kFR, kRL, kRR;
 
+        /// <summary>
+        /// Hinge for sipne movement.
+        /// </summary>
         [Header("Spine actuators")]
-        public Hinge spinePitch;
-        public Hinge spineYaw;
+        public Hinge spinePitch, spineYaw;
 
+        /// <summary>
+        /// Force point to simulate buoyancy control module.
+        /// </summary>
         [Header("Buoyancy Module")]
         public SimpleForcePoint BuoyancyForcePoint;
 
@@ -41,27 +50,29 @@ namespace RoboIguanaRL
         // PHYSICAL JOINTS
         // =========================================================
 
+        /// <summary>
+        /// <c>ArticulationBody</c> for yaw movement in the hip.
+        /// </summary>
         [Header("Hip yaw links")]
-        public ArticulationBody hyFL_Link;
-        public ArticulationBody hyFR_Link;
-        public ArticulationBody hyRL_Link;
-        public ArticulationBody hyRR_Link;
+        public ArticulationBody hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link;
 
+        /// <summary>
+        /// <c>ArticulationBody</c> for pitch movement in the hip.
+        /// </summary>
         [Header("Hip pitch links")]
-        public ArticulationBody hpFL_Link;
-        public ArticulationBody hpFR_Link;
-        public ArticulationBody hpRL_Link;
-        public ArticulationBody hpRR_Link;
+        public ArticulationBody hpFL_Link, hpFR_Link, hpRL_Link, hpRR_Link;
 
+        /// <summary>
+        /// <c>ArticulationBody</c> for movement in the knee.
+        /// </summary>
         [Header("Knee links")]
-        public ArticulationBody kFL_Link;
-        public ArticulationBody kFR_Link;
-        public ArticulationBody kRL_Link;
-        public ArticulationBody kRR_Link;
+        public ArticulationBody kFL_Link, kFR_Link, kRL_Link, kRR_Link;
 
+        /// <summary>
+        /// <c>ArticulationBody</c> for movement in the spine.
+        /// </summary>
         [Header("Spine links")]
-        public ArticulationBody spine_link_pitch;
-        public ArticulationBody spine_link_yaw;
+        public ArticulationBody spine_link_pitch, spine_link_yaw;
 
 
         // =========================================================
@@ -78,11 +89,12 @@ namespace RoboIguanaRL
         // LEG GEOMETRY
         // =========================================================
 
+        // 0.116, 0.09, 0.172, 0.2
+        /// <summary>
+        /// Parameters for leg geometry
+        /// </summary>
         [Header("Leg geometry (meters)")]
-        public float a; // 0.116f;
-        public float b; // 0.09f;
-        public float c; // 0.172f;
-        public float d; // 0.2f;
+        public float a, b, c, d;
 
 
         // =========================================================
@@ -113,14 +125,12 @@ namespace RoboIguanaRL
         /// <summary>
         /// Maximum rotation range for spine in degrees.
         /// </summary>
-        public float spineRangePitch; // 15;
-        public float spineRangeYaw; // 10f;
+        public float spineRangePitch, spineRangeYaw; // 15, 10;
 
         /// <summary>
         /// Maximum range for sway and yaw of the tail in degrees.
         /// </summary>
-        public float tailSwayRange; // 20f;
-        public float tailYawRange; // 40f;
+        public float tailSwayRange, tailYawRange; // 20, 40;
 
         [Header("Buoyancy Module Limits")]
         public float maxBuoyancy; // 3f [N]
@@ -156,20 +166,28 @@ namespace RoboIguanaRL
         // Arrays for collecticve Access
         // =========================================================
 
-        private float[] yaws = new float[4];
-        private float[] hips = new float[4];
-        private float[] knees = new float[4];
+        /// <summary>
+        /// Current joint angles.
+        /// </summary>
+        private float[] 
+            yaws = new float[4],
+            hips = new float[4], 
+            knees = new float[4];
 
-        private ArticulationBody[] hipYawLinks;
-        private Hinge[] hipYawHinges;
-        private ArticulationBody[] hipPitchLinks;
-        private Hinge[] hipPitchHinges;
-        private ArticulationBody[] kneeLinks;
-        private Hinge[] kneeHinges;
-        private ArticulationBody[] spineLinks;
-        private Hinge[] spineHinges;
+        /// <summary>
+        /// Array of <c>ArticulationBody</c> to faciltate access.
+        /// </summary>
+        private ArticulationBody[] hipYawLinks, hipPitchLinks, kneeLinks, spineLinks;
+
+        /// <summary>
+        /// Array of <c>Hinge</c> to faciltate access.
+        /// </summary>
+        private Hinge[] hipYawHinges, hipPitchHinges, kneeHinges, spineHinges;
+
+        /// <summary>
+        /// Array for easier access.
+        /// </summary>
         private float[] spineRanges;
-
 
         // =========================================================
         // CPG PARAMETERS       Leg Order: FL, FR, RL, RR
@@ -246,9 +264,10 @@ namespace RoboIguanaRL
         // Action indices
         // =====================================
 
-        private int ActionIdxAmp;
-        private int ActionIdxOrientation;
-        private int ActionIdxBuoyancy;
+        /// <summary>
+        /// Starting index in Agent's actions for actions regarding this aspect.
+        /// </summary>
+        private int ActionIdxAmp, ActionIdxOrientation, ActionIdxBuoyancy;
 
 
         // =========================================================
@@ -283,6 +302,10 @@ namespace RoboIguanaRL
         public float GetBuoyancy() {return Buoyancy.y;}
         public float GetBuoyancyShift() {return BuoyancyShift;} 
 
+        /// <summary>
+        /// Returns State of the tail.
+        /// </summary>
+        /// <returns></returns>
         public float[] GetTailState() {return new float[] {Tail.frequency, Tail.swayAmplitude, Tail.yawAmplitude, Tail.phase};}
 
 
@@ -436,7 +459,6 @@ namespace RoboIguanaRL
             {
                 OrientationOffsets[i] = (OrientationOffsets[i] + OrientationOffsetShifts[i] * TimeStep) % (2 * Mathf.PI);
             }    
-  
         }
 
         /// <summary>
@@ -510,6 +532,9 @@ namespace RoboIguanaRL
             Tail.UpdateParameters(TailChanges);
         }
 
+        /// <summary>
+        /// Handles time step for buoyancy control module. Applies corresponding force.
+        /// </summary>
         private void UpdateBuoyancy()
         {
             Buoyancy.y = Mathf.Clamp(Buoyancy.y + BuoyancyShift * TimeStep, maxNegativeBuoyancy, maxBuoyancy);

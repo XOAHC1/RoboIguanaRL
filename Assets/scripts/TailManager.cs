@@ -1,7 +1,5 @@
 using UnityEngine;
-using Force;
 using RoboIguanaAgentRL;
-using CoordinateSharp;
 using System;
 
 namespace RoboIguanaRL {

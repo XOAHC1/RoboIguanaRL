@@ -207,7 +207,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial amplitude values for legs (4) and spine (2).
         /// </summary>
-        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f};
+        private readonly float[] initialAmplitudes = {0.5f, 0.5f, 0.5f, 0.5f, 0f, 1f};
         /// <summary>
         /// Initial amplitude shift rates for legs and spine.
         /// </summary>
@@ -557,9 +557,9 @@ namespace RoboIguanaRL
         /// <returns>A tuple containing the x, y, z coordinates of the foot position.</returns>
         private (float x, float y, float z) GetFootPosition(float phase, float amplitude, float orientationOffset, int left)
         {
-            float x = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Cos(orientationOffset);
-            float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
-            float z = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset) + left * 0.25f;
+            float x = -dStep * (amplitude - 1.0f) * MathF.Sin(phase) * MathF.Cos(orientationOffset);
+            float y  = -h + (MathF.Cos(phase) > 0.0f ? gC : gP) * MathF.Cos(phase);
+            float z = -dStep * (amplitude - 1.0f) * MathF.Sin(phase) * MathF.Sin(orientationOffset) + left * 0.25f;
 
             return (x, y, z);
         }

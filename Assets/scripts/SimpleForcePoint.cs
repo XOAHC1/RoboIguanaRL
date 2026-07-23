@@ -1,35 +1,34 @@
 using UnityEngine;
 
 namespace RoboIguanaAgentRL {
+
     /// <summary>
     /// Simple Force point to apply forces to an <c>ArticulationBody</c>.
     /// </summary>
     public class SimpleForcePoint : MonoBehaviour
     {
+        /// <summary>
+        /// Body to which force is applied.
+        /// </summary>
         [Header("ArticulationBody")]
         public ArticulationBody body;
 
-        Vector3 worldPostion;
-
         /// <summary>
-        /// Applies a force to the <c>ArticulationBody</c> in the position of the gameObject.
+        /// Applies a force relatve to the body to the <c>ArticulationBody</c>.
         /// </summary>
         /// <param name="localForce"></param>
         public void ApplyLocalForce (Vector3 localForce) 
         {
-            Vector3 worldForce = transform.TransformDirection(localForce);
-            ApplyWorldForce(worldForce);
+            body.AddRelativeForce(localForce);
         }
 
+        /// <summary>
+        /// Applies a force in world coordinates to the object.
+        /// </summary>
+        /// <param name="worldForce"></param>
         public void ApplyWorldForce(Vector3 worldForce)
         {
-            // worldPostion = transform.position;
-            // Debug.Log($"Pos: {worldPostion}, F: {worldForce}");
-            // body.AddForceAtPosition(worldPostion, worldForce);
-
             body.AddForce(worldForce);
-
         }
-
     }
 }

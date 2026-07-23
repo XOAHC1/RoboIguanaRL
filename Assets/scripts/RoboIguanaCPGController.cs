@@ -4,6 +4,10 @@ using Unity.MLAgents.Actuators;
 using UnityEngine;
 using System.Linq;
 using RoboIguanaAgentRL;
+using Unity.VisualScripting;
+using MQTTnet.Client;
+using NUnit.Framework.Constraints;
+using UnityEditor;
 
 namespace RoboIguanaRL
 {
@@ -172,26 +176,26 @@ namespace RoboIguanaRL
         // =========================================================
 
         /// <summary>
-        /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine pitch, Spine yaw, tail phase.
+        /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine pitch, Spine yaw.
         /// </summary>
-        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f, 0f};
+        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f};
         /// <summary>
-        /// Initial phase shift rates for legs, spine and tail.
+        /// Initial phase shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
-        /// Initial amplitude values for legs (4) spine (2) and Tail (2).
+        /// Initial amplitude values for legs (4) and spine (2).
         /// </summary>
-        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f, 0f, 0f};
+        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 0f, 1f};
         /// <summary>
         /// Initial amplitude shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f};
         /// <summary>
         /// Initial second derivative of amplitude shifts for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial orientation offsets for foot trajectories (Phi). Leg order: FL, FR, RL, RR.
@@ -201,12 +205,6 @@ namespace RoboIguanaRL
         /// Initial orientation offset shift rates for legs. Controlled via psy.
         /// </summary>
         private readonly float[] initialOrientationOffsetShifts = {0f, 0f, 0f, 0f};
-
-        /// <summary>
-        /// Phase difference and Amplitudes.
-        /// </summary>
-        private readonly float initialTailPhaseLag = 0f;
-        private readonly float initialTailPhaseLagShift = 0f;
 
         /// <summary>
         /// Current CPG phases (Theta).
@@ -239,18 +237,10 @@ namespace RoboIguanaRL
         /// </summary>
         private float[] OrientationOffsetShifts;
 
-        /// <summary>
-        /// Phase lag from sway to yaw in the tail.
-        /// </summary>
-        private float TailPhaseLag;
-        /// <summary>
-        /// Change in <c>TailPhaseLag</c> per time step.
-        /// </summary>
-        private float TailPhaseLagShift;
-
         private Vector3 Buoyancy;
         private float BuoyancyShift;
 
+        private int[] TailChanges = new int[3];
 
         // =====================================
         // Action indices
@@ -258,7 +248,6 @@ namespace RoboIguanaRL
 
         private int ActionIdxAmp;
         private int ActionIdxOrientation;
-        private int ActionIdxTail;
         private int ActionIdxBuoyancy;
 
 
@@ -288,18 +277,13 @@ namespace RoboIguanaRL
         public float[] GetOrientationOffsetShifts() { return (float[])OrientationOffsetShifts.Clone();}
 
         /// <summary>
-        /// Gets a copy of the current tail phase lag.
-        /// </summary>
-        /// <returns>The phase lag in the tail.</returns>
-        public float GetTailPhaseLag() { return TailPhaseLag;}
-        public float GetTailPhaseLagShift() {return TailPhaseLagShift;}
-
-        /// <summary>
         /// Get current force added by the buoyancy module.
         /// </summary>
         /// <returns></returns>
         public float GetBuoyancy() {return Buoyancy.y;}
         public float GetBuoyancyShift() {return BuoyancyShift;} 
+
+        public float[] GetTailState() {return new float[] {Tail.frequency, Tail.swayAmplitude, Tail.yawAmplitude, Tail.phase};}
 
 
         // =========================================================
@@ -312,7 +296,12 @@ namespace RoboIguanaRL
         public void Initialize()
         {
             Debug.Log("Initialze CPG");
+            // get components
             Tail = GetComponent<TailManager>();
+            Tail.Initialize();
+
+            TimeStep = Time.fixedDeltaTime;
+
             // group joints for easier access.
             hipYawLinks = new ArticulationBody[] {hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link};
             hipYawHinges = new Hinge[] {hyFL, hyFR, hyRL, hyRR};
@@ -326,19 +315,15 @@ namespace RoboIguanaRL
 
             spineRanges = new float[] {spineRangePitch, spineRangeYaw};
 
-            // Initialize all joints to their starting positions.
+            // Set up internal states
             InitializeAllJoints();
-
-            // copy initial states to running CPG state.
             ResetCPG();
-            ResetNonPhasicParameters();
+            ResetBuoyancy();
 
-            TimeStep = Time.fixedDeltaTime;
-
+            // prepare indices for updates
             ActionIdxAmp = Phases.Length;
             ActionIdxOrientation = ActionIdxAmp + Amplitudes.Length;
-            ActionIdxTail = ActionIdxOrientation + OrientationOffsets.Length;
-            ActionIdxBuoyancy = ActionIdxTail + 1;
+            ActionIdxBuoyancy = ActionIdxOrientation + OrientationOffsets.Length;
 
             // Debug.Log("CPG Ready");
         }
@@ -391,9 +376,10 @@ namespace RoboIguanaRL
         /// </summary>
         public void Reset()
         {
-            ResetNonPhasicParameters();
+            ResetBuoyancy();
             ResetCPG();
             UpdatePose();
+            Tail.Reset();
         }
 
         /// <summary>
@@ -413,15 +399,10 @@ namespace RoboIguanaRL
         /// <summary>
         /// Resets tail control parameters to initial values.
         /// </summary>
-        private void ResetNonPhasicParameters()
+        private void ResetBuoyancy()
         {
-            // Tail
-            TailPhaseLag = initialTailPhaseLag;
-            TailPhaseLagShift = initialTailPhaseLagShift;
-            // Buoyancy
             Buoyancy = new Vector3(0f, 0f, 0f);
             BuoyancyShift = 0f;
-
         }
 
         /// <summary>
@@ -432,7 +413,6 @@ namespace RoboIguanaRL
             // Debug.Log("Fixed Update CPG");
             UpdateCPG();
             UpdatePose();
-            UpdateTail();
             UpdateBuoyancy();
         }
 
@@ -456,8 +436,7 @@ namespace RoboIguanaRL
             {
                 OrientationOffsets[i] = (OrientationOffsets[i] + OrientationOffsetShifts[i] * TimeStep) % (2 * Mathf.PI);
             }    
-
-            TailPhaseLag = (TailPhaseLag + TailPhaseLagShift * TimeStep) % (2 * Mathf.PI);        
+  
         }
 
         /// <summary>
@@ -498,6 +477,7 @@ namespace RoboIguanaRL
             // Debug.Log("Applying Actions");
             // Apply the actions received from the RL agent to the CPG parameters
             ActionSegment<float> continuous = actions.ContinuousActions;
+            ActionSegment<int> discrete = actions.DiscreteActions;
 
             // update phase and amplitude for all joints
             for (int i = 0; i < Phases.Length; i++)
@@ -518,25 +498,16 @@ namespace RoboIguanaRL
                 OrientationOffsetShifts[i] = continuous[i + ActionIdxOrientation];
             }
 
-            // Tail Parameters
-            TailPhaseLagShift += continuous[ActionIdxTail];
-
             // Buoyancy Module
             BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift;
-        }
 
-        /// <summary>
-        /// Set tail parameters to current control values.
-        /// </summary>
-        private void UpdateTail()
-        {
-            Tail.UpdateTail(
-                Phases.Last(),
-                PhaseShifts.Last() / (2*Mathf.PI),    // get Freq in Hz
-                Amplitudes[^2],
-                Amplitudes.Last(),
-                TailPhaseLag       
-            );
+            // Tail Parameters
+            for (int i = 0; i < TailChanges.Length; i++)
+            {
+                TailChanges[i] = discrete[i] - 1;
+            }
+
+            Tail.UpdateParameters(TailChanges);
         }
 
         private void UpdateBuoyancy()

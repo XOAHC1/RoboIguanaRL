@@ -110,15 +110,16 @@ namespace RoboIguanaRL
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:
-        ///         Phases                          7D
-        ///         Phase shifts                    7D
-        ///         Amplitudes                      8D
-        ///         Ampltude shifts                 8D
+        ///         Phases                          6D
+        ///         Phase shifts                    6D
+        ///         Amplitudes                      6D
+        ///         Ampltude shifts                 6D
         ///         Orientation offsets             4D
         ///         Orientation offset shifts       4D
-        ///         TailPhaseLag                    2D
+        ///     Others:
         ///         Buoyancy                        2D
-        /// For a total of 55 input dimensions.
+        ///         Tail State                      4D
+        /// For a total of 51 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
@@ -145,19 +146,18 @@ namespace RoboIguanaRL
             sensor.AddObservation(CPG.GetOrientationOffsets());
             sensor.AddObservation(CPG.GetOrientationOffsetShifts());
 
-            // Tail State
-            sensor.AddObservation(CPG.GetTailPhaseLag());
-            sensor.AddObservation(CPG.GetTailPhaseLagShift());
-
             // Buoyancy
             sensor.AddObservation(CPG.GetBuoyancy());
             sensor.AddObservation(CPG.GetBuoyancyShift());
+
+            sensor.AddObservation(CPG.GetTailState());
         }
 
         /// <summary>
         /// Relays actions received from the policy to control CPG parameters.
         /// <remarks>
         /// Possible actions are: 
+        ///   continuous:
         ///     for each limb oscillator:
         ///         change intrinsic frequency  4D
         ///         change amplitude            4D
@@ -165,12 +165,15 @@ namespace RoboIguanaRL
         ///     for the spine:
         ///         change intrinsic frequency  2D
         ///         change amplitude            2D
-        ///     for the Tail:
-        ///         change frequency            1D
-        ///         change amplitudes           2D
-        ///         change phase lag            1D
-        ///         change buoyancy shft        1D
-        /// For a total of 21 action dimensions.
+        ///     buoyancy:
+        ///         change in buoyancy          1D
+        ///   discrete:
+        ///     Tail:
+        ///         frequency                   [-1, 0, 1]
+        ///         sway amplitude              [-1, 0, 1]
+        ///         yaw amplitude               [-1, 0, 1]
+        ///         
+        /// For a total of 20 action dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>

@@ -1,35 +1,4 @@
 {
-    "Submerged Walking": {
-        "checkpoints": [
-            {
-                "steps": 499998,
-                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-499998.onnx",
-                "reward": -40333.8971862793,
-                "creation_time": 1783625915.3851192,
-                "auxillary_file_paths": [
-                    "results\\ppo\\Submerged Walking\\Submerged Walking-499998.pt"
-                ]
-            },
-            {
-                "steps": 500062,
-                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-500062.onnx",
-                "reward": -40333.8971862793,
-                "creation_time": 1783625915.4429994,
-                "auxillary_file_paths": [
-                    "results\\ppo\\Submerged Walking\\Submerged Walking-500062.pt"
-                ]
-            }
-        ],
-        "final_checkpoint": {
-            "steps": 500062,
-            "file_path": "results\\ppo\\Submerged Walking.onnx",
-            "reward": -40333.8971862793,
-            "creation_time": 1783625915.4429994,
-            "auxillary_file_paths": [
-                "results\\ppo\\Submerged Walking\\Submerged Walking-500062.pt"
-            ]
-        }
-    },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "1.1.0",

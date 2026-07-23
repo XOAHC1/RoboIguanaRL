@@ -214,7 +214,7 @@ namespace RoboIguanaRL
         private void ResetTarget()
         {
             // turn on for training, turn off for testing
-            bool randomMode = true;
+            bool randomMode = false;
             if (randomMode) { 
                 // Random horizontal direction (unit vector)
                 Vector2 direction = Random.onUnitCircle;

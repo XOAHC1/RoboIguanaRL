@@ -50,6 +50,12 @@ namespace RoboIguanaRL
         private Vector3 TargetVelocity;
 
         /// <summary>
+        /// Type of locomotion requested by higher level controller. 
+        /// <remarks> 1 = walking, -1 = swimming. </remarks>
+        /// </summary>
+        private int locomotionType;
+
+        /// <summary>
         /// Initial positon of the robot.
         /// </summary>
         private Vector3 StartingPosition;
@@ -134,7 +140,7 @@ namespace RoboIguanaRL
         ///     Others:
         ///         Buoyancy                        2D
         ///         Tail State                      4D
-        /// For a total of 51 input dimensions.
+        /// For a total of 52 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
@@ -143,6 +149,7 @@ namespace RoboIguanaRL
 
             // Debug.Log("Collecting Observations");
             // position and velocity observations
+            sensor.AddObservation(locomotionType);
             sensor.AddObservation(TargetDirection - transform.forward);
             sensor.AddObservation(TargetVelocity - Body.linearVelocity);
             sensor.AddObservation(Body.angularVelocity);
@@ -220,6 +227,7 @@ namespace RoboIguanaRL
                 TargetDirection = Vector3.forward;
                 TargetVelocity = 3f * TargetDirection;
             }
+            locomotionType = 1;
         }
 
         /// <summary>
@@ -301,9 +309,9 @@ namespace RoboIguanaRL
             
             // Any foot touching the ground?
             bool groundContact = footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround;
-            float GroundContact = groundContact ? 1f : -1f;
+            float GroundContact = locomotionType * (groundContact ? 1f : -1f);
             
-            float TailMovementWhenWalking = groundContact ? CPG.GetAmplitudes().Last() : 0;
+            float TailMovementWhenWalking = (locomotionType == 1) ? CPG.GetTailState()[0] : 0;
 
             // EnergyConsumption
             float EnergyConsumption = EnergyEstimator.CurrentEnergy;

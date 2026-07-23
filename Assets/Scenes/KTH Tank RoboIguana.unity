@@ -190,6 +190,7 @@ Transform:
   - {fileID: 2003671163}
   - {fileID: 1707233845}
   - {fileID: 1826013492}
+  - {fileID: 661005041}
   m_Father: {fileID: 1877632282}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!171741748 &33066898
@@ -2120,9 +2121,8 @@ MonoBehaviour:
   spineRangeYaw: 10
   tailSwayRange: 20
   tailYawRange: 40
-  maxBuoyancy: 3
-  maxNegativeBuoyancy: -3
-  maxBuoyancyShift: 0.3
+  maxBuoyancy: 2.25
+  maxBuoyancyShift: 1
   convergence: 1
 --- !u!114 &346296845
 MonoBehaviour:
@@ -3655,11 +3655,11 @@ Transform:
   m_GameObject: {fileID: 661005040}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.665, y: 0, z: 0}
+  m_LocalPosition: {x: 0.667, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1731859856}
+  m_Father: {fileID: 33066897}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &661005042
 MonoBehaviour:
@@ -7212,7 +7212,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 406386227}
-  - {fileID: 661005041}
   m_Father: {fileID: 33066897}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1737546213

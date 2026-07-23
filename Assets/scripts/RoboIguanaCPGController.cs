@@ -18,25 +18,26 @@ namespace RoboIguanaRL
         /// <summary>
         /// Hinge for hip yaw movement.
         /// </summary>
-        [Header("Hip yaw actuators")]
+        [Header("Hip yaw actuator:")]
         public Hinge hyFL, hyFR, hyRL, hyRR;
 
         /// <summary>
         /// Hinge for hip pith movement.
         /// </summary>
-        [Header("Hip pitch actuators")]
+        [Header("Hip pitch actuator:")]
         public Hinge hpFL, hpFR, hpRL, hpRR;
 
         /// <summary>
         /// Hinge for knee movement.
         /// </summary>
-        [Header("Knee actuators")]
+        [Header("Knee actuator:")]
         public Hinge kFL, kFR, kRL, kRR;
 
+        
         /// <summary>
         /// Hinge for sipne movement.
         /// </summary>
-        [Header("Spine actuators")]
+        [Header("Spine actuator:")]
         public Hinge spinePitch, spineYaw;
 
         /// <summary>
@@ -53,25 +54,25 @@ namespace RoboIguanaRL
         /// <summary>
         /// <c>ArticulationBody</c> for yaw movement in the hip.
         /// </summary>
-        [Header("Hip yaw links")]
+        [Header("Hip yaw link:")]
         public ArticulationBody hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link;
 
         /// <summary>
         /// <c>ArticulationBody</c> for pitch movement in the hip.
         /// </summary>
-        [Header("Hip pitch links")]
+        [Header("Hip pitch link:")]
         public ArticulationBody hpFL_Link, hpFR_Link, hpRL_Link, hpRR_Link;
 
         /// <summary>
         /// <c>ArticulationBody</c> for movement in the knee.
         /// </summary>
-        [Header("Knee links")]
+        [Header("Knee link:")]
         public ArticulationBody kFL_Link, kFR_Link, kRL_Link, kRR_Link;
 
         /// <summary>
         /// <c>ArticulationBody</c> for movement in the spine.
         /// </summary>
-        [Header("Spine links")]
+        [Header("Spine link:")]
         public ArticulationBody spine_link_pitch, spine_link_yaw;
 
 
@@ -93,8 +94,11 @@ namespace RoboIguanaRL
         /// <summary>
         /// Parameters for leg geometry
         /// </summary>
-        [Header("Leg geometry (meters)")]
-        public float a, b, c, d;
+        [Header("Leg geometry (meters)")]        
+        public float a;        
+        public float b;        
+        public float c;
+        public float d;
 
 
         // =========================================================
@@ -133,8 +137,7 @@ namespace RoboIguanaRL
         public float tailSwayRange, tailYawRange; // 20, 40;
 
         [Header("Buoyancy Module Limits")]
-        public float maxBuoyancy; // 3f [N]
-        public float maxNegativeBuoyancy; // 3f [N]
+        public float maxBuoyancy; // 2.25f [N]
         public float maxBuoyancyShift; // 0.3 [N/dt]
 
         [Header("Training parameters")]
@@ -537,8 +540,8 @@ namespace RoboIguanaRL
         /// </summary>
         private void UpdateBuoyancy()
         {
-            Buoyancy.y = Mathf.Clamp(Buoyancy.y + BuoyancyShift * TimeStep, maxNegativeBuoyancy, maxBuoyancy);
-
+            Buoyancy.y = Mathf.Clamp(Buoyancy.y + BuoyancyShift * TimeStep, 0, maxBuoyancy) * 1.8f;
+            
             BuoyancyForcePoint.ApplyWorldForce(Buoyancy);
         }
 

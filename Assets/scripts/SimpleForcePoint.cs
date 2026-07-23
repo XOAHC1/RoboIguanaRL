@@ -23,8 +23,12 @@ namespace RoboIguanaAgentRL {
 
         public void ApplyWorldForce(Vector3 worldForce)
         {
-            worldPostion = transform.position;
-            body.AddForceAtPosition(worldPostion, worldForce);
+            // worldPostion = transform.position;
+            // Debug.Log($"Pos: {worldPostion}, F: {worldForce}");
+            // body.AddForceAtPosition(worldPostion, worldForce);
+
+            body.AddForce(worldForce);
+
         }
 
     }

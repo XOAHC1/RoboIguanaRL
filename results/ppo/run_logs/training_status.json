@@ -1,4 +1,53 @@
 {
+    "Submerged Walking": {
+        "checkpoints": [
+            {
+                "steps": 499990,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-499990.onnx",
+                "reward": -134430.8721923828,
+                "creation_time": 1784881454.1351662,
+                "auxillary_file_paths": [
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-499990.pt"
+                ]
+            },
+            {
+                "steps": 500054,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-500054.onnx",
+                "reward": -134430.8721923828,
+                "creation_time": 1784881454.279449,
+                "auxillary_file_paths": [
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-500054.pt"
+                ]
+            },
+            {
+                "steps": 500054,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-500054.onnx",
+                "reward": null,
+                "creation_time": 1784881895.2529526,
+                "auxillary_file_paths": [
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-500054.pt"
+                ]
+            },
+            {
+                "steps": 504566,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-504566.onnx",
+                "reward": -130225.70989990234,
+                "creation_time": 1784882286.9500625,
+                "auxillary_file_paths": [
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-504566.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 504566,
+            "file_path": "results\\ppo\\Submerged Walking.onnx",
+            "reward": -130225.70989990234,
+            "creation_time": 1784882286.9500625,
+            "auxillary_file_paths": [
+                "results\\ppo\\Submerged Walking\\Submerged Walking-504566.pt"
+            ]
+        }
+    },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "1.1.0",

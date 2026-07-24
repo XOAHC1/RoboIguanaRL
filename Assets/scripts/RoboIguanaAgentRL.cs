@@ -27,13 +27,13 @@ namespace RoboIguanaRL
         /// <summary> Weight for reward calculation.</summary>
         [Header("Reward Weights")]
         private readonly float
-            VelocityWeight = -1f,
-            DirectionWeight = -1f,
+            VelocityWeight = -4f,
+            DirectionWeight = -5f,
             PitchWeight = -1f,
             RollWeight = -1f,
-            GroundContactWeight = 1f,
+            GroundContactWeight = 10f,
             EnergyConsumptionWeight = -1f,
-            TailWhileWalkingWeight = -1f;
+            TailWhileWalkingWeight = -2f;
 
         /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
         private RoboIguanaCPGController CPG;

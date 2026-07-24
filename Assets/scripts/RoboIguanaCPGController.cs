@@ -202,7 +202,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial phase shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialPhaseShifts = {0.2f, 0.2f, 0.2f, 0.2f, 0f, 0f};
 
         /// <summary>
         /// Initial amplitude values for legs (4) and spine (2).
@@ -523,7 +523,7 @@ namespace RoboIguanaRL
             }
 
             // Buoyancy Module
-            BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift;
+            BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift * 1.8f;
 
             // Tail Parameters
             for (int i = 0; i < TailChanges.Length; i++)
@@ -539,7 +539,7 @@ namespace RoboIguanaRL
         /// </summary>
         private void UpdateBuoyancy()
         {
-            Buoyancy.y = Mathf.Clamp(Buoyancy.y + BuoyancyShift * TimeStep, 0, maxBuoyancy) * 1.8f;
+            Buoyancy.y = Mathf.Clamp(Buoyancy.y + BuoyancyShift * TimeStep, 0, maxBuoyancy * 1.8f);
             
             BuoyancyForcePoint.ApplyWorldForce(Buoyancy);
         }

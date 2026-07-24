@@ -136,7 +136,7 @@ namespace RoboIguanaRL {
         {
             for (int i = 0; i < parameters.Length; i++)
             {
-                ParamIdcs[i] = Math.Clamp(ParamIdcs[i] + changes[i], 0, possibleParameters[i].Length);
+                ParamIdcs[i] = Math.Clamp(ParamIdcs[i] + changes[i], 0, possibleParameters[i].Length-1);
                 parameters[i] = possibleParameters[i][ParamIdcs[i]];
             }       
             // prevent f==1, r_sway == 40 for mechanical reasons   

@@ -2,49 +2,58 @@
     "Submerged Walking": {
         "checkpoints": [
             {
-                "steps": 499990,
-                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-499990.onnx",
-                "reward": -134430.8721923828,
-                "creation_time": 1784881454.1351662,
+                "steps": 1499969,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-1499969.onnx",
+                "reward": -142148.88809204102,
+                "creation_time": 1785171120.761466,
                 "auxillary_file_paths": [
-                    "results\\ppo\\Submerged Walking\\Submerged Walking-499990.pt"
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-1499969.pt"
                 ]
             },
             {
-                "steps": 500054,
-                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-500054.onnx",
-                "reward": -134430.8721923828,
-                "creation_time": 1784881454.279449,
+                "steps": 1999984,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-1999984.onnx",
+                "reward": -51859.262634277344,
+                "creation_time": 1785175976.8133674,
                 "auxillary_file_paths": [
-                    "results\\ppo\\Submerged Walking\\Submerged Walking-500054.pt"
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-1999984.pt"
                 ]
             },
             {
-                "steps": 500054,
-                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-500054.onnx",
+                "steps": 2499954,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-2499954.onnx",
                 "reward": null,
-                "creation_time": 1784881895.2529526,
+                "creation_time": 1785180577.973904,
                 "auxillary_file_paths": [
-                    "results\\ppo\\Submerged Walking\\Submerged Walking-500054.pt"
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-2499954.pt"
                 ]
             },
             {
-                "steps": 504566,
-                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-504566.onnx",
-                "reward": -130225.70989990234,
-                "creation_time": 1784882286.9500625,
+                "steps": 2999986,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-2999986.onnx",
+                "reward": -73088.2972869873,
+                "creation_time": 1785185207.6802797,
                 "auxillary_file_paths": [
-                    "results\\ppo\\Submerged Walking\\Submerged Walking-504566.pt"
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-2999986.pt"
+                ]
+            },
+            {
+                "steps": 3234170,
+                "file_path": "results\\ppo\\Submerged Walking\\Submerged Walking-3234170.onnx",
+                "reward": -72349.74395751953,
+                "creation_time": 1785187723.1832216,
+                "auxillary_file_paths": [
+                    "results\\ppo\\Submerged Walking\\Submerged Walking-3234170.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 504566,
+            "steps": 3234170,
             "file_path": "results\\ppo\\Submerged Walking.onnx",
-            "reward": -130225.70989990234,
-            "creation_time": 1784882286.9500625,
+            "reward": -72349.74395751953,
+            "creation_time": 1785187723.1832216,
             "auxillary_file_paths": [
-                "results\\ppo\\Submerged Walking\\Submerged Walking-504566.pt"
+                "results\\ppo\\Submerged Walking\\Submerged Walking-3234170.pt"
             ]
         }
     },

@@ -35,15 +35,15 @@ namespace RoboIguanaRL {
         /// </summary>
         private readonly float[][] possibleParameters = new float[][]
         {
-            new float[] {0f, 0.5f, 0.75f, 1f},      // Frequencies
-            new float[] {20f, 30f, 40f},            // Sway Ampls
-            new float[] {0f, 10f, 20f, 30f, 40f}    // yaw Amps
+            new float[] {0.75f, 1f},      // Frequencies
+            new float[] {0f, 5f, 10f, 15f, 20f, 25f, 30f, 35f, 40f}    // yaw Amps
         };
 
         /// <summary>
         /// Phase lag from sway to yaw in the tail. 270 found as optimal value by experiment
         /// </summary>
         private const float DefaultPhaseLag = 270f;
+        private const float DefaultSwayAmp = 30f;
 
         /// <summary>
         /// Marks progress of the tail cycle. Progress is calculated from frequency.
@@ -54,11 +54,6 @@ namespace RoboIguanaRL {
         /// Frequency of tail cycles.
         /// </summary>
         public float frequency;
-
-        /// <summary>
-        /// Ampltude of sway in the tail base.
-        /// </summary>
-        public float swayAmplitude;
 
         /// <summary>
         /// Ampltude of yaw in the tail.
@@ -81,7 +76,7 @@ namespace RoboIguanaRL {
         public void Initialize()
         {
             TimeStep  = Time.fixedDeltaTime;
-            parameters = new float[] {frequency, swayAmplitude, yawAmplitude};
+            parameters = new float[] {frequency, yawAmplitude};
             Reset();
         }
 
@@ -90,7 +85,7 @@ namespace RoboIguanaRL {
         /// </summary>
         public void Reset()
         {
-            ParamIdcs = new int[] {0, 0, 0};
+            ParamIdcs = new int[] {0, 0};
             Force = Vector3.zero;
             EnergyConsumption = 0f;
             phase = 0f;
@@ -138,11 +133,6 @@ namespace RoboIguanaRL {
             {
                 ParamIdcs[i] = Math.Clamp(ParamIdcs[i] + changes[i], 0, possibleParameters[i].Length-1);
                 parameters[i] = possibleParameters[i][ParamIdcs[i]];
-            }       
-            // prevent f==1, r_sway == 40 for mechanical reasons   
-            if (parameters[0] * parameters[1] == 40) {
-                parameters[0] = 0.75f;  
-                ParamIdcs[0] -= 1;
             }
         }
 

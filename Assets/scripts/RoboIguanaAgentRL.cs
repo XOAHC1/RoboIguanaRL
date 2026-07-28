@@ -139,8 +139,8 @@ namespace RoboIguanaRL
         ///         Orientation offset shifts       4D
         ///     Others:
         ///         Buoyancy                        2D
-        ///         Tail State                      4D
-        /// For a total of 52 input dimensions.
+        ///         Tail State                      3D
+        /// For a total of 51 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
@@ -190,12 +190,11 @@ namespace RoboIguanaRL
         ///     buoyancy:
         ///         change in buoyancy          1D
         ///   discrete:
-        ///     Tail:
-        ///         frequency                   [-1, 0, 1]
-        ///         sway amplitude              [-1, 0, 1]
-        ///         yaw amplitude               [-1, 0, 1]
+        ///     Tail:                           Will be translated to [-1, 0, 1] later on.
+        ///         frequency                   [0, 1, 2]
+        ///         yaw amplitude               [0, 1, 2]
         ///         
-        /// For a total of 20 action dimensions.
+        /// For a total of 19 action dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>

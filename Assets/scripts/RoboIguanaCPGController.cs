@@ -260,7 +260,7 @@ namespace RoboIguanaRL
         private Vector3 Buoyancy;
         private float BuoyancyShift;
 
-        private int[] TailChanges = new int[3];
+        private int[] TailChanges = new int[2];
 
         // =====================================
         // Action indices
@@ -308,7 +308,7 @@ namespace RoboIguanaRL
         /// Returns State of the tail.
         /// </summary>
         /// <returns></returns>
-        public float[] GetTailState() {return new float[] {Tail.frequency, Tail.swayAmplitude, Tail.yawAmplitude, Tail.phase};}
+        public float[] GetTailState() {return new float[] {Tail.frequency, Tail.yawAmplitude, Tail.phase};}
 
 
         // =========================================================

@@ -2027,11 +2027,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 52
+    VectorObservationSize: 51
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 17
-      BranchSizes: 030000000300000003000000
+      BranchSizes: 0300000003000000
     VectorActionSize: 
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
@@ -2183,7 +2183,6 @@ MonoBehaviour:
   parameters: []
   phase: 0
   frequency: 0
-  swayAmplitude: 0
   yawAmplitude: 0
 --- !u!1 &363100052
 GameObject:

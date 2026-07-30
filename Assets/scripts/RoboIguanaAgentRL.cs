@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RoboIguanaRL
@@ -26,14 +27,18 @@ namespace RoboIguanaRL
 
         /// <summary> Weight for reward calculation.</summary>
         [Header("Reward Weights")]
-        private readonly float
-            VelocityWeight = -4f,
-            DirectionWeight = -5f,
-            PitchWeight = -1f,
-            RollWeight = -1f,
-            GroundContactWeight = 10f,
-            EnergyConsumptionWeight = -1f,
-            TailWhileWalkingWeight = -2f;
+        private readonly float[] RewardWeights = new float[] {
+            -4f, // VelocityWeight
+            -5f, // DirectionWeight
+            -1f, // RollWeight
+            10f, // GroundContactWeight
+            -1f, // EnergyConsumptionWeight
+            -2f // TailWhileWalkingWeight
+        }; 
+
+        private float[] Rewards = new float[6];
+
+        public Dictionary<string, List<float>> RewardTracker = new Dictionary<string, List<float>>();
 
         /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
         private RoboIguanaCPGController CPG;
@@ -77,6 +82,7 @@ namespace RoboIguanaRL
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
 
+            ResetRewardTracker();
             CPG = GetComponent<RoboIguanaCPGController>();
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
             ComponentABs = GetComponentsInChildren<ArticulationBody>();
@@ -84,8 +90,18 @@ namespace RoboIguanaRL
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
 
             CPG.Initialize();
+            Debug.Log("Agent initialization over");
         }
 
+        private void ResetRewardTracker()
+        {
+           RewardTracker["Velocity"] = new List<float>();
+           RewardTracker["Direction"] = new List<float>();
+           RewardTracker["Roll"] = new List<float>();
+           RewardTracker["Ground contact"] = new List<float>();
+           RewardTracker["Energy"] = new List<float>();
+           RewardTracker["Tail while walking"] = new List<float>();
+        }
         /// <summary>
         /// Resets the Robots Positon, CPG and Sensors.
         /// </summary>
@@ -114,12 +130,16 @@ namespace RoboIguanaRL
         /// </summary>
         public override void OnEpisodeBegin()
         {
+            Debug.Log($"Last Episode Reward composition: \n    Velocity: {RewardTracker["Velocity"].Sum()} \n    Direction: {RewardTracker["Direction"].Sum()} \n    Roll: {RewardTracker["Roll"].Sum()} \n    Ground contact: {RewardTracker["Ground contact"].Sum()} \n    Energy: {RewardTracker["Energy"].Sum()} \n    Tail while walking: {RewardTracker["Tail while walking"].Sum()}");
+            ResetRewardTracker();
             Debug.Log("Starting new Epsode");
-
             ResetRobot();
             SetReward(0f);
             ResetTarget();
+
+
         }
+
 
         /// <summary>
         /// Collects state observations and adds them to a VectorSensor.
@@ -150,8 +170,8 @@ namespace RoboIguanaRL
             // Debug.Log("Collecting Observations");
             // position and velocity observations
             sensor.AddObservation(locomotionType);
-            sensor.AddObservation(TargetDirection - transform.forward);
-            sensor.AddObservation(TargetVelocity - Body.linearVelocity);
+            sensor.AddObservation(transform.InverseTransformDirection(TargetDirection));
+            sensor.AddObservation(transform.InverseTransformDirection(TargetVelocity - Body.linearVelocity));
             sensor.AddObservation(Body.angularVelocity);
 
             // Contact Booleans
@@ -172,7 +192,7 @@ namespace RoboIguanaRL
             sensor.AddObservation(CPG.GetBuoyancy());
             sensor.AddObservation(CPG.GetBuoyancyShift());
 
-            sensor.AddObservation(CPG.GetTailState());
+            sensor.AddObservation(CPG.GetTailState().Values.ToArray());
         }
 
         /// <summary>
@@ -295,45 +315,44 @@ namespace RoboIguanaRL
         private void GiveReward()
         {
             // linear velocity
-            Vector3 VelError = TargetVelocity - Body.linearVelocity;
-            (float VelocityErrorX, float VelocityErrorY, float VelocityErrorZ) = (VelError.x, VelError.y, VelError.z);
+            var VelError = transform.InverseTransformDirection(TargetVelocity - Body.linearVelocity).sqrMagnitude;
 
             // Direction
-            Vector3 DirectionDifference = TargetDirection - transform.forward;
-            (float DirectionDifferenceX, float DirectionDifferenceY, float DirectionDifferenceZ) = (DirectionDifference.x, DirectionDifference.y, DirectionDifference.z);
+            var DirectionDifference = transform.InverseTransformDirection(TargetDirection - transform.forward).sqrMagnitude;
 
-            // undesired pitch and roll
-            float PitchPenalty = Mathf.Abs(Body.angularVelocity[0]) * Mathf.Abs(Body.angularVelocity[0]);
+            // undesired roll
             float RollPenalty = Mathf.Abs(Body.angularVelocity[2]) * Mathf.Abs(Body.angularVelocity[2]);
             
             // Any foot touching the ground?
             bool groundContact = footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround;
             float GroundContact = locomotionType * (groundContact ? 1f : -1f);
             
-            float TailMovementWhenWalking = (locomotionType == 1) ? CPG.GetTailState()[0] : 0;
+            float TailMovementWhenWalking = (locomotionType == 1) ? CPG.GetTailState()["frequency"] : 0;
 
             // EnergyConsumption
             float EnergyConsumption = EnergyEstimator.CurrentEnergy;
 
+            Rewards = new float[] {
+                VelError,
+                DirectionDifference,
+                RollPenalty,
+                GroundContact,
+                TailMovementWhenWalking,
+                EnergyConsumption,
+            };
+
             // Apply Rewards
             float stepReward = 0f;
-            stepReward += VelocityErrorX * VelocityWeight;
-            stepReward += VelocityErrorY * VelocityWeight;
-            stepReward += VelocityErrorZ * VelocityWeight;
-            stepReward += DirectionDifferenceX * DirectionWeight;
-            stepReward += DirectionDifferenceY * DirectionWeight;
-            stepReward += DirectionDifferenceZ * DirectionWeight;
-            stepReward += PitchPenalty * PitchWeight;
-            stepReward += RollPenalty * RollWeight;
-            stepReward += GroundContact * GroundContactWeight;
-            stepReward += TailMovementWhenWalking * TailWhileWalkingWeight;
-            stepReward += EnergyConsumption * EnergyConsumptionWeight;
+
+            for (int i = 0; i < 6; i++)
+            {
+                var partialReward = Rewards[i] * RewardWeights[i];
+                stepReward += partialReward;
+                RewardTracker[RewardTracker.Keys.ToArray()[i]].Add(partialReward);
+            }
 
             AddReward(stepReward);
-
-            // Debug.Log($"Step Reward: {stepReward}, Cumulative Reward: {GetCumulativeReward()}");
-            // Debug.Log($"Reward Details:\n Velocity: {VelocityError * VelocityWeight}\n Direction: {DirectionError * DirectionWeight}\n Pitch: {PitchPenalty * PitchWeight}\n Roll: {RollPenalty * RollWeight}\n GroundContact: {GroundContact * GroundContactWeight}\n EnergyConsumption: {EnergyConsumption * EnergyConsumptionWeight}\n Total: {stepReward}");
-            
+ 
         }
 
         /// <summary>

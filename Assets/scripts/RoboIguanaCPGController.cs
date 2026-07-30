@@ -2,6 +2,7 @@ using System;
 using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace RoboIguanaRL
 {
@@ -308,8 +309,15 @@ namespace RoboIguanaRL
         /// Returns State of the tail.
         /// </summary>
         /// <returns></returns>
-        public float[] GetTailState() {return new float[] {Tail.frequency, Tail.yawAmplitude, Tail.phase};}
+        Dictionary<string, float> TailState = new Dictionary<string, float>();
 
+        public Dictionary<string, float> GetTailState()
+        {
+            TailState["frequency"] = Tail.frequency;
+            TailState["yaw amplitude"] = Tail.yawAmplitude;
+
+            return TailState;
+        }
 
         // =========================================================
         // Internal function
@@ -324,7 +332,7 @@ namespace RoboIguanaRL
             // get components
             Tail = GetComponent<TailManager>();
             Tail.Initialize();
-
+            Debug.Log("Tail Done");
             TimeStep = Time.fixedDeltaTime;
 
             // group joints for easier access.

@@ -348,8 +348,8 @@ namespace RoboIguanaRL
             for (int i = 0; i < 6; i++)                             continuousActionsOut[i] = 0.2f;
             // everything else
             for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
-            continuousActionsOut[continuousActionsOut.Length - 2] = 1f;
-            continuousActionsOut[continuousActionsOut.Length - 1] = 1f;
+            // continuousActionsOut[continuousActionsOut.Length - 2] = 1f;
+            // continuousActionsOut[continuousActionsOut.Length - 1] = 1f;
             }
     }
 }

@@ -225,7 +225,7 @@ namespace RoboIguanaRL
             var vel = trainingConfigManager.Config["RandomVelocity"]? Random.Range(0.01f, 0.6f): 0.2f;
             TargetVelocity = vel * (locomotionType + 1f) * TargetDirection;
 
-            Debug.Log($"Target: \n Direction: {TargetDirection} \n Velocity: {TargetVelocity} \n locomotion: {locomotionType}");
+            // Debug.Log($"Target: \n Direction: {TargetDirection} \n Velocity: {TargetVelocity} \n locomotion: {locomotionType}");
         }
 
         /// <summary>

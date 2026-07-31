@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using System;
 
 namespace RoboIguanaRL
 {
     /// <summary>
     /// Class to handle import of reward weights and logging of reward development throughout training.
     /// </summary>
-    public class RewardManager
+    public class TrainingConfigManager
     {
+        public Dictionary<string, bool> Config;
+
         /// <summary>
         /// Reward factors as measured by the agent.
         /// </summary>
@@ -52,15 +55,19 @@ namespace RoboIguanaRL
         private string LogPath = Path.Combine("results", "Rewards");
 
         /// <summary>
-        /// Wether or not to log reward history.
+        /// Wether to log reward history.
         /// </summary>
         private bool LogHistory;
 
+        /// <summary>
+        /// Envronment parameters.
+        /// </summary>
+        public bool RandomDirection, RandomVelocity, Swimming, Transition;
 
         /// <summary>
         /// Class to handle import of reward weights and logging of reward development throughout training.
         /// </summary>
-        public RewardManager()
+        public TrainingConfigManager()
         {
             Debug.Log("Loading Reward Weights");
 
@@ -140,17 +147,19 @@ namespace RoboIguanaRL
                 return;
             }
 
-            string config = File.ReadAllText(ConfigFile);
+            string configString = File.ReadAllText(ConfigFile);
 
-            if (string.IsNullOrWhiteSpace(config))
+            if (string.IsNullOrWhiteSpace(configString))
             {
                 Debug.Log("Reward weight file is empty!");
                 return;
             }
 
-            Dictionary<string, bool> Config = JsonConvert.DeserializeObject<Dictionary<string, bool>>(config)!;
+            Config = JsonConvert.DeserializeObject<Dictionary<string, bool>>(configString)!;
 
             LogHistory = Config["LogRewardHistory"];
+
+            Config.Remove("LogHistory");
 
         }
 

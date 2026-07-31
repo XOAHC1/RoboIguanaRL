@@ -1,3 +1,7 @@
 {
-    "LogRewardHistory": true
+    "LogRewardHistory": false,
+    "RandomDirection": false,
+    "RandomVelocity": false,
+    "Swimming": false,
+    "Transition": false
 }

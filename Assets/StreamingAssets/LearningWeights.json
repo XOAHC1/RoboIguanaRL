@@ -1,0 +1,8 @@
+{
+    "VelocityWeight": -0.6,  
+    "DirectionWeight": -0.7,  
+    "RollWeight": -0.05,  
+    "GroundContactWeight": 0.5,  
+    "EnergyConsumptionWeight": -0.01,  
+    "TailWhileWalkingWeight": -0.1
+}

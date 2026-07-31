@@ -138,8 +138,8 @@ namespace RoboIguanaRL
         ///         Orientation offset shifts       4D
         ///     Others:
         ///         Buoyancy                        2D
-        ///         Tail State                      3D
-        /// For a total of 51 input dimensions.
+        ///         Tail State                      2D
+        /// For a total of 50 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
@@ -295,12 +295,15 @@ namespace RoboIguanaRL
         {
             // Provide manual control for testing purposes
             var continuousActionsOut = actionsOut.ContinuousActions;
+            var discreteActionsOut = actionsOut.DiscreteActions;
             // Phase shifts
-            for (int i = 0; i < 6; i++)                             continuousActionsOut[i] = 0.2f;
+            for (int i = 0; i < 6; i++)                             continuousActionsOut[i] = 0.3f;
             // everything else
             for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
-            // continuousActionsOut[continuousActionsOut.Length - 1] = 1f;
-            // continuousActionsOut[continuousActionsOut.Length - 2] = 1f;
+            
+            // continuousActionsOut[continuousActionsOut.Length-1] = 1f;
+            discreteActionsOut[0] = 1;
+            discreteActionsOut[1] = 1;
             }
     }
 }

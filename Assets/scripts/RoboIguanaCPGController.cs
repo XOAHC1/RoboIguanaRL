@@ -3,6 +3,7 @@ using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEditor.EditorTools;
 
 namespace RoboIguanaRL
 {
@@ -18,32 +19,32 @@ namespace RoboIguanaRL
         /// <summary>
         /// Hinge for hip yaw movement.
         /// </summary>
-        [Header("Hip yaw actuator:")]
+        [Tooltip("Hip yaw actuator")]
         public Hinge hyFL, hyFR, hyRL, hyRR;
 
         /// <summary>
         /// Hinge for hip pith movement.
         /// </summary>
-        [Header("Hip pitch actuator:")]
+        [Tooltip("Hip pitch actuator")]
         public Hinge hpFL, hpFR, hpRL, hpRR;
 
         /// <summary>
         /// Hinge for knee movement.
         /// </summary>
-        [Header("Knee actuator:")]
+        [Tooltip("Knee actuator")]
         public Hinge kFL, kFR, kRL, kRR;
 
         
         /// <summary>
         /// Hinge for sipne movement.
         /// </summary>
-        [Header("Spine actuator:")]
+        [Tooltip("Spine actuator")]
         public Hinge spinePitch, spineYaw;
 
         /// <summary>
         /// Force point to simulate buoyancy control module.
         /// </summary>
-        [Header("Buoyancy Module")]
+        [Tooltip("Buoyancy Module")]
         public SimpleForcePoint BuoyancyForcePoint;
 
 
@@ -54,25 +55,25 @@ namespace RoboIguanaRL
         /// <summary>
         /// <c>ArticulationBody</c> for yaw movement in the hip.
         /// </summary>
-        [Header("Hip yaw link:")]
+        [Tooltip("Hip yaw link")]
         public ArticulationBody hyFL_Link, hyFR_Link, hyRL_Link, hyRR_Link;
 
         /// <summary>
         /// <c>ArticulationBody</c> for pitch movement in the hip.
         /// </summary>
-        [Header("Hip pitch link:")]
+        [Tooltip("Hip pitch link")]
         public ArticulationBody hpFL_Link, hpFR_Link, hpRL_Link, hpRR_Link;
 
         /// <summary>
         /// <c>ArticulationBody</c> for movement in the knee.
         /// </summary>
-        [Header("Knee link:")]
+        [Tooltip("Knee link")]
         public ArticulationBody kFL_Link, kFR_Link, kRL_Link, kRR_Link;
 
         /// <summary>
         /// <c>ArticulationBody</c> for movement in the spine.
         /// </summary>
-        [Header("Spine link:")]
+        [Tooltip("Spine link:")]
         public ArticulationBody spine_link_pitch, spine_link_yaw;
 
 
@@ -136,9 +137,18 @@ namespace RoboIguanaRL
         /// </summary>
         public float tailSwayRange, tailYawRange; // 20, 40;
 
+        /// <summary>
+        /// Limits of the buoyancy module.
+        /// </summary>
         [Header("Buoyancy Module Limits")]
-        public float maxBuoyancy; // 2.25f [N]
-        public float maxBuoyancyShift; // 0.3 [N/dt]
+        public float maxBuoyancy, maxBuoyancyShift; // // 2.25f, 0.3 [N/dt]
+
+        /// <summary>
+        /// Limit of CPG progression.
+        /// </summary>
+        [Tooltip("Limit of CPG progression in Oscillations per second.")]
+        public float maxPhaseShift, maxAmplitudeShift, maxOrientationShift;    // 1, 1, 1
+
 
         [Header("Training parameters")]
         /// <summary>
@@ -515,7 +525,7 @@ namespace RoboIguanaRL
             for (int i = 0; i < Phases.Length; i++)
             {
                 // adapt phase shifts
-                PhaseShifts[i] = continuous[i];
+                PhaseShifts[i] = continuous[i] * maxPhaseShift * Mathf.PI*2f;
             }
 
             for (int i = 0; i < Amplitudes.Length; i++) {
@@ -527,11 +537,11 @@ namespace RoboIguanaRL
             // update trajectory rotation shifts
             for (int i = 0; i < OrientationOffsetShifts.Length; i++)
             {
-                OrientationOffsetShifts[i] = continuous[i + ActionIdxOrientation];
+                OrientationOffsetShifts[i] = continuous[i + ActionIdxOrientation] * maxOrientationShift * Mathf.PI*2;
             }
 
             // Buoyancy Module
-            BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift * 1.8f;
+            BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift * Mathf.PI*2;
 
             // Tail Parameters
             for (int i = 0; i < TailChanges.Length; i++)

@@ -30,7 +30,7 @@ public class RobotEnergyEstimator : MonoBehaviour
     /// <summary>
     /// Connects to joint power etimators.
     /// </summary>
-    void Start()
+    public void Start()
     {
         Estimators = GetComponentsInChildren<ServoPowerEstimator>();
         Tail = GetComponent<TailManager>();
@@ -44,7 +44,7 @@ public class RobotEnergyEstimator : MonoBehaviour
     /// </summary>
     public void Reset()
     {
-        CurrentEnergy = 0f;
+        CurrentEnergy = 1f;
         CumulatedEnergy = 0f;
 
         foreach (var est in Estimators)
@@ -56,19 +56,18 @@ public class RobotEnergyEstimator : MonoBehaviour
     /// <summary>
     /// Retrieves current energy consumption and updates cumulated energy.
     /// </summary>
-    void FixedUpdate()
+    public void FixedUpdate()
     {
         EstimateEnergy();
-
         CumulatedEnergy += CurrentEnergy;
     }
 
     /// <summary>
     /// Calculates current energy consumption.
     /// </summary>
-    void EstimateEnergy()
+    private void EstimateEnergy()
     {
-        CurrentEnergy = 0f;
+        CurrentEnergy = 1f;
         foreach (var est in Estimators)
         {
             CurrentEnergy += est.mechanicalEnergyJ;

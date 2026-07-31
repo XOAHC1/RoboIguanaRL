@@ -258,40 +258,8 @@ namespace RoboIguanaRL
         }
         
         /// <summary>
-        /// Computes the reward from multiple components and applies it to the agent.
+        /// Sets raw rewards of <c>rewardManager</c> and applise reward to the agent.
         /// </summary>
-        /// <remarks>
-        /// <list type="table">
-        ///   <listheader>
-        ///     <term>Parameter</term>
-        ///     <description>Description</description>
-        ///   </listheader>
-        ///   <item>
-        ///     <term>VelocityError</term>
-        ///     <description>Penalizes deviation from target speed.</description>
-        ///   </item>
-        ///   <item>
-        ///     <term>DirectionError</term>
-        ///     <description>Penalizes deviation from the target heading.</description>
-        ///   </item>
-        ///   <item>
-        ///     <term>PitchPenalty</term>
-        ///     <description>Penalizes excessive pitch angular velocity.</description>
-        ///   </item>
-        ///   <item>
-        ///     <term>RollPenalty</term>
-        ///     <description>Penalizes excessive roll angular velocity.</description>
-        ///   </item>
-        ///   <item>
-        ///     <term>GroundContact</term>
-        ///     <description>Rewards contact of one or more feet with ground.</description>
-        ///   </item>
-        ///   <item>
-        ///     <term>EnergyConsumption</term>
-        ///     <description>Penalizes energy usage.</description>
-        ///   </item>
-        /// </list>
-        /// </remarks>
         private void GiveReward()
         {
             // Any foot touching the ground?

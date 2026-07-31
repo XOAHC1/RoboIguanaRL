@@ -28,10 +28,10 @@ namespace RoboIguanaRL
         /// <summary> Weight for reward calculation.</summary>
         [Header("Reward Weights")]
         private readonly float[] RewardWeights = new float[] {
-            -4f, // VelocityWeight
-            -5f, // DirectionWeight
+            -6f, // VelocityWeight
+            -7f, // DirectionWeight
             -1f, // RollWeight
-            10f, // GroundContactWeight
+            5f, // GroundContactWeight
             -1f, // EnergyConsumptionWeight
             -2f // TailWhileWalkingWeight
         }; 
@@ -102,6 +102,7 @@ namespace RoboIguanaRL
            RewardTracker["Energy"] = new List<float>();
            RewardTracker["Tail while walking"] = new List<float>();
         }
+
         /// <summary>
         /// Resets the Robots Positon, CPG and Sensors.
         /// </summary>
@@ -130,6 +131,7 @@ namespace RoboIguanaRL
         /// </summary>
         public override void OnEpisodeBegin()
         {
+            Debug.Log($"Terminating Agent. \n Traveled distance: {transform.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
             Debug.Log($"Last Episode Reward composition: \n    Velocity: {RewardTracker["Velocity"].Sum()} \n    Direction: {RewardTracker["Direction"].Sum()} \n    Roll: {RewardTracker["Roll"].Sum()} \n    Ground contact: {RewardTracker["Ground contact"].Sum()} \n    Energy: {RewardTracker["Energy"].Sum()} \n    Tail while walking: {RewardTracker["Tail while walking"].Sum()}");
             ResetRewardTracker();
             Debug.Log("Starting new Epsode");
@@ -337,8 +339,8 @@ namespace RoboIguanaRL
                 DirectionDifference,
                 RollPenalty,
                 GroundContact,
-                TailMovementWhenWalking,
                 EnergyConsumption,
+                TailMovementWhenWalking,
             };
 
             // Apply Rewards

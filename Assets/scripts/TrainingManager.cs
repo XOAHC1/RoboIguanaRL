@@ -94,6 +94,7 @@ namespace RoboIguanaRL
                     {
                         writer.Write($",{key}");
                     }
+                    writer.Write(",Crashed");
                     writer.WriteLine();
                 }
             }
@@ -104,8 +105,6 @@ namespace RoboIguanaRL
         /// </summary>
         public void NewEpisode()
         {
-            Crashed = false;
-
             if (LogHistory)
             {
                 string filePath = Path.Combine(LogPath, "RewardHistory.csv");
@@ -126,6 +125,7 @@ namespace RoboIguanaRL
                         Rewards[key].Clear();
                     }
 
+                    writer.Write($",{(Crashed? 0: 1)}");
                     writer.WriteLine();
                 }   
             } 
@@ -138,6 +138,8 @@ namespace RoboIguanaRL
                     RawRewards[key] = 0f;
                 }
             }
+
+            Crashed = false;
 
         }
 

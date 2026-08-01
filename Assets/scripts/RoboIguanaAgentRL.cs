@@ -141,8 +141,8 @@ namespace RoboIguanaRL
         ///         Orientation offset shifts       4D
         ///     Others:
         ///         Buoyancy                        2D
-        ///         Tail State                      2D
-        /// For a total of 50 input dimensions.
+        ///         Tail State                      3D
+        /// For a total of 51 input dimensions.
         /// </remarks>
         /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>

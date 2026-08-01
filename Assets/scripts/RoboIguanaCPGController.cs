@@ -315,15 +315,19 @@ namespace RoboIguanaRL
         public float GetBuoyancyShift() {return BuoyancyShift;} 
 
         /// <summary>
-        /// Returns State of the tail.
+        /// Contains tail state.
         /// </summary>
-        /// <returns></returns>
         Dictionary<string, float> TailState = new Dictionary<string, float>();
 
+        /// <summary>
+        /// Returns the current state of the tail.
+        /// </summary>
+        /// <returns>Tail State</returns>
         public Dictionary<string, float> GetTailState()
         {
-            TailState["frequency"] = Tail.frequency;
-            TailState["yaw amplitude"] = Tail.yawAmplitude;
+            TailState["yaw amplitude"] = Tail.parameters[0];
+            TailState["frequency"] = Tail.parameters[1];
+            TailState["phase"] = Tail.phase;
 
             return TailState;
         }

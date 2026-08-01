@@ -6,5 +6,5 @@
     "EnergyConsumption": 0.01,  
     "TailWhileWalking": 0.1,
     "BaseReward": 1,
-    "Crash": 1
+    "CrashPenalty": 1
 }

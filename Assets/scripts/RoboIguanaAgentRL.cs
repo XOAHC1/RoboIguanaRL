@@ -245,14 +245,14 @@ namespace RoboIguanaRL
             if (Back.IsTouchingGround)
             {
                 Debug.Log("Back is on the ground!");
-                Terminate();
+            training.Crashed = true;
+            Terminate();
             }
         }
 
         private void Terminate()
         {
             // Debug.Log($"Terminating Agent. \n Traveled distance: {transform.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
-            training.Crashed = true;
             EndEpisode();
         }
         
@@ -303,8 +303,8 @@ namespace RoboIguanaRL
             for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
             
             // continuousActionsOut[continuousActionsOut.Length-1] = 1f;
-            discreteActionsOut[0] = 2;
-            discreteActionsOut[1] = 2;
+            discreteActionsOut[0] = 1;
+            discreteActionsOut[1] = 1;
             }
     }
 }

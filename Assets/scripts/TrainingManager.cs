@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using System;
 
 namespace RoboIguanaRL
 {
     /// <summary>
     /// Class to handle import of reward weights and logging of reward development throughout training.
     /// </summary>
-    public class TrainingConfigManager
+    public class TrainingManager
     {
         public Dictionary<string, bool> Config;
 
@@ -33,6 +32,16 @@ namespace RoboIguanaRL
         /// Weights of different reward aspects.
         /// </summary>
         public Dictionary<string, float> RewardWeights;
+
+        /// <summary>
+        /// Wether the Robot has crashed.
+        /// </summary>
+        public bool Crashed;
+
+        /// <summary>
+        /// Linear reward.
+        /// </summary>
+        private float CrashPenalty, BaseReward;
 
         /// <summary>
         /// Different reward parameters.
@@ -67,7 +76,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Class to handle import of reward weights and logging of reward development throughout training.
         /// </summary>
-        public TrainingConfigManager()
+        public TrainingManager()
         {
             Debug.Log("Loading Reward Weights");
 
@@ -95,6 +104,8 @@ namespace RoboIguanaRL
         /// </summary>
         public void NewEpisode()
         {
+            Crashed = false;
+
             if (LogHistory)
             {
                 string filePath = Path.Combine(LogPath, "RewardHistory.csv");
@@ -124,6 +135,7 @@ namespace RoboIguanaRL
                 {
                     RewardHistory[key].Add(Rewards[key].Sum());
                     Rewards[key].Clear();
+                    RawRewards[key] = 0f;
                 }
             }
 
@@ -185,6 +197,13 @@ namespace RoboIguanaRL
 
             RewardWeights = JsonConvert.DeserializeObject<Dictionary<string, float>>(json)!;
 
+            // extract linear rewards
+            Crashed = false;
+            CrashPenalty = RewardWeights["CrashPenalty"];
+            BaseReward = RewardWeights["BaseReward"];
+            RewardWeights.Remove("CrashPenalty");
+            RewardWeights.Remove("BaseReward");
+
             keys = RewardWeights.Keys.ToArray();
 
             foreach (var key in keys)
@@ -197,17 +216,21 @@ namespace RoboIguanaRL
         /// <summary>
         /// Calculates weighted rewards from current <c>RawRewards</c>.
         /// </summary>
+        /// <remarks>
+        /// All raw rewards are high => bad.
+        /// </remarks>
         /// <returns>Current step reward</returns>
         public float GetReward()
         {
             var stepReward = 0f;
             foreach (var key in keys)
             {
-                var partialReward = RawRewards[key] * RewardWeights[key];
+                var partialReward = Mathf.Exp(-(RawRewards[key]/0.25f)) * RewardWeights[key] * Time.fixedDeltaTime;
                 Rewards[key].Add(partialReward);
                 stepReward += partialReward;
             }
 
+            stepReward += BaseReward * Time.fixedDeltaTime + (Crashed? CrashPenalty: 0);
             return stepReward;            
         }
 

@@ -1,8 +1,10 @@
 {
-    "VelocityWeight": -0.6,  
-    "DirectionWeight": -0.7,  
-    "RollWeight": -0.05,  
-    "GroundContactWeight": 0.5,  
-    "EnergyConsumptionWeight": -0.01,  
-    "TailWhileWalkingWeight": -0.1
+    "Velocity": 0.6,  
+    "Direction": 0.7,  
+    "Roll": 0.05,  
+    "GroundContact": 0.3,  
+    "EnergyConsumption": 0.01,  
+    "TailWhileWalking": 0.1,
+    "BaseReward": 1,
+    "Crash": 1
 }

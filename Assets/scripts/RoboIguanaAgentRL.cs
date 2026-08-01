@@ -27,7 +27,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Helper object to handle reward weight import and reward logging.
         /// </summary>
-        private TrainingConfigManager trainingConfigManager;
+        private TrainingManager training;
 
         /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
         private RoboIguanaCPGController CPG;
@@ -45,7 +45,7 @@ namespace RoboIguanaRL
 
         /// <summary>
         /// Type of locomotion requested by higher level controller. 
-        /// <remarks> 1 = walking, -1 = swimming. </remarks>
+        /// <remarks> 0: swimming, 1: walking. </remarks>
         /// </summary>
         private int locomotionType;
 
@@ -76,13 +76,13 @@ namespace RoboIguanaRL
             CPG.Initialize();
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
             ComponentABs = GetComponentsInChildren<ArticulationBody>();
-            trainingConfigManager = new TrainingConfigManager();
+            training = new TrainingManager();
 
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
 
             // Apply Config settings
-            if (trainingConfigManager.Config["Swimming"])
+            if (training.Config["Swimming"])
                 StartingPosition.y += 1;
 
             Debug.Log("Agent initialization over");
@@ -120,11 +120,12 @@ namespace RoboIguanaRL
             ResetTarget();
             ResetRobot();
             SetReward(0f);
-            trainingConfigManager.NewEpisode();
+            training.NewEpisode();
         }
 
         /// <summary>
         /// Collects state observations and adds them to a VectorSensor.
+        /// </summary>
         /// <remarks>
         /// Observed are:
         ///     World State:
@@ -144,7 +145,6 @@ namespace RoboIguanaRL
         ///         Tail State                      3D
         /// For a total of 51 input dimensions.
         /// </remarks>
-        /// </summary>
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
         {
@@ -180,6 +180,7 @@ namespace RoboIguanaRL
 
         /// <summary>
         /// Relays actions received from the policy to control CPG parameters.
+        /// </summary>
         /// <remarks>
         /// Possible actions are: 
         ///   continuous:
@@ -199,7 +200,6 @@ namespace RoboIguanaRL
         ///         
         /// For a total of 19 action dimensions.
         /// </remarks>
-        /// </summary>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>
         public override void OnActionReceived(ActionBuffers buffers)
         {
@@ -208,21 +208,20 @@ namespace RoboIguanaRL
         }
 
         /// <summary>
-        /// Resets the target direction and velocity. 
+        /// Resets the target direction and velocity.
+        /// </summary>
         /// <remark> In optimal deployment, this would be called by an independent agent or human.
         /// For training, uses random values; for testing, uses fixed values.
         /// </remark>
-        /// </summary>
         private void ResetTarget()
         {
+            locomotionType = training.Config["Swimming"]? 0: 1;
+            locomotionType = training.Config["Transition"]? (locomotionType + 1) % 2: locomotionType;
 
-            locomotionType = trainingConfigManager.Config["Swimming"]? 0: 1;
-            locomotionType = trainingConfigManager.Config["Transition"]? (locomotionType + 1) % 2: locomotionType;
-
-            Vector2 direction = trainingConfigManager.Config["RandomDirection"] ? Random.onUnitCircle: new Vector2(1, 0);
+            Vector2 direction = training.Config["RandomDirection"] ? Random.onUnitCircle: new Vector2(1, 0);
             TargetDirection = new Vector3(direction.x, 0f, direction.y);
 
-            var vel = trainingConfigManager.Config["RandomVelocity"]? Random.Range(0.01f, 0.6f): 0.2f;
+            var vel = training.Config["RandomVelocity"]? Random.Range(0.01f, 0.6f): 0.2f;
             TargetVelocity = vel * (locomotionType + 1f) * TargetDirection;
 
             // Debug.Log($"Target: \n Direction: {TargetDirection} \n Velocity: {TargetVelocity} \n locomotion: {locomotionType}");
@@ -252,38 +251,41 @@ namespace RoboIguanaRL
 
         private void Terminate()
         {
-            Debug.Log($"Terminating Agent. \n Traveled distance: {transform.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
+            // Debug.Log($"Terminating Agent. \n Traveled distance: {transform.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
+            training.Crashed = true;
             EndEpisode();
         }
         
         /// <summary>
-        /// Sets raw rewards of <c>trainingConfigManager</c> and applise reward to the agent.
+        /// Sets raw rewards of <c>training</c> and applies reward to the agent.
         /// </summary>
         private void GiveReward()
         {
+            // All reward related measures are high => bad.
+
             // Any foot touching the ground?
             bool groundContact = footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround;
 
-            // linear velocity
-            trainingConfigManager.RawRewards[trainingConfigManager.keys[0]] =
+            // linear velocity error
+            training.RawRewards[training.keys[0]] =
                     transform.InverseTransformDirection(TargetVelocity - Body.linearVelocity).sqrMagnitude;
-            // Direction
-            trainingConfigManager.RawRewards[trainingConfigManager.keys[1]] = 
+            // Direction error
+            training.RawRewards[training.keys[1]] = 
                     transform.InverseTransformDirection(TargetDirection - transform.forward).sqrMagnitude;
             // Roll
-            trainingConfigManager.RawRewards[trainingConfigManager.keys[2]] = 
-                    Mathf.Abs(Body.angularVelocity[2]) * Mathf.Abs(Body.angularVelocity[2]);
-            // Ground Contact 
-            trainingConfigManager.RawRewards[trainingConfigManager.keys[3]] = 
-                    locomotionType * (groundContact ? 1f : -1f);
-            // EnergyConsumption
-            trainingConfigManager.RawRewards[trainingConfigManager.keys[4]] = 
-                    EnergyEstimator.CurrentEnergy;
+            training.RawRewards[training.keys[2]] = 
+                    Mathf.Pow(Mathf.Abs(Body.angularVelocity[2]), 2);                    
+            // Energy consumption
+            training.RawRewards[training.keys[4]] = 
+                    Mathf.Pow(EnergyEstimator.CurrentEnergy, 2);
             // Tail while walking
-            trainingConfigManager.RawRewards[trainingConfigManager.keys[5]] = 
-                    (locomotionType == 1) ? CPG.GetTailState()["frequency"] : 0;
+            training.RawRewards[training.keys[5]] = 
+                    (locomotionType == 1) ? Mathf.Pow(CPG.GetTailState()["frequency"], 2) : 0;
+            // Wrong ground contact status
+            training.RawRewards[training.keys[3]] = 
+                    ((locomotionType == 0) ? 1: -1) * (groundContact ? 1f : -1f);
 
-            AddReward(trainingConfigManager.GetReward());
+            AddReward(training.GetReward());
         }
 
         /// <summary>
@@ -301,8 +303,8 @@ namespace RoboIguanaRL
             for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
             
             // continuousActionsOut[continuousActionsOut.Length-1] = 1f;
-            discreteActionsOut[0] = 1;
-            discreteActionsOut[1] = 1;
+            discreteActionsOut[0] = 2;
+            discreteActionsOut[1] = 2;
             }
     }
 }

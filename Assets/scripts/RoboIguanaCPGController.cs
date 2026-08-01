@@ -162,10 +162,10 @@ namespace RoboIguanaRL
 
         /// <summary>
         /// Initial foot positions for each leg (FL, FR, RL, RR).
-        /// <remarks>
-        /// Only needed for retreiving initial CPG states.
-        /// </remarks>
         /// </summary>
+        /// <remarks>
+        /// Only needed for retrieving initial CPG states.
+        /// </remarks>
         private readonly Vector3[] initialFootPositions = {
             new Vector3(0.075f, -0.18f, 0f),
             new Vector3(-0.075f, -0.18f, -0f),
@@ -508,6 +508,7 @@ namespace RoboIguanaRL
 
         /// <summary>
         /// Applies actions received from the RL agent to the CPG parameters.
+        /// </summary>
         /// <remark>
         ///     Assuming the action space is structured as follows:
         ///         0-6: Phase shifts (legs: 4, spine: 2, tail: 1).
@@ -515,7 +516,6 @@ namespace RoboIguanaRL
         ///       16-18: trajectory rotation shifts (legs: 4).
         ///          19: Phase lag shift for the tail. 
         /// </remark>
-        /// </summary>
         /// <param name="actions">Action buffers containing continuous actions for phase shifts, amplitude shifts, and orientation offsets.</param>
         public void ApplyActions(ActionBuffers actions)
         {

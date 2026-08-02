@@ -1,10 +1,10 @@
 {
     "Velocity": 0.6,  
     "Direction": 0.7,  
-    "Roll": 0.05,  
-    "GroundContact": 0.3,  
-    "EnergyConsumption": 0.01,  
+    "Roll": 0.1,  
+    "GroundContact": 0.03,  
+    "EnergyConsumption": 0.1,  
     "TailWhileWalking": 0.1,
-    "BaseReward": 1,
+    "BaseReward": 0.03,
     "CrashPenalty": 1
 }

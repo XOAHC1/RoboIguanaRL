@@ -117,8 +117,8 @@ namespace RoboIguanaRL
         public override void OnEpisodeBegin()
         {
             Debug.Log("Starting new Epsode");
-            ResetTarget();
             ResetRobot();
+            ResetTarget();
             SetReward(0f);
             training.NewEpisode();
         }
@@ -245,8 +245,8 @@ namespace RoboIguanaRL
             if (Back.IsTouchingGround)
             {
                 Debug.Log("Back is on the ground!");
-            training.Crashed = true;
-            Terminate();
+                training.Crashed = true;
+                Terminate();
             }
         }
 

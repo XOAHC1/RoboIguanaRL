@@ -38,15 +38,15 @@ namespace RoboIguanaRL
         private RobotEnergyEstimator EnergyEstimator;
 
         /// <summary>Target direction for locomotion.</summary>
-        private Vector3 TargetDirection;
+        /// <remarks>Relative to the robot: [yaw, pitch]</remarks>
+        private Vector2 TargetAngularVelocity;
 
         /// <summary>Target velocity in meters per second.</summary>
-        private Vector3 TargetVelocity;
+        /// <remarks>Relative to the robot, x,y</remarks>
+        private Vector2 TargetLinearVelocity;
 
-        /// <summary>
-        /// Type of locomotion requested by higher level controller. 
-        /// <remarks> 0: swimming, 1: walking. </remarks>
-        /// </summary>
+        /// <summary> Type of locomotion requested by higher level controller. </summary>
+        /// <remarks>  0: swimming, 1: walking. </remarks>
         private int locomotionType;
 
         /// <summary>
@@ -77,6 +77,8 @@ namespace RoboIguanaRL
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
             ComponentABs = GetComponentsInChildren<ArticulationBody>();
             training = new TrainingManager();
+            TargetAngularVelocity = Vector2.zero;
+            TargetLinearVelocity = Vector2.zero;
 
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
@@ -129,8 +131,10 @@ namespace RoboIguanaRL
         /// <remarks>
         /// Observed are:
         ///     World State:
-        ///         Direction deviation from target 3D
-        ///         Velocity deviation from target  3D
+        ///         Locomotion type                 [0, 1]
+        ///         Target linear velocity          2D
+        ///         Linear Velocity                 3D
+        ///         Target angular velocity         2D
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:
@@ -143,7 +147,7 @@ namespace RoboIguanaRL
         ///     Others:
         ///         Buoyancy                        2D
         ///         Tail State                      3D
-        /// For a total of 51 input dimensions.
+        /// For a total of 52 input dimensions.
         /// </remarks>
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
@@ -152,9 +156,10 @@ namespace RoboIguanaRL
 
             // position and velocity observations
             sensor.AddObservation(locomotionType);
-            sensor.AddObservation(transform.InverseTransformDirection(TargetDirection));
-            sensor.AddObservation(transform.InverseTransformDirection(TargetVelocity - Body.linearVelocity));
-            sensor.AddObservation(Body.angularVelocity);
+            sensor.AddObservation(TargetLinearVelocity);
+            sensor.AddObservation(transform.InverseTransformDirection(Body.linearVelocity));
+            sensor.AddObservation(TargetAngularVelocity);
+            sensor.AddObservation(transform.InverseTransformDirection(Body.angularVelocity));
 
             // Contact Booleans
             sensor.AddObservation(footFR.IsTouchingGround);
@@ -215,16 +220,42 @@ namespace RoboIguanaRL
         /// </remark>
         private void ResetTarget()
         {
+            // settle locomotion type
             locomotionType = training.Config["Swimming"]? 0: 1;
             locomotionType = training.Config["Transition"]? (locomotionType + 1) % 2: locomotionType;
 
-            Vector2 direction = training.Config["RandomDirection"] ? Random.onUnitCircle: new Vector2(1, 0);
-            TargetDirection = new Vector3(direction.x, 0f, direction.y);
+            // generate target velocities, foreward and upward
+            var vel = training.Config["RandomLinearVelocity"] ? 
+                // random values
+                new Vector2 (
+                    Random.Range(0.01f, 0.6f), 
+                    (locomotionType == 0) ? 
+                        Random.Range(-0.3f, 0.3f) :
+                        training.Config["Transition"] ? -0.3f: 0f
+                ): 
+                // default values:
+                new Vector2 (
+                    0.3f,
+                    0f
+                );
+            TargetLinearVelocity = vel * (training.Config["Swimming"]? 2f: 1f);
+            
+            // generate target angular velocities
+            TargetAngularVelocity = training.Config["RandomAngularVelocity"] ?
+                // random values
+                new Vector2 (
+                    Random.Range(-0.3f, 0.3f),
+                    (locomotionType == 0) ? 
+                        Random.Range(-0.2f, 0.2f) :
+                        0f
+                ): 
+                // default values
+                new Vector2 (
+                    0f,
+                    0f
+                );
 
-            var vel = training.Config["RandomVelocity"]? Random.Range(0.01f, 0.6f): 0.2f;
-            TargetVelocity = vel * (locomotionType + 1f) * TargetDirection;
-
-            // Debug.Log($"Target: \n Direction: {TargetDirection} \n Velocity: {TargetVelocity} \n locomotion: {locomotionType}");
+            // Debug.Log($"Target: \n AngVel: {TargetAngularVelocity} \n Velocity: {TargetLinearVelocity} \n locomotion: {locomotionType}");
         }
 
         /// <summary>
@@ -232,7 +263,6 @@ namespace RoboIguanaRL
         /// </summary>
         public void FixedUpdate()
         {
-            // Debug.Log("Fixed Update Agent");
             TerminateIfNecessary();
             GiveReward();
         }
@@ -245,7 +275,8 @@ namespace RoboIguanaRL
             if (Back.IsTouchingGround)
             {
                 Debug.Log("Back is on the ground!");
-                training.Crashed = true;
+                training.LinRewards["crash"] = 1/Time.fixedDeltaTime;
+                _ = training.GetReward();
                 Terminate();
             }
         }
@@ -261,29 +292,31 @@ namespace RoboIguanaRL
         /// </summary>
         private void GiveReward()
         {
-            // All reward related measures are high => bad.
-
             // Any foot touching the ground?
             bool groundContact = footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround;
 
-            // linear velocity error
-            training.RawRewards[training.keys[0]] =
-                    transform.InverseTransformDirection(TargetVelocity - Body.linearVelocity).sqrMagnitude;
-            // Direction error
-            training.RawRewards[training.keys[1]] = 
-                    transform.InverseTransformDirection(TargetDirection - transform.forward).sqrMagnitude;
-            // Roll
-            training.RawRewards[training.keys[2]] = 
-                    Mathf.Pow(Mathf.Abs(Body.angularVelocity[2]), 2);                    
-            // Energy consumption
-            training.RawRewards[training.keys[4]] = 
-                    Mathf.Pow(EnergyEstimator.CurrentEnergy, 2);
-            // Tail while walking
-            training.RawRewards[training.keys[5]] = 
-                    (locomotionType == 1) ? Mathf.Pow(CPG.GetTailState()["frequency"], 2) : 0;
-            // Wrong ground contact status
-            training.RawRewards[training.keys[3]] = 
-                    ((locomotionType == 0) ? 1: -1) * (groundContact ? 1f : -1f);
+            // precalculate velocites
+            var relVel = transform.InverseTransformDirection(Body.linearVelocity);
+            var angVel = transform.InverseTransformDirection(Body.angularVelocity);
+
+            // linear velocity x
+            training.ExpRewards["xVel"] = relVel.x - TargetLinearVelocity.x;
+            // linear velocity y
+            training.ExpRewards["yVel"] = relVel.y - TargetLinearVelocity.y;
+            // angular velocity yaw
+            training.ExpRewards["yawRate"] = angVel.y - TargetAngularVelocity.x;
+            // angular velocity pitch
+            training.ExpRewards["pitchRate"] = angVel.z - TargetAngularVelocity.y;
+            // linear velocity z
+            training.QuadPenalties["zVel"] = relVel.z;
+            // angular velocity roll
+            training.QuadPenalties["rollRate"] = angVel.x;
+            // Work
+            training.QuadPenalties["work"] = EnergyEstimator.CurrentEnergy;
+            // ground contact
+            training.LinRewards["groundContact"] = ((locomotionType == 1) ? 1: -1) * (groundContact ? 1f : -1f);
+            // Tail Status
+            training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: 1);
 
             AddReward(training.GetReward());
         }

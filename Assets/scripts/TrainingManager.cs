@@ -16,7 +16,10 @@ namespace RoboIguanaRL
         /// <summary>
         /// Reward factors as measured by the agent.
         /// </summary>
-        public Dictionary<string, float> RawRewards = new Dictionary<string, float>();
+        public Dictionary<string, float> 
+            ExpRewards = new Dictionary<string, float>(),
+            QuadPenalties = new Dictionary<string, float>(),
+            LinRewards = new Dictionary<string, float>();
 
         /// <summary>
         /// Weighted rewards of the ongoing episode.
@@ -31,22 +34,20 @@ namespace RoboIguanaRL
         /// <summary>
         /// Weights of different reward aspects.
         /// </summary>
-        public Dictionary<string, float> RewardWeights;
+        public Dictionary<string, float> RewardWeights = new Dictionary<string, float>();
 
         /// <summary>
-        /// Wether the Robot has crashed.
+        /// All reward parameters.
         /// </summary>
-        public bool Crashed;
+        public List<string> keys;
 
         /// <summary>
-        /// Linear reward.
+        /// Reward factors by category.
         /// </summary>
-        private float CrashPenalty, BaseReward;
-
-        /// <summary>
-        /// Different reward parameters.
-        /// </summary>
-        public string[] keys;
+        public List<string> 
+            expKeys = new List<string>(),
+            quadKeys = new List<string>(),
+            linKeys = new List<string>();
 
         /// <summary>
         /// File path of reward weights.
@@ -61,17 +62,12 @@ namespace RoboIguanaRL
         /// <summary>
         /// Path to which Rewards are logged.
         /// </summary>
-        private string LogPath = Path.Combine("results", "Rewards");
+        private string LogPath = Path.Combine("results", "Rewards", "RewardHistory.csv");
 
         /// <summary>
         /// Wether to log reward history.
         /// </summary>
         private bool LogHistory;
-
-        /// <summary>
-        /// Envronment parameters.
-        /// </summary>
-        public bool RandomDirection, RandomVelocity, Swimming, Transition;
 
         /// <summary>
         /// Class to handle import of reward weights and logging of reward development throughout training.
@@ -83,21 +79,8 @@ namespace RoboIguanaRL
             ReadConfig();
             LoadWeights();
 
-            if (LogHistory) {
-                // Prepare file for logging rewards
-                string filePath = Path.Combine(LogPath, "RewardHistory.csv");
-
-                using (var writer = new StreamWriter(filePath, false))
-                {
-                    writer.Write("Episode");
-                    foreach (var key in keys)
-                    {
-                        writer.Write($",{key}");
-                    }
-                    writer.Write(",Crashed");
-                    writer.WriteLine();
-                }
-            }
+            if (LogHistory)
+                WriteHead();
         }
 
         /// <summary>
@@ -105,42 +88,17 @@ namespace RoboIguanaRL
         /// </summary>
         public void NewEpisode()
         {
-            if (LogHistory)
+            Debug.Log($"Rew_crash: {Rewards["crash"].Sum()}");
+            foreach (var key in keys)
             {
-                string filePath = Path.Combine(LogPath, "RewardHistory.csv");
-
-                using (var writer = new StreamWriter(filePath, true))
-                {
-                    // Log last episode's rewards
-                    writer.Write(RewardHistory.Values.FirstOrDefault()?.Count ?? 0);
-
-                    foreach (var key in keys)
-                    {
-                        float episodeReward = Rewards[key].Sum();
-
-                        RewardHistory[key].Add(episodeReward);
-
-                        writer.Write($",{episodeReward}");
-
-                        Rewards[key].Clear();
-                    }
-
-                    writer.Write($",{(Crashed? 0: 1)}");
-                    writer.WriteLine();
-                }   
-            } 
-            else 
-            {
-                foreach (var key in keys)
-                {
-                    RewardHistory[key].Add(Rewards[key].Sum());
-                    Rewards[key].Clear();
-                    RawRewards[key] = 0f;
-                }
+                RewardHistory[key].Add(Rewards[key].Sum());
+                Rewards[key].Clear();
             }
 
-            Crashed = false;
+            if (LogHistory)
+                LogEpisode();                
 
+            LinRewards["crash"] = 0;
         }
 
         /// <summary>
@@ -182,8 +140,6 @@ namespace RoboIguanaRL
         /// </summary>
         public void LoadWeights()
         {
-            RewardWeights = new Dictionary<string, float>();
-
             if (!File.Exists(WeightFile))
             {
                 Debug.LogWarning($"Weight file not found: {WeightFile}");
@@ -197,44 +153,113 @@ namespace RoboIguanaRL
                 return;
             }
 
-            RewardWeights = JsonConvert.DeserializeObject<Dictionary<string, float>>(json)!;
+            var input = JsonConvert.DeserializeObject<Dictionary<string, float>>(json)!;
 
-            // extract linear rewards
-            Crashed = false;
-            CrashPenalty = RewardWeights["CrashPenalty"];
-            BaseReward = RewardWeights["BaseReward"];
-            RewardWeights.Remove("CrashPenalty");
-            RewardWeights.Remove("BaseReward");
+            foreach (var k in input.Keys.ToArray())
+            {
+                // seperate identifier
+                var id = k[0];
+                var key = k[2..];
 
-            keys = RewardWeights.Keys.ToArray();
+                // sort into respectice category
+                if (id == 'e') expKeys.Add(key);
+                else if (id == 'q') quadKeys.Add(key);
+                else if (id == 'l') linKeys.Add(key);
+
+                RewardWeights[key] = input[k];                
+            }
+
+            keys = RewardWeights.Keys.ToList();
 
             foreach (var key in keys)
             {
                 Rewards[key] = new List<float>();
                 RewardHistory[key] = new List<float>();
             }
+
+            // set default values
+            LinRewards["crash"] = 0f;
+            LinRewards["baseReward"] = 1f;
         }
 
         /// <summary>
-        /// Calculates weighted rewards from current <c>RawRewards</c>.
+        /// Calculates weighted rewards from current <c>ExpRewards</c>.
         /// </summary>
         /// <remarks>
-        /// All raw rewards are high => bad.
+        /// All raw reward factors are high => bad.
         /// </remarks>
         /// <returns>Current step reward</returns>
         public float GetReward()
         {
             var stepReward = 0f;
-            foreach (var key in keys)
+            foreach (var key in expKeys)
             {
-                var partialReward = Mathf.Exp(-(RawRewards[key]/0.25f)) * RewardWeights[key] * Time.fixedDeltaTime;
+                var val = 
+                    Mathf.Pow(Mathf.Abs(ExpRewards[key]), 2);
+                var partialReward = 
+                    Mathf.Exp(-(val / 0.25f)) * RewardWeights[key] * Time.fixedDeltaTime;
+
+                Rewards[key].Add(partialReward);
+                stepReward += partialReward;
+            }
+            foreach (var key in linKeys) 
+            {
+                var partialReward = 
+                LinRewards[key] * RewardWeights[key] * Time.fixedDeltaTime;
+                Rewards[key].Add(partialReward);
+                stepReward += partialReward;
+            }
+            foreach (var key in quadKeys) 
+            {
+                var partialReward = 
+                - Mathf.Pow(QuadPenalties[key], 2) * RewardWeights[key] * Time.fixedDeltaTime;
                 Rewards[key].Add(partialReward);
                 stepReward += partialReward;
             }
 
-            stepReward += BaseReward * Time.fixedDeltaTime + (Crashed? CrashPenalty: 0);
             return stepReward;            
         }
 
+        private void WriteHead() 
+        {
+            // Prepare file for logging rewards
+            using (var writer = new StreamWriter(LogPath, false))
+            {
+                
+                 foreach (var entry in Config)
+                {
+                    writer.WriteLine($"\"{entry.Key}\",\"{entry.Value}\"");
+                }
+
+                writer.WriteLine();
+
+                writer.Write("Episode");
+                foreach (var key in keys)
+                {
+                    writer.Write($",{key}");
+                }
+
+                writer.WriteLine();
+            }
+
+        }
+
+        private void LogEpisode()
+        {
+
+            using (var writer = new StreamWriter(LogPath, true))
+            {
+                // Log last episode's rewards
+                writer.Write(RewardHistory.Values.FirstOrDefault()?.Count ?? 0);
+
+                foreach (var key in keys)
+                {
+                    writer.Write($",{RewardHistory[key].Last()}");
+
+                }
+
+                writer.WriteLine();
+            }   
+        }
     }
 }

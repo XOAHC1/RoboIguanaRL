@@ -1,10 +1,13 @@
 {
-    "Velocity": 0.6,  
-    "Direction": 0.7,  
-    "Roll": 0.1,  
-    "GroundContact": 0.03,  
-    "EnergyConsumption": 0.1,  
-    "TailWhileWalking": 0.1,
-    "BaseReward": 0.03,
-    "CrashPenalty": 1
+    "e_xVel": 0.75,
+    "e_yVel": 0.75,
+    "e_yawRate": 0.5,
+    "e_pitchRate": 0.5,
+    "q_zVel": 1.5,
+    "q_rollRate": 0.5,
+    "q_work": 0.01,
+    "l_groundContact": 1,
+    "l_tailStatus": -1,
+    "l_baseReward": 0.01,
+    "l_crash": 10
 }

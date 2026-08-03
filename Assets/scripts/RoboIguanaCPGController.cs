@@ -322,7 +322,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Returns the current state of the tail.
         /// </summary>
-        /// <returns>Tail State</returns>
+        /// <returns>Tail state dictionary. \n Fields: \n   yaw amplitude, frequency, phase</returns>
         public Dictionary<string, float> GetTailState()
         {
             TailState["yaw amplitude"] = Tail.parameters[0];
@@ -511,10 +511,14 @@ namespace RoboIguanaRL
         /// </summary>
         /// <remark>
         ///     Assuming the action space is structured as follows:
-        ///         0-6: Phase shifts (legs: 4, spine: 2, tail: 1).
-        ///        7-15: Amplitude shifts (legs: 4, spine: 2, tail: 2).
-        ///       16-18: trajectory rotation shifts (legs: 4).
-        ///          19: Phase lag shift for the tail. 
+        ///         continuous:
+        ///         0-5: Phase shifts (legs: 4, spine: 2).
+        ///        6-11: Amplitude shifts (legs: 4, spine: 2).
+        ///       12-15: Trajectory rotation shifts (legs: 4).
+        ///          16: Buoyancy shift.
+        ///         discrete:
+        ///          0: Amplitude parameter change for the Tail.
+        ///          1: Frequency parameter change for the tail.
         /// </remark>
         /// <param name="actions">Action buffers containing continuous actions for phase shifts, amplitude shifts, and orientation offsets.</param>
         public void ApplyActions(ActionBuffers actions)

@@ -11,6 +11,9 @@ namespace RoboIguanaRL
     /// </summary>
     public class TrainingManager
     {
+        /// <summary>
+        /// Contains configuration settings for the training.
+        /// </summary>
         public Dictionary<string, bool> Config;
 
         /// <summary>

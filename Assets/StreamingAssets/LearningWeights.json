@@ -7,7 +7,7 @@
     "q_rollRate": 0.5,
     "q_work": 0.01,
     "l_groundContact": 1,
-    "l_tailStatus": -1,
+    "l_tailStatus": 1,
     "l_baseReward": 0.01,
     "l_crash": 10
 }

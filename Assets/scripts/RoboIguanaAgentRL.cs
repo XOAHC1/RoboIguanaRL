@@ -11,7 +11,9 @@ namespace RoboIguanaRL
     /// </summary>
     public class RoboIguanaAgentRL : Agent
     {
-        /// <summary>Contact detector for the foot.</summary>
+        /// <summary>
+        /// Contact detector for the foot.
+        /// </summary>
         [Header("Contact Sensors")]
         public ContactDetector footFL, footFR, footRL, footRR;
 
@@ -20,7 +22,9 @@ namespace RoboIguanaRL
         /// </summary> 
         public ContactDetector Back;
 
-        /// <summary>The main articulation body representing the robot's physical body.</summary>
+        /// <summary>
+        /// The main articulation body representing the robot's physical body.
+        /// </summary>
         [Header("Articulation Body")]
         public ArticulationBody Body;
 
@@ -29,7 +33,9 @@ namespace RoboIguanaRL
         /// </summary>
         private TrainingManager training;
 
-        /// <summary>Central Pattern Generator controller for managing limb oscillations.</summary>
+        /// <summary>
+        /// Central Pattern Generator controller for managing limb oscillations.
+        /// </summary>
         private RoboIguanaCPGController CPG;
 
         /// <summary>
@@ -37,16 +43,24 @@ namespace RoboIguanaRL
         /// </summary>
         private RobotEnergyEstimator EnergyEstimator;
 
-        /// <summary>Target direction for locomotion.</summary>
-        /// <remarks>Relative to the robot: [yaw, pitch]</remarks>
+        /// <summary>
+        /// Target direction for locomotion.
+        /// </summary> <remarks>
+        /// Relative to the robot: [yaw, pitch]
+        /// </remarks>
         private Vector2 TargetAngularVelocity;
 
-        /// <summary>Target velocity in meters per second.</summary>
-        /// <remarks>Relative to the robot, x,y</remarks>
+        /// <summary>
+        /// Target velocity in meters per second.
+        /// </summary> <remarks>
+        /// Relative to the robot, x,y
+        /// </remarks>
         private Vector2 TargetLinearVelocity;
 
-        /// <summary> Type of locomotion requested by higher level controller. </summary>
-        /// <remarks>  0: swimming, 1: walking. </remarks>
+        /// <summary> 
+        /// Type of locomotion requested by higher level controller.
+        /// </summary> <remarks>  0: swimming, 1: walking. 
+        /// </remarks>
         private int locomotionType;
 
         /// <summary>
@@ -213,10 +227,9 @@ namespace RoboIguanaRL
         }
 
         /// <summary>
-        /// Resets the target direction and velocity.
-        /// </summary>
-        /// <remark> In optimal deployment, this would be called by an independent agent or human.
-        /// For training, uses random values; for testing, uses fixed values.
+        /// Selects new locomotion targets.
+        /// </summary> <remark> 
+        /// If random target values are disabled, default values will be selected.
         /// </remark>
         private void ResetTarget()
         {
@@ -281,6 +294,9 @@ namespace RoboIguanaRL
             }
         }
 
+        /// <summary>
+        /// Terminates the agent end ends the episode early.
+        /// </summary>
         private void Terminate()
         {
             // Debug.Log($"Terminating Agent. \n Traveled distance: {transform.position - StartingPosition} \n Consumed Energy: {EnergyEstimator.CumulatedEnergy} \n Acheived Reward: {GetCumulativeReward()}");
@@ -288,7 +304,7 @@ namespace RoboIguanaRL
         }
         
         /// <summary>
-        /// Sets raw rewards of <c>training</c> and applies reward to the agent.
+        /// Gives reward measures to <c>training</c> and applies reward to the agent.
         /// </summary>
         private void GiveReward()
         {
@@ -303,20 +319,20 @@ namespace RoboIguanaRL
             training.ExpRewards["xVel"] = relVel.x - TargetLinearVelocity.x;
             // linear velocity y
             training.ExpRewards["yVel"] = relVel.y - TargetLinearVelocity.y;
-            // angular velocity yaw
-            training.ExpRewards["yawRate"] = angVel.y - TargetAngularVelocity.x;
-            // angular velocity pitch
-            training.ExpRewards["pitchRate"] = angVel.z - TargetAngularVelocity.y;
             // linear velocity z
             training.QuadPenalties["zVel"] = relVel.z;
             // angular velocity roll
             training.QuadPenalties["rollRate"] = angVel.x;
+            // angular velocity yaw
+            training.ExpRewards["yawRate"] = angVel.y - TargetAngularVelocity.x;
+            // angular velocity pitch
+            training.ExpRewards["pitchRate"] = angVel.z - TargetAngularVelocity.y;
             // Work
             training.QuadPenalties["work"] = EnergyEstimator.CurrentEnergy;
             // ground contact
             training.LinRewards["groundContact"] = ((locomotionType == 1) ? 1: -1) * (groundContact ? 1f : -1f);
             // Tail Status
-            training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: 1);
+            training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: -1);
 
             AddReward(training.GetReward());
         }

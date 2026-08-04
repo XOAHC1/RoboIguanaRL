@@ -3,6 +3,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace RoboIguanaRL
 {
@@ -48,14 +49,14 @@ namespace RoboIguanaRL
         /// </summary> <remarks>
         /// Relative to the robot: [yaw, pitch]
         /// </remarks>
-        private Vector2 TargetAngularVelocity;
+        private Vector2 TargetAngularVelocity = Vector2.zero;
 
         /// <summary>
         /// Target velocity in meters per second.
         /// </summary> <remarks>
         /// Relative to the robot, x,y
         /// </remarks>
-        private Vector2 TargetLinearVelocity;
+        private Vector2 TargetLinearVelocity = Vector2.zero;
 
         /// <summary> 
         /// Type of locomotion requested by higher level controller.
@@ -79,20 +80,27 @@ namespace RoboIguanaRL
         private ArticulationBody[] ComponentABs;
 
         /// <summary>
+        /// Collect penaltes for undesired actions in simple mode.
+        /// </summary>
+        public Dictionary<string, float> training_stage_penalties;
+        /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
         /// </summary>
         public override void Initialize()
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
 
+            training_stage_penalties = new Dictionary<string, float>();
+
             // Get components
             CPG = GetComponent<RoboIguanaCPGController>();
             CPG.Initialize();
+
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
             ComponentABs = GetComponentsInChildren<ArticulationBody>();
+
             training = new TrainingManager();
-            TargetAngularVelocity = Vector2.zero;
-            TargetLinearVelocity = Vector2.zero;
+            CPG.simpleMode = training.Config["SimpleMode"];
 
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
@@ -166,8 +174,6 @@ namespace RoboIguanaRL
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
         {
-            // Debug.Log("Collecting Observations");
-
             // position and velocity observations
             sensor.AddObservation(locomotionType);
             sensor.AddObservation(TargetLinearVelocity);
@@ -224,6 +230,15 @@ namespace RoboIguanaRL
         {
             // Debug.Log("Actions Received");
             CPG.ApplyActions(buffers);
+
+            Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
+
+            if (training.Config["SimpleMode"])
+                training.LinRewards["simpleTrainingPenalties"] = 
+                    (buffers.ContinuousActions[4] + 1) /2       +   // spine pitch phase progression
+                    buffers.ContinuousActions[16]               +   // buoyancy increase
+                    ((buffers.DiscreteActions[0] != 1)? 1f:0f)  +   // Tail amp
+                    ((buffers.DiscreteActions[1] != 1)? 1f:0f)  ;   // tail freq
         }
 
         /// <summary>

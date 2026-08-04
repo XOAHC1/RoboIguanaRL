@@ -178,7 +178,7 @@ namespace RoboIguanaRL {
         /// </summary>
         public void FixedUpdate()
         {
-            phase = (phase +  parameters[1] * TimeStep) % (Mathf.PI * 2);
+            phase = (phase +  parameters[1] * Mathf.PI * 2f * TimeStep) % (Mathf.PI * 2);
             
             CalculateForces();
             CalculateEnergyConsuption();

@@ -2011,7 +2011,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: e81c3bad664d93d499389f2aff8bbc0e, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: Submerged Walking
@@ -2054,6 +2054,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9813b72e51c99644aa1ed2686ce0d525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  simpleMode: 1
   hyFL: {fileID: 173308367}
   hyFR: {fileID: 478301744}
   hyRL: {fileID: 1129640554}
@@ -2097,7 +2098,7 @@ MonoBehaviour:
   tailYawRange: 40
   maxBuoyancy: 2.25
   maxBuoyancyShift: 1
-  maxPhaseShift: 1
+  maxPhaseShift: 0.8
   maxAmplitudeShift: 1
   maxOrientationShift: 1
   convergence: 1

@@ -231,7 +231,7 @@ namespace RoboIguanaRL
             // Debug.Log("Actions Received");
             CPG.ApplyActions(buffers);
 
-            Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
+            // Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
 
             if (training.Config["SimpleMode"])
                 training.LinRewards["simpleTrainingPenalties"] = 

@@ -1,5 +1,5 @@
 {
-    "LogRewardHistory": true,
+    "test_simple_mode": true,
     "RandomLinearVelocity": false,
     "RandomAngularVelocity": false,
     "Swimming": false,

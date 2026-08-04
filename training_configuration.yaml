@@ -38,3 +38,7 @@ env_settings:
 
 engine_settings:
   no_graphics: true
+
+checkpoint_settings:
+  force: true
+  resume: true

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using UnityEditor.Rendering;
 
 namespace RoboIguanaRL
 {
@@ -65,7 +66,14 @@ namespace RoboIguanaRL
         /// <summary>
         /// Path to which Rewards are logged.
         /// </summary>
-        private string LogPath = Path.Combine("results", "Rewards", "RewardHistory.csv");
+        private string LogPath;
+
+        /// <summary>
+        /// Run id parameter of the mlagents learning process.
+        /// </summary>
+        private string run_id;
+
+        private bool LogHistory;
 
         /// <summary>
         /// Class to handle import of reward weights and logging of reward development throughout training.
@@ -77,7 +85,12 @@ namespace RoboIguanaRL
             ReadConfig();
             LoadWeights();
 
-            if (Config["LogRewardHistory"]) WriteHead();
+            if (LogHistory)
+            {
+                LogPath = Path.Combine("results", run_id, "RewardHistory.csv");
+                WriteHead();
+                
+            }
         }
 
         /// <summary>
@@ -92,7 +105,7 @@ namespace RoboIguanaRL
                 Rewards[key].Clear();
             }
 
-            if (Config["LogRewardHistory"])
+            if (LogHistory)
                 LogEpisode();                
 
             LinRewards["crash"] = 0;
@@ -126,6 +139,8 @@ namespace RoboIguanaRL
 
             Config = JsonConvert.DeserializeObject<Dictionary<string, bool>>(configString)!;
 
+            run_id = Config.Keys.First();
+            LogHistory = Config.Values.First();
         }
 
         /// <summary>
@@ -215,6 +230,12 @@ namespace RoboIguanaRL
         /// </summary>
         private void WriteHead() 
         {
+            var directory = Path.GetDirectoryName(LogPath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             // Prepare file for logging rewards
             using (var writer = new StreamWriter(LogPath, false))
             {

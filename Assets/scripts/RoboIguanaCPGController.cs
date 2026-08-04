@@ -11,6 +11,11 @@ namespace RoboIguanaRL
     /// </summary>
     public class RoboIguanaCPGController: MonoBehaviour
     {
+        /// <summary>
+        /// Disables functons related to swimming, in order to facilitate training for legged locomotion.
+        /// </summary>
+        public bool simpleMode = true;
+
         // =========================================================
         // ACTUATORS
         // =========================================================
@@ -199,6 +204,9 @@ namespace RoboIguanaRL
         /// <summary>
         /// Array for easier access.
         /// </summary>
+        /// <remarks>
+        /// Contains pitch range, yaw range 
+        /// </remarks>
         private float[] spineRanges;
 
         // =========================================================
@@ -212,7 +220,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial phase shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialPhaseShifts = {0.2f, 0.2f, 0.2f, 0.2f, 0f, 0f};
+        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial amplitude values for legs (4) and spine (2).
@@ -391,7 +399,7 @@ namespace RoboIguanaRL
                 InitialiseJoint(kneeLinks[i], kneeHinges[i], knee);
             }
 
-            // Spine and tail
+            // Spine
             for (int i = 0; i < spineRanges.Length; i++)
             {
                 InitialiseJoint(spineLinks[i], spineHinges[i], GetSpineAngle(initialPhases[i+4], initialAmplitudes[i+4]) * spineRanges[i]);
@@ -454,12 +462,15 @@ namespace RoboIguanaRL
         /// <summary>
         /// Update for each time step. Handles CPG oscillations and calls pose update.
         /// </summary>
-        public void FixedUpdate()
+        public void Step()
         {
             // Debug.Log("Fixed Update CPG");
             UpdateCPG();
             UpdatePose();
             UpdateBuoyancy();
+
+            // call Tail step
+            Tail.Step();
         }
 
         /// <summary>
@@ -531,21 +542,30 @@ namespace RoboIguanaRL
             // update phase and amplitude for all joints
             for (int i = 0; i < Phases.Length; i++)
             {
+                if (i == 4 & simpleMode) continue; // simpleVersion: ignore spine pitch
                 // adapt phase shifts
-                PhaseShifts[i] = continuous[i] * maxPhaseShift * Mathf.PI*2f;
+                PhaseShifts[i] = 
+                        (continuous[i] + 1) / 2  // keep phaseshift posivite
+                        * maxPhaseShift          // scale phase shift as relative to max phase shift
+                        * Mathf.PI*2;            // scale phase shift to represent oscillatons per second
             }
 
             for (int i = 0; i < Amplitudes.Length; i++) {
 
                 // adapt second derivative of amplitude 
-                AmplitudeShifts2[i] =  convergence * ((convergence / 4) * (continuous[i + ActionIdxAmp] - Amplitudes[i]) - AmplitudeShifts[i]);
+                AmplitudeShifts2[i] =  convergence * (convergence / 4 * (continuous[i + ActionIdxAmp] - Amplitudes[i]) - AmplitudeShifts[i]);
             }
 
             // update trajectory rotation shifts
             for (int i = 0; i < OrientationOffsetShifts.Length; i++)
             {
-                OrientationOffsetShifts[i] = continuous[i + ActionIdxOrientation] * maxOrientationShift * Mathf.PI*2;
+                OrientationOffsetShifts[i] = 
+                        continuous[i + ActionIdxOrientation] 
+                        * maxOrientationShift 
+                        * Mathf.PI*2;
             }
+
+            if (simpleMode) return; // ignore buoyancy and tail actions
 
             // Buoyancy Module
             BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift * Mathf.PI*2;
@@ -683,8 +703,6 @@ namespace RoboIguanaRL
         private void ApplySpineAngle(float[] angles)
         {
             for (int i = 0; i < angles.Length; i++) spineHinges[i].SetAngle(angles[i] * spineRanges[i]);
-            // spinePitch.SetAngle(angles[0] * spineRangePitch);
-            // spineYaw.SetAngle(angles[1] * spineRangeYaw);
         }
 
 

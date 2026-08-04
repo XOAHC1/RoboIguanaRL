@@ -176,7 +176,7 @@ namespace RoboIguanaRL {
         /// <summary>
         /// Sets generated forces and consumed energy according to current parameters.
         /// </summary>
-        public void FixedUpdate()
+        public void Step()
         {
             phase = (phase +  parameters[1] * Mathf.PI * 2f * TimeStep) % (Mathf.PI * 2);
             
@@ -198,6 +198,5 @@ namespace RoboIguanaRL {
                 parameters[i] = possibleParameters[i][ParamIdcs[i]];
             }
         }
-
     }
 }

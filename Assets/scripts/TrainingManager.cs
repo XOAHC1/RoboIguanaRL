@@ -65,11 +65,13 @@ namespace RoboIguanaRL
         /// <summary>
         /// Path to which Rewards are logged.
         /// </summary>
-        private string LogPath = Path.Combine("results", "Rewards", "RewardHistory.csv");
+        private string LogPath;
 
         /// <summary>
-        /// Wether to log reward history.
+        /// Run id parameter of the mlagents learning process.
         /// </summary>
+        private string run_id;
+
         private bool LogHistory;
 
         /// <summary>
@@ -83,7 +85,11 @@ namespace RoboIguanaRL
             LoadWeights();
 
             if (LogHistory)
+            {
+                LogPath = Path.Combine("results", run_id, "RewardHistory.csv");
                 WriteHead();
+                
+            }
         }
 
         /// <summary>
@@ -91,7 +97,7 @@ namespace RoboIguanaRL
         /// </summary>
         public void NewEpisode()
         {
-            Debug.Log($"Rew_crash: {Rewards["crash"].Sum()}");
+            // Log 
             foreach (var key in keys)
             {
                 RewardHistory[key].Add(Rewards[key].Sum());
@@ -132,10 +138,8 @@ namespace RoboIguanaRL
 
             Config = JsonConvert.DeserializeObject<Dictionary<string, bool>>(configString)!;
 
-            LogHistory = Config["LogRewardHistory"];
-
-            Config.Remove("LogHistory");
-
+            run_id = Config.Keys.First();
+            LogHistory = Config.Values.First();
         }
 
         /// <summary>
@@ -163,25 +167,22 @@ namespace RoboIguanaRL
                 // seperate identifier
                 var id = k[0];
                 var key = k[2..];
-
+                          
                 // sort into respectice category
-                if (id == 'e') expKeys.Add(key);
-                else if (id == 'q') quadKeys.Add(key);
-                else if (id == 'l') linKeys.Add(key);
+                if (id == 'e') {expKeys.Add(key); ExpRewards[key] = 0;}
+                else if (id == 'q') {quadKeys.Add(key); QuadPenalties[key] = 0;}
+                else if (id == 'l') {linKeys.Add(key); LinRewards[key] = 0;}
 
-                RewardWeights[key] = input[k];                
-            }
-
-            keys = RewardWeights.Keys.ToList();
-
-            foreach (var key in keys)
-            {
+                // initialize reward lists
+                RewardWeights[key] = input[k];      
                 Rewards[key] = new List<float>();
                 RewardHistory[key] = new List<float>();
             }
 
+            // collect reward parameters
+            keys = RewardWeights.Keys.ToList();
+
             // set default values
-            LinRewards["crash"] = 0f;
             LinRewards["baseReward"] = 1f;
         }
 
@@ -223,33 +224,44 @@ namespace RoboIguanaRL
             return stepReward;            
         }
 
+        /// <summary>
+        /// Writes reward weights and config in log file.
+        /// </summary>
         private void WriteHead() 
         {
+            var directory = Path.GetDirectoryName(LogPath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             // Prepare file for logging rewards
             using (var writer = new StreamWriter(LogPath, false))
             {
-                
-                 foreach (var entry in Config)
-                {
-                    writer.WriteLine($"\"{entry.Key}\",\"{entry.Value}\"");
-                }
-
+                // write reward weights
+                writer.Write("Episode ");
+                foreach (var k in keys) writer.Write($",{k}");
+                writer.WriteLine();
+                writer.Write("Weights: ");
+                foreach (var w in RewardWeights.Values) writer.Write($",{w}");
+                writer.WriteLine();
                 writer.WriteLine();
 
-                writer.Write("Episode");
-                foreach (var key in keys)
-                {
-                    writer.Write($",{key}");
-                }
-
+                // write config
+                writer.WriteLine("Config:");
+                foreach(var c in Config) writer.WriteLine($"{c.Key}, \"{c.Value}\"");
                 writer.WriteLine();
+
+                writer.WriteLine("Values:");
             }
 
         }
 
+        /// <summary>
+        /// Writes cumulated rewards of last episode by reward parameter into log file.
+        /// </summary>
         private void LogEpisode()
         {
-
             using (var writer = new StreamWriter(LogPath, true))
             {
                 // Log last episode's rewards

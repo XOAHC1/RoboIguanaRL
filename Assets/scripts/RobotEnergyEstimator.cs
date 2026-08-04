@@ -56,7 +56,7 @@ public class RobotEnergyEstimator : MonoBehaviour
     /// <summary>
     /// Retrieves current energy consumption and updates cumulated energy.
     /// </summary>
-    public void FixedUpdate()
+    public void Step()
     {
         EstimateEnergy();
         CumulatedEnergy += CurrentEnergy;

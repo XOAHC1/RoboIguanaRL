@@ -1,7 +1,8 @@
 {
-    "LogRewardHistory": true,
+    "test": true,
     "RandomLinearVelocity": false,
     "RandomAngularVelocity": false,
     "Swimming": false,
-    "Transition": false
+    "Transition": false,
+    "SimpleMode": true
 }

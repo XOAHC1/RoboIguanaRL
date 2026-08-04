@@ -33,7 +33,7 @@ behaviors:
     checkpoint_interval: 100000
 
 env_settings:
-  env_path: C:\Users\jo_dr\OneDrive\Documents\CogSci\8SoSe26\RobIguana\Simulation\RoboIguanaRL\Executable\SMARCUnityHDRP2.exe
+  env_path: Executable\SMARCUnityHDRP2.exe
   num_envs: 1
 
 engine_settings:

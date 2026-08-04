@@ -2089,7 +2089,7 @@ MonoBehaviour:
   d: 0.2
   dStep: 0.15
   gC: 0.04
-  gP: 0.03
+  gP: 0.01
   h: 0.18
   spineRangePitch: 15
   spineRangeYaw: 10

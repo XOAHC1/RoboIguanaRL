@@ -45,6 +45,11 @@ namespace RoboIguanaRL
         private RobotEnergyEstimator EnergyEstimator;
 
         /// <summary>
+        /// Requests decsions from the Agent.
+        /// </summary>
+        private DecisionRequester decisionRequester;
+
+        /// <summary>
         /// Target direction for locomotion.
         /// </summary> <remarks>
         /// Relative to the robot: [yaw, pitch]
@@ -83,12 +88,19 @@ namespace RoboIguanaRL
         /// Collect penaltes for undesired actions in simple mode.
         /// </summary>
         public Dictionary<string, float> training_stage_penalties;
+
+        /// <summary>
+        /// Number of physics steps to wait at the begin of an episode, to let the robot settle.
+        /// </summary>
+        private int waiting, waitSteps = 200;
+
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
         /// </summary>
         public override void Initialize()
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
+            decisionRequester = GetComponent<DecisionRequester>();
 
             training_stage_penalties = new Dictionary<string, float>();
 
@@ -125,6 +137,8 @@ namespace RoboIguanaRL
                 ab.angularVelocity = Vector3.zero;
             }
 
+            
+
             CPG.Reset();
 
             // Reset foot contact sensors
@@ -143,8 +157,12 @@ namespace RoboIguanaRL
             Debug.Log("Starting new Epsode");
             ResetRobot();
             ResetTarget();
-            SetReward(0f);
             training.NewEpisode();
+
+            waiting = waitSteps;
+            decisionRequester.enabled = false;
+
+            SetReward(0f);
         }
 
         /// <summary>
@@ -228,10 +246,9 @@ namespace RoboIguanaRL
         /// <param name="buffers">The action buffers containing the policy decisions.</param>
         public override void OnActionReceived(ActionBuffers buffers)
         {
-            // Debug.Log("Actions Received");
             CPG.ApplyActions(buffers);
 
-            // Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
+            Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
 
             if (training.Config["SimpleMode"])
                 training.LinRewards["simpleTrainingPenalties"] = 
@@ -291,6 +308,20 @@ namespace RoboIguanaRL
         /// </summary>
         public void FixedUpdate()
         {
+            // wait after reset
+            if (waiting > 0)
+            {
+                waiting--;
+                // Debug.Log("waiting");
+                if (waiting < Time.fixedDeltaTime) decisionRequester.enabled = true;
+                return;
+            }
+
+            // update Robot
+            CPG.Step();
+            EnergyEstimator.Step();
+
+            // evaluate step
             TerminateIfNecessary();
             GiveReward();
         }
@@ -358,6 +389,9 @@ namespace RoboIguanaRL
         /// <param name="actionsOut">The action buffers to write heuristic actions to.</param>
         public override void Heuristic(in ActionBuffers actionsOut)
         {
+            if (waiting > 0) {
+                return;
+            }
             // Provide manual control for testing purposes
             var continuousActionsOut = actionsOut.ContinuousActions;
             var discreteActionsOut = actionsOut.DiscreteActions;
@@ -366,7 +400,7 @@ namespace RoboIguanaRL
             // everything else
             for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
             
-            // continuousActionsOut[continuousActionsOut.Length-1] = 1f;
+            // continuousActionsOut[continuousActionsOut.Length-1] = -1f;
             discreteActionsOut[0] = 1;
             discreteActionsOut[1] = 1;
             }

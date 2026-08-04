@@ -220,7 +220,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial phase shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialPhaseShifts = {0.2f, 0.2f, 0.2f, 0.2f, 0f, 0f};
+        private readonly float[] initialPhaseShifts = {0, 0, 0, 0, 0, 0};
 
         /// <summary>
         /// Initial amplitude values for legs (4) and spine (2).
@@ -462,12 +462,15 @@ namespace RoboIguanaRL
         /// <summary>
         /// Update for each time step. Handles CPG oscillations and calls pose update.
         /// </summary>
-        public void FixedUpdate()
+        public void Step()
         {
             // Debug.Log("Fixed Update CPG");
             UpdateCPG();
             UpdatePose();
             UpdateBuoyancy();
+
+            // call Tail step
+            Tail.Step();
         }
 
         /// <summary>

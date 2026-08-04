@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using UnityEditor.Rendering;
 
 namespace RoboIguanaRL
 {
@@ -98,7 +97,7 @@ namespace RoboIguanaRL
         /// </summary>
         public void NewEpisode()
         {
-            Debug.Log($"Rew_crash: {Rewards["crash"].Sum()}");
+            // Log 
             foreach (var key in keys)
             {
                 RewardHistory[key].Add(Rewards[key].Sum());
@@ -266,7 +265,7 @@ namespace RoboIguanaRL
             using (var writer = new StreamWriter(LogPath, true))
             {
                 // Log last episode's rewards
-                writer.Write(RewardHistory.Values.FirstOrDefault()?.Count ?? -1);
+                writer.Write(RewardHistory.Values.FirstOrDefault()?.Count ?? 0);
 
                 foreach (var key in keys)
                 {

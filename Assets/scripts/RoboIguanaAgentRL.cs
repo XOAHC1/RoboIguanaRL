@@ -92,7 +92,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Number of physics steps to wait at the begin of an episode, to let the robot settle.
         /// </summary>
-        private int waiting, waitSteps = 500;
+        private int waiting, waitSteps = 250;
 
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
@@ -160,7 +160,7 @@ namespace RoboIguanaRL
             training.NewEpisode();
 
             waiting = waitSteps;
-            decisionRequester.enabled = false;
+            decisionRequester.DecisionPeriod = 99999;
 
             SetReward(0f);
         }
@@ -313,7 +313,7 @@ namespace RoboIguanaRL
             {
                 waiting--;
                 // Debug.Log("waiting");
-                if (waiting < Time.fixedDeltaTime) decisionRequester.enabled = true;
+                if (waiting < Time.fixedDeltaTime) decisionRequester.DecisionPeriod = 10;
                 return;
             }
 

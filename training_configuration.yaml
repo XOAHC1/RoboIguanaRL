@@ -1,5 +1,5 @@
 behaviors:
-  Submerged Walking:
+  Submerged Walking s2:
     trainer_type: ppo
 
     hyperparameters:

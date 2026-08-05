@@ -92,7 +92,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Number of physics steps to wait at the begin of an episode, to let the robot settle.
         /// </summary>
-        private int waiting, waitSteps = 200;
+        private int waiting, waitSteps = 500;
 
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
@@ -248,7 +248,7 @@ namespace RoboIguanaRL
         {
             CPG.ApplyActions(buffers);
 
-            // Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
+            Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
 
             if (training.Config["SimpleMode"])
                 training.LinRewards["simpleTrainingPenalties"] = 
@@ -396,11 +396,11 @@ namespace RoboIguanaRL
             var continuousActionsOut = actionsOut.ContinuousActions;
             var discreteActionsOut = actionsOut.DiscreteActions;
             // Phase shifts
-            for (int i = 0; i < 6; i++)                             continuousActionsOut[i] = 0.3f;
+            for (int i = 0; i < 6; i++)                             continuousActionsOut[i] = 1f;
             // everything else
             for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
             
-            // continuousActionsOut[continuousActionsOut.Length-1] = -1f;
+            continuousActionsOut[continuousActionsOut.Length-1] = -1f;
             discreteActionsOut[0] = 1;
             discreteActionsOut[1] = 1;
             }

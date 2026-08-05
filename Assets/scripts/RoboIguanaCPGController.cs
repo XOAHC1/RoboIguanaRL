@@ -565,7 +565,11 @@ namespace RoboIguanaRL
                         * Mathf.PI*2;
             }
 
-            if (simpleMode) return; // ignore buoyancy and tail actions
+            if (simpleMode) 
+            {
+                BuoyancyShift = -1f * maxBuoyancyShift * Mathf.PI *2;
+                return; // ignore buoyancy and tail actions
+            }
 
             // Buoyancy Module
             BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift * Mathf.PI*2;

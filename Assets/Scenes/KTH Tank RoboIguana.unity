@@ -2011,10 +2011,10 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: e81c3bad664d93d499389f2aff8bbc0e, type: 3}
+  m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: Submerged Walking
+  m_BehaviorName: Submerged Walking s2
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -2089,8 +2089,8 @@ MonoBehaviour:
   c: 0.172
   d: 0.2
   dStep: 0.15
-  gC: 0.04
-  gP: 0.01
+  gC: 0.06
+  gP: 0
   h: 0.18
   spineRangePitch: 15
   spineRangeYaw: 10
@@ -2098,7 +2098,7 @@ MonoBehaviour:
   tailYawRange: 40
   maxBuoyancy: 2.25
   maxBuoyancyShift: 1
-  maxPhaseShift: 0.8
+  maxPhaseShift: 0.5
   maxAmplitudeShift: 1
   maxOrientationShift: 1
   convergence: 1
@@ -4297,7 +4297,7 @@ ArticulationBody:
   m_XDrive:
     lowerLimit: -10
     upperLimit: 10
-    stiffness: 8.64
+    stiffness: 17.28
     damping: 0
     forceLimit: 5.4
     target: 0

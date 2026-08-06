@@ -2006,7 +2006,7 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 17
-      BranchSizes: 0300000003000000
+      BranchSizes: 0300000002000000
     VectorActionSize: 
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
@@ -2014,7 +2014,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: Submerged Walking s2
+  m_BehaviorName: Submerged Walking s3
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -2092,16 +2092,14 @@ MonoBehaviour:
   gC: 0.06
   gP: 0
   h: 0.18
-  spineRangePitch: 15
-  spineRangeYaw: 10
+  spineRangePitch: 20
+  spineRangeYaw: 15
   tailSwayRange: 20
   tailYawRange: 40
   maxBuoyancy: 2.25
   maxBuoyancyShift: 1
   maxPhaseShift: 0.5
-  maxAmplitudeShift: 1
-  maxOrientationShift: 1
-  convergence: 1
+  maxOrientationShift: 1.5
 --- !u!114 &346296845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3266,8 +3264,8 @@ ArticulationBody:
   m_SwingZ: 2
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -20
-    upperLimit: 20
+    lowerLimit: -21
+    upperLimit: 21
     stiffness: 17.28
     damping: 0
     forceLimit: 5
@@ -4295,8 +4293,8 @@ ArticulationBody:
   m_SwingZ: 2
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -10
-    upperLimit: 10
+    lowerLimit: -17
+    upperLimit: 17
     stiffness: 17.28
     damping: 0
     forceLimit: 5.4
@@ -4493,7 +4491,7 @@ MonoBehaviour:
   yaw: 0
   FixedRotation: 0
   angle: 0
-  AngleMax: 3
+  AngleMax: 0.26
   reverse: 0
 --- !u!1 &967470251
 GameObject:
@@ -7004,7 +7002,7 @@ MonoBehaviour:
   yaw: 0
   FixedRotation: 0
   angle: 0
-  AngleMax: 3
+  AngleMax: 0.35
   reverse: 0
 --- !u!1 &1668514687
 GameObject:

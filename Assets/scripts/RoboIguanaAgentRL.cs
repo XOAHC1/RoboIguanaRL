@@ -237,9 +237,9 @@ namespace RoboIguanaRL
         ///     buoyancy:
         ///         change in buoyancy          1D
         ///   discrete:
-        ///     Tail:                           Will be translated to [-1, 0, 1] later on.
-        ///         frequency                   [0, 1, 2]
-        ///         yaw amplitude               [0, 1, 2]
+        ///     Tail:                          
+        ///         yaw amplitude               [0, 1, 2]   Will be translated to [-1, 0, 1] later on.
+        ///         frequency                   [0, 1]      Tail off/on
         ///         
         /// For a total of 19 action dimensions.
         /// </remarks>
@@ -248,7 +248,7 @@ namespace RoboIguanaRL
         {
             CPG.ApplyActions(buffers);
 
-            Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
+            // Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
 
             if (training.Config["SimpleMode"])
                 training.LinRewards["simpleTrainingPenalties"] = 
@@ -273,7 +273,7 @@ namespace RoboIguanaRL
             var vel = training.Config["RandomLinearVelocity"] ? 
                 // random values
                 new Vector2 (
-                    Random.Range(0.01f, 0.6f), 
+                    Random.Range(0.0f, 0.6f), 
                     (locomotionType == 0) ? 
                         Random.Range(-0.3f, 0.3f) :
                         training.Config["Transition"] ? -0.3f: 0f
@@ -396,13 +396,19 @@ namespace RoboIguanaRL
             var continuousActionsOut = actionsOut.ContinuousActions;
             var discreteActionsOut = actionsOut.DiscreteActions;
             // Phase shifts
-            for (int i = 0; i < 6; i++)                             continuousActionsOut[i] = 1f;
-            // everything else
-            for (int i = 6; i < continuousActionsOut.Length; i++)   continuousActionsOut[i] = 0f;
+            for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0.2f;
+            // spine phase
+            for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0.2f;
+            // amplitude change
+            for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
+            continuousActionsOut[10] = -1f;     // spine pitch
+            continuousActionsOut[11] = 1f;      // spine yaw
+            // drection change
+            for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
             
             continuousActionsOut[continuousActionsOut.Length-1] = -1f;
             discreteActionsOut[0] = 1;
-            discreteActionsOut[1] = 1;
+            discreteActionsOut[1] = 0;
             }
     }
 }

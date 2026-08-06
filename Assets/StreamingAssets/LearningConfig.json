@@ -1,9 +1,9 @@
 {
-    "test": false,
+    "SubmergedWalking": true,
     "RandomLinearVelocity": false,
     "RandomAngularVelocity": false,
     "Swimming": false,
     "Transition": false,
     "SimpleMode": true,
-    "Analysis": true
+    "Analysis": false
 }

@@ -40,6 +40,6 @@ engine_settings:
   no_graphics: true
 
 checkpoint_settings:
-  run_id: simpleMode3
+  run_id: SubmergedWalking
   force: true
   resume: false

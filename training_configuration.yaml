@@ -1,10 +1,10 @@
 behaviors:
-  Submerged Walking s3:
+  Submerged Walking s4:
     trainer_type: ppo
 
     hyperparameters:
-      batch_size: 2048
-      buffer_size: 20480
+      batch_size: 4096
+      buffer_size: 40960
       learning_rate: 3.0e-4
       beta: 5.0e-3
       epsilon: 0.2
@@ -34,7 +34,7 @@ behaviors:
 
 env_settings:
   env_path: Executable\SMARCUnityHDRP2.exe
-  num_envs: 1
+  num_envs: 4
 
 engine_settings:
   no_graphics: true

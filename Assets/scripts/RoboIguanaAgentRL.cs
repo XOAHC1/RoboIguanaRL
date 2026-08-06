@@ -95,6 +95,11 @@ namespace RoboIguanaRL
         private int waiting, waitSteps = 250;
 
         /// <summary>
+        /// Number of agent decisions until new target inputs are generated.
+        /// </summary>
+        private int nextTargetSteps, nextTargetFreq = 120;
+
+        /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
         /// </summary>
         public override void Initialize()
@@ -194,7 +199,10 @@ namespace RoboIguanaRL
         {
             if (training.Config["Analysis"])
                 Debug.Log($"Linear velocity: {transform.InverseTransformDirection(Body.linearVelocity)} \n Angular velocity: {transform.InverseTransformDirection(Body.angularVelocity)}");
-                
+            
+            if (nextTargetSteps < 2) ResetTarget();
+            else nextTargetSteps --;
+
             // position and velocity observations
             sensor.AddObservation(locomotionType);
             sensor.AddObservation(TargetLinearVelocity);
@@ -269,6 +277,8 @@ namespace RoboIguanaRL
         /// </remark>
         private void ResetTarget()
         {
+            nextTargetSteps = nextTargetFreq;
+
             // settle locomotion type
             locomotionType = training.Config["Swimming"]? 0: 1;
             locomotionType = training.Config["Transition"]? (locomotionType + 1) % 2: locomotionType;
@@ -295,7 +305,8 @@ namespace RoboIguanaRL
                     0f
                 );
 
-            // Debug.Log($"Target: \n AngVel: {TargetAngularVelocity} \n Velocity: {TargetLinearVelocity} \n locomotion: {locomotionType}");
+            
+            if (training.Config["Analysis"]) Debug.Log($"New Target: \n LinVel: {TargetLinearVelocity} \n AngVel: {TargetAngularVelocity}");
         }
 
         /// <summary>

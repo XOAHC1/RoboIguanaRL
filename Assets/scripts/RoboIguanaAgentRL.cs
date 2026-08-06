@@ -94,12 +94,17 @@ namespace RoboIguanaRL
         /// </summary>
         private int waiting, waitSteps = 250;
 
-        private int nextTargetSteps, nextTargetFreq = 120;
-
         /// <summary>
         /// Number of agent decisions until new target inputs are generated.
         /// </summary>
         private int nextTargetSteps, nextTargetFreq = 120;
+
+        /// <summary>
+        /// Number of target resets until locomotion mode is changed when landing.
+        /// </summary>
+        private int 
+            nextLocomotionmode = 2, 
+            locomotionModeChange = 2;
 
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
@@ -291,9 +296,25 @@ namespace RoboIguanaRL
         {
             nextTargetSteps = nextTargetFreq;
 
+            if(training.Config["Transition"] & (training.Config["Swimming"] | training.Config["Landing"]))
+            {
+                if (nextLocomotionmode < 1)
+                {
+                    if (training.Config["Swimming"])
+                    {
+                        training.Config["Swimming"] = false;
+                        training.Config["Landing"] = true;
+                    }
+                    else if (training.Config["Landing"])
+                    {
+                        training.Config["Landing"] = false;
+                    }
+                }
+                else nextLocomotionmode--;
+            }
+
             // settle locomotion type
             locomotionType = training.Config["Swimming"]? 0: 1;
-            locomotionType = training.Config["Transition"]? (locomotionType + 1) % 2: locomotionType;
 
             // generate target velocities, foreward and upward
             var vel = new Vector2(
@@ -317,7 +338,6 @@ namespace RoboIguanaRL
                     0f,
                     0f
                 );
-
             
             if (training.Config["Analysis"]) Debug.Log($"New Target: \n LinVel: {TargetLinearVelocity} \n AngVel: {TargetAngularVelocity}");
         }

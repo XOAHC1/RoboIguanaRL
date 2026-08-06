@@ -3,7 +3,6 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace RoboIguanaRL
 {
@@ -85,11 +84,6 @@ namespace RoboIguanaRL
         private ArticulationBody[] ComponentABs;
 
         /// <summary>
-        /// Collect penaltes for undesired actions in simple mode.
-        /// </summary>
-        public Dictionary<string, float> training_stage_penalties;
-
-        /// <summary>
         /// Number of physics steps to wait at the begin of an episode, to let the robot settle.
         /// </summary>
         private int waiting, waitSteps = 250;
@@ -113,8 +107,6 @@ namespace RoboIguanaRL
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
             decisionRequester = GetComponent<DecisionRequester>();
-
-            training_stage_penalties = new Dictionary<string, float>();
 
             // Get components
             CPG = GetComponent<RoboIguanaCPGController>();
@@ -265,12 +257,24 @@ namespace RoboIguanaRL
         /// <param name="buffers">The action buffers containing the policy decisions.</param>
         public override void OnActionReceived(ActionBuffers buffers)
         {
-            CPG.ApplyActions(buffers);
-
             if (training.Config["Analysis"])
                 Debug.Log($"Agent Actons: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
+            
+            var cont = buffers.ContinuousActions;
+            var disc = buffers.DiscreteActions;
 
-            if (training.Config["SimpleWalking"])
+            // block and punish undesirable actions in training mode
+            if (training.Config["Landing"])
+            {
+                // punish
+                training.LinRewards["SimpleTrainingPenalties"] = 
+                    cont[16] > 0? cont[16]: 0;
+                    
+                // block
+                cont[16] = Mathf.Clamp(cont[16], -1, 0);
+            }
+
+            else if (training.Config["SimpleWalking"])
                 training.LinRewards["simpleTrainingPenalties"] = 
                     (buffers.ContinuousActions[4] + 1) /2        +   // spine pitch phase progression
                     buffers.ContinuousActions[16]                +   // buoyancy increase
@@ -285,6 +289,9 @@ namespace RoboIguanaRL
                         2 ) / 2;                                       // scale to [0,1] 
                 }
             }
+
+            // relay actions to CPG
+            CPG.ApplyActions(buffers);
         }
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Disables functons related to swimming, in order to facilitate training for legged locomotion.
         /// </summary>
-        public bool SimpleWalking = true;
+        public bool SimpleWalking, SimpleSwimming;
 
         // =========================================================
         // ACTUATORS
@@ -459,7 +459,7 @@ namespace RoboIguanaRL
         /// </summary>
         private void ResetBuoyancy()
         {
-            Buoyancy = new Vector3(0f, 0f, 0f);
+            Buoyancy = new Vector3(0f, 2f, 0f);
             BuoyancyShift = 0f;
         }
 
@@ -547,7 +547,8 @@ namespace RoboIguanaRL
             // update phase and amplitude for all joints
             for (int i = 0; i < Phases.Length; i++)
             {
-                if (i == 4 & SimpleWalking) continue; // simpleVersion: ignore spine pitch
+                if (SimpleSwimming & i < 4) i = 4;      // skip limb phases
+                if (SimpleWalking & i == 4) continue; // simpleVersion: ignore spine pitch
                 // adapt phase shifts
                 PhaseShifts[i] = 
                         (continuous[i] + 1) / 2  // keep phaseshift posivite
@@ -563,6 +564,7 @@ namespace RoboIguanaRL
             // update trajectory rotation shifts
             for (int i = 0; i < OrientationOffsetShifts.Length; i++)
             {
+                if (SimpleSwimming & i < 4) {i=4; continue;}
                 OrientationOffsetShifts[i] = 
                         continuous[i + ActionIdxOrientation] 
                         * maxOrientationShift 

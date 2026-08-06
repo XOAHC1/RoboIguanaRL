@@ -183,6 +183,7 @@ namespace RoboIguanaRL {
             CalculateForces();
             CalculateEnergyConsuption();
 
+            // Debug.Log($"Applying Tail Force: ({Force.x}, {Force.y}, {Force.z})");
             forcePoint.ApplyLocalForce(Force);
         }
 
@@ -192,8 +193,8 @@ namespace RoboIguanaRL {
         /// <param name="changes"></param>
         public void UpdateParameters(int[] changes)
         {
-            changes[^1] = changes[^1] * 2 - 1;  // transform options to {-1, 1}
-            for (int i = 0; i < parameters.Length-1; i++)
+            changes[1] = (changes[1] * 2) + 1;  // transform options to {-1, 1}
+            for (int i = 0; i < parameters.Length; i++)
             {
                 ParamIdcs[i] = Math.Clamp(ParamIdcs[i] + changes[i], 0, possibleParameters[i].Length-1);
                 parameters[i] = possibleParameters[i][ParamIdcs[i]];

@@ -120,6 +120,7 @@ namespace RoboIguanaRL
 
             training = new TrainingManager();
             CPG.SimpleWalking = training.Config["SimpleWalking"];
+            CPG.SimpleSwimming = training.Config["SimpleSwimming"];
 
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
@@ -266,10 +267,19 @@ namespace RoboIguanaRL
 
             if (training.Config["SimpleWalking"])
                 training.LinRewards["simpleTrainingPenalties"] = 
-                    (buffers.ContinuousActions[4] + 1) /2       +   // spine pitch phase progression
-                    buffers.ContinuousActions[16]               +   // buoyancy increase
-                    ((buffers.DiscreteActions[0] != 1)? 1f:0f)  +   // Tail amp
-                    ((buffers.DiscreteActions[1] != 1)? 1f:0f)  ;   // tail freq
+                    (buffers.ContinuousActions[4] + 1) /2        +   // spine pitch phase progression
+                    buffers.ContinuousActions[16]                +   // buoyancy increase
+                    ((buffers.DiscreteActions[0] != 1)? 1f: 0f)  +   // Tail amp
+                    ((buffers.DiscreteActions[1] != 1)? 1f: 0f)  ;   // tail freq
+
+            else if (training.Config["SimpleSwimming"]) {
+                for (int i = 0; i < 4; i++) {
+                    training.LinRewards["SimpleTrainingPenalties"] = (
+                        buffers.ContinuousActions[i]              +    // limb frequencies
+                        buffers.ContinuousActions[i+8]            +    // limb sideqays phases
+                        2 ) / 2;                                       // scale to [0,1] 
+                }
+            }
         }
 
         /// <summary>
@@ -288,8 +298,9 @@ namespace RoboIguanaRL
             // generate target velocities, foreward and upward
             var vel = new Vector2(
                 training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.6f): 0.4f,
-                training.Config["RandomYVelocity"] ? Random.Range(-0.2f, 0.2f): 0f
+                training.Config["RandomYVelocity"] ? Random.Range(-0.4f, 0.4f): 0f
             );
+            if (training.Config["Landing"]) vel.y = -0.2f;
             TargetLinearVelocity = vel * (training.Config["Swimming"]? 2f: 1f);
             
             // generate target angular velocities
@@ -400,23 +411,47 @@ namespace RoboIguanaRL
             if (waiting > 0) {
                 return;
             }
+
             // Provide manual control for testing purposes
             var continuousActionsOut = actionsOut.ContinuousActions;
             var discreteActionsOut = actionsOut.DiscreteActions;
-            // Phase shifts
-            for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0.2f;
-            // spine phase
-            for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0.2f;
-            // amplitude change
-            for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
-            continuousActionsOut[10] = -1f;     // spine pitch
-            continuousActionsOut[11] = 1f;      // spine yaw
-            // drection change
-            for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
-            
-            continuousActionsOut[continuousActionsOut.Length-1] = -1f;
-            discreteActionsOut[0] = 1;
-            discreteActionsOut[1] = 0;
+
+            if (training.Config["Swimming"])
+            {
+                // Phase shifts
+                for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -1;
+                // spine phase
+                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -1;
+                // amplitude change
+                for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
+                // spine amplitudes
+                continuousActionsOut[10] = 0f;                                  // pitch
+                continuousActionsOut[11] = 0f;                                  // spine yaw
+                // drection change
+                for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
+                
+                continuousActionsOut[continuousActionsOut.Length-1] = 0f;       // buoyancy
+                discreteActionsOut[0] = 2;                                      // tail amp
+                discreteActionsOut[1] = 1;                                      // tail freq
             }
+            else
+            {
+                // Phase shifts
+                for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0.2f;
+                // spine phase
+                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0.2f;
+                // amplitude change
+                for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
+                // spine amplitudes
+                continuousActionsOut[10] = -1f;                                 // pitch
+                continuousActionsOut[11] = 1f;                                  // yaw
+                // drection change
+                for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
+                
+                continuousActionsOut[continuousActionsOut.Length-1] = -1f;      // buoyancy
+                discreteActionsOut[0] = 1;                                      // tail amp
+                discreteActionsOut[1] = 0;                                      // tail freq
+            }
+        }
     }
 }

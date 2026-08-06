@@ -1,12 +1,12 @@
 {
-    "SubmergedWalking": false,
+    "SimpleSwimmingTest": false,
     "RandomXVelocity": false,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
-    "Swimming": false,
+    "Swimming": true,
     "Transition": false,
-    "SimpleWalking": true,
-    "SimpleSwimming": false,
-    "landing": false,
+    "SimpleWalking": false,
+    "SimpleSwimming": true,
+    "Landing": false,
     "Analysis": false
 }

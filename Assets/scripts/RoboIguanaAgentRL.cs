@@ -94,6 +94,8 @@ namespace RoboIguanaRL
         /// </summary>
         private int waiting, waitSteps = 250;
 
+        private int nextTargetSteps, nextTargetFreq = 120;
+
         /// <summary>
         /// Number of agent decisions until new target inputs are generated.
         /// </summary>

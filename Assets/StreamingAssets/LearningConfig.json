@@ -5,6 +5,8 @@
     "RandomAngularVelocity": false,
     "Swimming": false,
     "Transition": false,
-    "SimpleMode": true,
+    "SimpleWalking": true,
+    "SimpleSwimming": false,
+    "landing": false,
     "Analysis": false
 }

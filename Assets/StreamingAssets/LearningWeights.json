@@ -1,7 +1,7 @@
 {
     "e_xVel": 1.5,
     "e_yVel": 0.5,
-    "e_yawRate": 0.5,
+    "e_yawRate": 0,
     "e_pitchRate": 0,
     "q_zVel": 0.5,
     "q_rollRate": 0.5,

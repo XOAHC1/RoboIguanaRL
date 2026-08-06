@@ -112,7 +112,7 @@ namespace RoboIguanaRL
             ComponentABs = GetComponentsInChildren<ArticulationBody>();
 
             training = new TrainingManager();
-            CPG.simpleMode = training.Config["SimpleMode"];
+            CPG.SimpleWalking = training.Config["SimpleWalking"];
 
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
@@ -254,7 +254,7 @@ namespace RoboIguanaRL
             if (training.Config["Analysis"])
                 Debug.Log($"Agent Actons: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
 
-            if (training.Config["SimpleMode"])
+            if (training.Config["SimpleWalking"])
                 training.LinRewards["simpleTrainingPenalties"] = 
                     (buffers.ContinuousActions[4] + 1) /2       +   // spine pitch phase progression
                     buffers.ContinuousActions[16]               +   // buoyancy increase

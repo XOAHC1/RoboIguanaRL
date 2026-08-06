@@ -192,6 +192,9 @@ namespace RoboIguanaRL
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
         {
+            if (training.Config["Analysis"])
+                Debug.Log($"Linear velocity: {transform.InverseTransformDirection(Body.linearVelocity)} \n Angular velocity: {transform.InverseTransformDirection(Body.angularVelocity)}");
+                
             // position and velocity observations
             sensor.AddObservation(locomotionType);
             sensor.AddObservation(TargetLinearVelocity);
@@ -248,7 +251,8 @@ namespace RoboIguanaRL
         {
             CPG.ApplyActions(buffers);
 
-            // Debug.Log($"Actions Received: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
+            if (training.Config["Analysis"])
+                Debug.Log($"Agent Actons: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
 
             if (training.Config["SimpleMode"])
                 training.LinRewards["simpleTrainingPenalties"] = 

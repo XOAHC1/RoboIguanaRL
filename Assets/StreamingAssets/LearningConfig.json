@@ -1,8 +1,9 @@
 {
-    "simpleMode3": true,
+    "test": false,
     "RandomLinearVelocity": false,
     "RandomAngularVelocity": false,
     "Swimming": false,
     "Transition": false,
-    "SimpleMode": true
+    "SimpleMode": true,
+    "Analysis": true
 }

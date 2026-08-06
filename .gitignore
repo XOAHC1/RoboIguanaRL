@@ -61,7 +61,7 @@ Assets/TextMesh\ Pro/
 Assets/TextMesh\ Pro.meta
 Assets/msgbrowser_settings.asset*
 Assets/_Recovery
-Assest/scripts/*.onnx
+Assets/scripts/*.onnx
 
 # ignore training results for now
 results
@@ -69,3 +69,4 @@ Assets/ML-Agents
 
 # Ignore all meta files
 *.meta
+# Assets/scripts/Submerged Walking s3-2299833.onnx

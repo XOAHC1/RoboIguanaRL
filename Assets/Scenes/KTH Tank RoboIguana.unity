@@ -2098,7 +2098,7 @@ MonoBehaviour:
   tailYawRange: 40
   maxBuoyancy: 2.25
   maxBuoyancyShift: 1
-  maxPhaseShift: 0.5
+  maxPhaseShift: 0.6
   maxOrientationShift: 1.5
 --- !u!114 &346296845
 MonoBehaviour:

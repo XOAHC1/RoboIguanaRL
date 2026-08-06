@@ -1,6 +1,7 @@
 {
-    "SubmergedWalking": true,
-    "RandomLinearVelocity": false,
+    "SubmergedWalking": false,
+    "RandomXVelocity": false,
+    "RandomYVelocity": false,
     "RandomAngularVelocity": false,
     "Swimming": false,
     "Transition": false,

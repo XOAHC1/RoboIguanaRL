@@ -274,19 +274,10 @@ namespace RoboIguanaRL
             locomotionType = training.Config["Transition"]? (locomotionType + 1) % 2: locomotionType;
 
             // generate target velocities, foreward and upward
-            var vel = training.Config["RandomLinearVelocity"] ? 
-                // random values
-                new Vector2 (
-                    Random.Range(0.0f, 0.6f), 
-                    (locomotionType == 0) ? 
-                        Random.Range(-0.3f, 0.3f) :
-                        training.Config["Transition"] ? -0.3f: 0f
-                ): 
-                // default values:
-                new Vector2 (
-                    0.3f,
-                    0f
-                );
+            var vel = new Vector2(
+                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.6f): 0.4f,
+                training.Config["RandomYVelocity"] ? Random.Range(-0.2f, 0.2f): 0f
+            );
             TargetLinearVelocity = vel * (training.Config["Swimming"]? 2f: 1f);
             
             // generate target angular velocities

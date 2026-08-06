@@ -119,12 +119,12 @@ namespace RoboIguanaRL
         /// <summary>
         /// Ground clearance during swing phase.
         /// </summary>
-        public float gC; // 0.04f;
+        public float gC; // 0.06f;
 
         /// <summary>
         /// Ground penetration during stance phase.
         /// </summary>
-        public float gP; // 0.03f;
+        public float gP; // 0;
 
         /// <summary>
         /// Height of the robot body.
@@ -145,20 +145,20 @@ namespace RoboIguanaRL
         /// Limits of the buoyancy module.
         /// </summary>
         [Header("Buoyancy Module Limits")]
-        public float maxBuoyancy, maxBuoyancyShift; // // 2.25f, 0.3 [N/dt]
+        public float maxBuoyancy, maxBuoyancyShift; // 2.25f, 0.3 [N/dt]
 
         /// <summary>
         /// Limit of CPG progression.
         /// </summary>
         [Tooltip("Limit of CPG progression in Oscillations per second.")]
-        public float maxPhaseShift, maxAmplitudeShift, maxOrientationShift;    // 1, 1, 1
+        public float maxPhaseShift, maxOrientationShift;    // 0.5, 1.5
 
 
         [Header("Training parameters")]
         /// <summary>
         /// Convergence rate for amplitude shifts (literature notation: a).
         /// </summary>
-        public float convergence; // 1f;
+        private float convergence = 150;
 
         /// <summary>
         /// Time step for CPG updates in seconds.
@@ -225,7 +225,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial amplitude values for legs (4) and spine (2).
         /// </summary>
-        private readonly float[] initialAmplitudes = {0.5f, 0.5f, 0.5f, 0.5f, 0f, 1f};
+        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 1f, 2f};
         /// <summary>
         /// Initial amplitude shift rates for legs and spine.
         /// </summary>
@@ -262,9 +262,13 @@ namespace RoboIguanaRL
         /// </summary>
         private float[] AmplitudeShifts;
         /// <summary>
-        /// Current second derivative of amplitude shifts (r''). Controlled via mu.
+        /// Current second derivative of amplitude shifts (r''). Controlled via µ.
         /// </summary>
         private float[] AmplitudeShifts2;
+        /// <summary>
+        /// Amplitude controll parameters from the agent. Amplitude will converge to µ.
+        /// </summary>
+        private float[] µ = {1.5f, 1.5f, 1.5f, 1.5f, 1f, 2f};
 
         /// <summary>
         /// Current orientation offsets for foot trajectories (Phi).
@@ -487,6 +491,7 @@ namespace RoboIguanaRL
             {
                 Amplitudes[i] += AmplitudeShifts[i] * TimeStep;
                 AmplitudeShifts[i] += AmplitudeShifts2[i] * TimeStep;
+                AmplitudeShifts2[i] =  convergence * (convergence / 4 * (µ[i] - Amplitudes[i]) - AmplitudeShifts[i]);
             }
 
             for (int i = 0; i < OrientationOffsets.Length; i++)
@@ -551,9 +556,8 @@ namespace RoboIguanaRL
             }
 
             for (int i = 0; i < Amplitudes.Length; i++) {
-
-                // adapt second derivative of amplitude 
-                AmplitudeShifts2[i] =  convergence * (convergence / 4 * (continuous[i + ActionIdxAmp] - Amplitudes[i]) - AmplitudeShifts[i]);
+                // scale parameter
+                µ[i] = continuous[i + ActionIdxAmp] / 2 + 1.5f;
             }
 
             // update trajectory rotation shifts
@@ -606,9 +610,9 @@ namespace RoboIguanaRL
         /// <returns>A tuple containing the x, y, z coordinates of the foot position.</returns>
         private (float x, float y, float z) GetFootPosition(float phase, float amplitude, float orientationOffset, int left)
         {
-            float x = -dStep * (amplitude - 1.0f) * MathF.Sin(phase) * MathF.Cos(orientationOffset);
-            float y  = -h + (MathF.Cos(phase) > 0.0f ? gC : gP) * MathF.Cos(phase);
-            float z = -dStep * (amplitude - 1.0f) * MathF.Sin(phase) * MathF.Sin(orientationOffset) + left * 0.25f;
+            float x = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Cos(orientationOffset);
+            float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
+            float z = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset) + left * 0.25f;
 
             return (x, y, z);
         }
@@ -621,7 +625,7 @@ namespace RoboIguanaRL
         /// <returns>The angle for the spine/tail joint.</returns>
         private float GetSpineAngle(float phase, float amplitude)
         {
-            return MathF.Sin(phase) * amplitude;
+            return MathF.Sin(phase) * (amplitude - 1f) * Mathf.Deg2Rad;
         }
 
         // =========================================================

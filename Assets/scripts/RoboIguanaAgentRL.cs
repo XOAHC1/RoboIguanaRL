@@ -3,6 +3,8 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using System.Linq;
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace RoboIguanaRL
 {
@@ -71,7 +73,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial positon of the robot.
         /// </summary>
-        private Vector3 StartingPosition;
+        private Vector3 higherPos, StartingPosition;
 
         /// <summary>
         /// Initial orientation of the robot.
@@ -81,7 +83,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Contains <c>ArticulationBody</c> elements of all components of the robot.
         /// </summary>
-        private ArticulationBody[] ComponentABs;
+        private List<ArticulationBody> ComponentABs;
 
         /// <summary>
         /// Number of physics steps to wait at the begin of an episode, to let the robot settle.
@@ -92,14 +94,16 @@ namespace RoboIguanaRL
         /// <summary>
         /// Number of agent decisions until new target inputs are generated.
         /// </summary>
-        private int nextTargetSteps, nextTargetFreq = 120;
+        private int nextTargetSteps, nextTargetFreq = 100;
 
         /// <summary>
         /// Number of target resets until locomotion mode is changed when landing.
         /// </summary>
         private int 
             nextLocomotionmode = 2, 
-            locomotionModeChange = 2;
+            locomotionModeChange= 2;
+
+        private bool firstEpisode;
 
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
@@ -114,18 +118,17 @@ namespace RoboIguanaRL
             CPG.Initialize();
 
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
-            ComponentABs = GetComponentsInChildren<ArticulationBody>();
+            ComponentABs = GetComponentsInChildren<ArticulationBody>().ToList();
+            ComponentABs.Add(Body);
 
             training = new TrainingManager();
-            CPG.SimpleWalking = training.Config["SimpleWalking"];
-            CPG.SimpleSwimming = training.Config["SimpleSwimming"];
 
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
+            StartingPosition.y += 0.01f;
+            higherPos = new Vector3(StartingPosition.x, StartingPosition.y+1, StartingPosition.z);
 
-            // Apply Config settings
-            if (training.Config["Swimming"])
-                StartingPosition.y += 1;
+            firstEpisode = true;
 
             Debug.Log("Agent initialization over");
         }
@@ -135,17 +138,25 @@ namespace RoboIguanaRL
         /// </summary>
         public void ResetRobot()
         {
+            if (firstEpisode) firstEpisode = false;
+            else {SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);}
+            waiting = waitSteps;
+
             // Reset Robot Position
-            Body.TeleportRoot(StartingPosition, StartingOrientation);
+            CPG.Reset();
+
+            if (training.Config["Swimming"]) Body.TeleportRoot(higherPos, StartingOrientation);
+
             foreach (ArticulationBody ab in ComponentABs)
             {
                 ab.linearVelocity = Vector3.zero;
                 ab.angularVelocity = Vector3.zero;
+                // drives
+                var xDrive = ab.xDrive;
+                xDrive.target = 0f;
+                ab.xDrive = xDrive;
+
             }
-
-            
-
-            CPG.Reset();
 
             // Reset foot contact sensors
             footFL.Reset();
@@ -153,6 +164,14 @@ namespace RoboIguanaRL
             footRL.Reset();
             footRR.Reset();
             Back.Reset();
+        }
+
+        public new void EndEpisode()
+        {
+            Debug.Log("Episode ended");
+            if (training.LogHistory) training.LogEpisode();
+
+            base.EndEpisode();
         }
 
         /// <summary>
@@ -165,6 +184,16 @@ namespace RoboIguanaRL
             waiting = waitSteps;
             decisionRequester.DecisionPeriod = 99999;
 
+            // set locomotion mode to start value
+            if (training.Config["Transition"]) {training.Config["Swimming"] = true; training.Config["Landing"] = false;}
+
+
+            ResetTarget();
+            nextLocomotionmode = locomotionModeChange;
+
+            ResetRobot();
+
+            training.NewEpisode();
             SetReward(0f);
         }
 
@@ -311,19 +340,24 @@ namespace RoboIguanaRL
         {
             nextTargetSteps = nextTargetFreq;
 
+            // update locomotion mode
             if(training.Config["Transition"] & (training.Config["Swimming"] | training.Config["Landing"]))
             {
-                if (nextLocomotionmode < 1)
+                Debug.Log($"modeCounter: {nextLocomotionmode}");
+                if (nextLocomotionmode == 0)
                 {
                     if (training.Config["Swimming"])
                     {
+                        if (training.Config["Analysis"]) Debug.Log("Start landing");
                         training.Config["Swimming"] = false;
                         training.Config["Landing"] = true;
                     }
                     else if (training.Config["Landing"])
                     {
+                        if (training.Config["Analysis"]) Debug.Log("Finished landing");
                         training.Config["Landing"] = false;
                     }
+                    nextLocomotionmode = locomotionModeChange;
                 }
                 else nextLocomotionmode--;
             }
@@ -334,10 +368,10 @@ namespace RoboIguanaRL
             // generate target velocities, foreward and upward
             var vel = new Vector2(
                 training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.6f): 0.4f,
-                training.Config["RandomYVelocity"] ? Random.Range(-0.4f, 0.4f): 0f
+                training.Config["RandomYVelocity"] ? Random.Range(-0.2f, 0.3f): 0f
             );
-            if (training.Config["Landing"]) vel.y = -0.2f;
-            TargetLinearVelocity = vel * (training.Config["Swimming"]? 2f: 1f);
+            if (training.Config["Landing"]) vel.y = -0.1f;
+            TargetLinearVelocity = vel * (training.Config["Swimming"]? 1.5f: 1f);
             
             // generate target angular velocities
             TargetAngularVelocity = training.Config["RandomAngularVelocity"] ?
@@ -376,7 +410,7 @@ namespace RoboIguanaRL
             EnergyEstimator.Step();
 
             // evaluate step
-            TerminateIfNecessary();
+            // TerminateIfNecessary();
             GiveReward();
         }
 
@@ -467,6 +501,28 @@ namespace RoboIguanaRL
                 
                 continuousActionsOut[continuousActionsOut.Length-1] = 0f;       // buoyancy
                 discreteActionsOut[0] = 2;                                      // tail amp
+                discreteActionsOut[1] = 1;                                      // tail freq
+
+                // For Testing
+                // for (int i = 0; i < 17; i++) continuousActionsOut[i] = 0;
+                // for (int i = 0; i < 2; i++) discreteActionsOut[i] = 0;
+            }
+            else if (training.Config["Landing"])
+            {
+                // Phase shifts
+                for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0.2f;
+                // spine phase
+                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0.2f;
+                // amplitude change
+                for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
+                // spine amplitudes
+                continuousActionsOut[10] = -1f;                                 // pitch
+                continuousActionsOut[11] = 1f;                                  // yaw
+                // drection change
+                for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
+                
+                continuousActionsOut[continuousActionsOut.Length-1] = -1f;      // buoyancy
+                discreteActionsOut[0] = 0;                                      // tail amp
                 discreteActionsOut[1] = 1;                                      // tail freq
             }
             else

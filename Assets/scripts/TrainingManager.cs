@@ -72,7 +72,7 @@ namespace RoboIguanaRL
         /// </summary>
         private string run_id;
 
-        private bool LogHistory;
+        public bool LogHistory;
 
         /// <summary>
         /// Class to handle import of reward weights and logging of reward development throughout training.
@@ -83,6 +83,7 @@ namespace RoboIguanaRL
 
             ReadConfig();
             LoadWeights();
+
 
             if (LogHistory)
             {
@@ -103,9 +104,6 @@ namespace RoboIguanaRL
                 RewardHistory[key].Add(Rewards[key].Sum());
                 Rewards[key].Clear();
             }
-
-            if (LogHistory)
-                LogEpisode();                
 
             LinRewards["crash"] = 0;
         }
@@ -260,7 +258,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Writes cumulated rewards of last episode by reward parameter into log file.
         /// </summary>
-        private void LogEpisode()
+        public void LogEpisode()
         {
             using (var writer = new StreamWriter(LogPath, true))
             {

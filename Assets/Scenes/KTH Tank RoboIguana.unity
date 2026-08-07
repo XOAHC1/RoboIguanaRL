@@ -2035,7 +2035,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 20000
+  MaxStep: 15000
   footFL: {fileID: 226582460}
   footFR: {fileID: 1337741628}
   footRL: {fileID: 1588934152}
@@ -2054,7 +2054,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9813b72e51c99644aa1ed2686ce0d525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  simpleMode: 1
   hyFL: {fileID: 173308367}
   hyFR: {fileID: 478301744}
   hyRL: {fileID: 1129640554}

@@ -11,11 +11,6 @@ namespace RoboIguanaRL
     /// </summary>
     public class RoboIguanaCPGController: MonoBehaviour
     {
-        /// <summary>
-        /// Disables functons related to swimming, in order to facilitate training for legged locomotion.
-        /// </summary>
-        public bool SimpleWalking, SimpleSwimming;
-
         // =========================================================
         // ACTUATORS
         // =========================================================
@@ -539,7 +534,6 @@ namespace RoboIguanaRL
         /// <param name="actions">Action buffers containing continuous actions for phase shifts, amplitude shifts, and orientation offsets.</param>
         public void ApplyActions(ActionBuffers actions)
         {
-            // Debug.Log("Applying Actions");
             // Apply the actions received from the RL agent to the CPG parameters
             ActionSegment<float> continuous = actions.ContinuousActions;
             ActionSegment<int> discrete = actions.DiscreteActions;
@@ -547,8 +541,6 @@ namespace RoboIguanaRL
             // update phase and amplitude for all joints
             for (int i = 0; i < Phases.Length; i++)
             {
-                if (SimpleSwimming & i < 4) i = 4;      // skip limb phases
-                if (SimpleWalking & i == 4) continue; // simpleVersion: ignore spine pitch
                 // adapt phase shifts
                 PhaseShifts[i] = 
                         (continuous[i] + 1) / 2  // keep phaseshift posivite
@@ -564,21 +556,14 @@ namespace RoboIguanaRL
             // update trajectory rotation shifts
             for (int i = 0; i < OrientationOffsetShifts.Length; i++)
             {
-                if (SimpleSwimming & i < 4) {i=4; continue;}
                 OrientationOffsetShifts[i] = 
                         continuous[i + ActionIdxOrientation] 
                         * maxOrientationShift 
                         * Mathf.PI*2;
             }
 
-            if (SimpleWalking) 
-            {
-                BuoyancyShift = -1f * maxBuoyancyShift * Mathf.PI *2;
-                return; // ignore buoyancy and tail actions
-            }
-
-            // Buoyancy Module
-            BuoyancyShift = continuous[ActionIdxBuoyancy] * maxBuoyancyShift * Mathf.PI*2;
+            // Buoyancy module target
+            beta = maxBuoyancy * 1.8f * (continuous[ActionIdxBuoyancy] + 1) / 2;
 
             // Tail Parameters
             for (int i = 0; i < TailChanges.Length; i++)

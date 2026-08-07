@@ -262,32 +262,42 @@ namespace RoboIguanaRL
             var disc = buffers.DiscreteActions;
 
             // block and punish undesirable actions in training mode
-            if (training.Config["Landing"])
+            if (training.Config["Swimming"] & training.Config["SimpleSwimming"]) {
+                for (int i = 0; i < 4; i++) {
+                    // apply penalty
+                    training.LinRewards["SimpleTrainingPenalties"] = 
+                        (cont[i] + 1)/2     +                           // limb frequencies
+                        Mathf.Abs(cont[i+12]);                           // limb sideqays phases 
+                    // change vaues to neutral behavour
+                    cont[i] = -1;
+                    cont[i+12] = 0;
+                }
+            }
+
+            else if (training.Config["Landing"])
             {
                 // punish
                 training.LinRewards["SimpleTrainingPenalties"] = 
                     cont[16] > 0? cont[16]: 0;
-                    
                 // block
-                cont[16] = Mathf.Clamp(cont[16], -1, 0);
+                cont[16] = Mathf.Clamp(cont[16], -1, 0.5f);
             }
 
             else if (training.Config["SimpleWalking"])
+            {
                 training.LinRewards["simpleTrainingPenalties"] = 
                     (buffers.ContinuousActions[4] + 1) /2        +   // spine pitch phase progression
                     buffers.ContinuousActions[16]                +   // buoyancy increase
                     ((buffers.DiscreteActions[0] != 1)? 1f: 0f)  +   // Tail amp
                     ((buffers.DiscreteActions[1] != 1)? 1f: 0f)  ;   // tail freq
-
-            else if (training.Config["SimpleSwimming"]) {
-                for (int i = 0; i < 4; i++) {
-                    training.LinRewards["SimpleTrainingPenalties"] = (
-                        buffers.ContinuousActions[i]              +    // limb frequencies
-                        buffers.ContinuousActions[i+8]            +    // limb sideqays phases
-                        2 ) / 2;                                       // scale to [0,1] 
-                }
+                // set values to neutral
+                cont[4] = -1;
+                cont[16] = -1;
+                disc[0] = 0;    disc[1] = 0;
             }
 
+    
+            // Debug.Log($"Agent Actons after processing: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
             // relay actions to CPG
             CPG.ApplyActions(buffers);
         }

@@ -1,13 +1,21 @@
 {
-    "SimpleSwimmingTest": false,
+    "HorizontalSwimming2": false,
     "RandomXVelocity": false,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
-    "Swimming": false,
+
+    "Swimming": true,
     "Transition": false,
-    "SimpleWalking": true,
-    "SimpleSwimming": true,
     "Landing": false,
-    "Analysis": false,
-    "2D" : true
+    "2D" : true,
+
+    "LegPhases": false,
+    "LegAmplitudes": false,
+    "LegRotations": false,
+    "SpinePhases": false,
+    "SpineAmplitudes": false,
+    "Buoyancy": false,
+    "Tail": true,
+
+    "Analysis": true
 }

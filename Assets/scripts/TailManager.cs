@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 using System.IO;
 using System.Globalization;
 
@@ -157,7 +156,7 @@ namespace RoboIguanaRL {
                 var forces = TailForces[ParamIdcs[0]];
 
                 // translate phase to index
-                var forceIdx = (int) Math.Round((forces.Length-1) * phase / (Mathf.PI * 2));
+                var forceIdx = (int) Mathf.Round((forces.Length-1) * phase / (Mathf.PI * 2));
 
                 // Set Values
                 Force.x = forces[forceIdx][0];
@@ -196,9 +195,10 @@ namespace RoboIguanaRL {
             changes[1] = (changes[1] * 2) + 1;  // transform options to {-1, 1}
             for (int i = 0; i < parameters.Length; i++)
             {
-                ParamIdcs[i] = Math.Clamp(ParamIdcs[i] + changes[i], 0, possibleParameters[i].Length-1);
+                ParamIdcs[i] = Mathf.Clamp(ParamIdcs[i] + changes[i], 0, possibleParameters[i].Length-1);
                 parameters[i] = possibleParameters[i][ParamIdcs[i]];
             }
+            // Debug.Log($"Tal Parameters: {parameters[0]}, {parameters[1]}");
         }
     }
 }

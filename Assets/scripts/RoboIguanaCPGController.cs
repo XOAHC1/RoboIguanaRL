@@ -545,6 +545,8 @@ namespace RoboIguanaRL
             ActionSegment<float> continuous = actions.ContinuousActions;
             ActionSegment<int> discrete = actions.DiscreteActions;
 
+            // Debug.Log($"Actions at CPG: Continuous=[{string.Join(", ", continuous)}], Discrete=[{string.Join(", ", discrete)}]");
+
             // update phase and amplitude for all joints
             for (int i = 0; i < Phases.Length; i++)
             {

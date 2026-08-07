@@ -293,41 +293,35 @@ namespace RoboIguanaRL
             var cont = buffers.ContinuousActions;
             var disc = buffers.DiscreteActions;
 
-            // block and punish undesirable actions in training mode
-            if (training.Config["Swimming"] & training.Config["SimpleSwimming"]) {
-                for (int i = 0; i < 4; i++) {
-                    // apply penalty
-                    training.LinRewards["SimpleTrainingPenalties"] = 
-                        (cont[i] + 1)/2     +                           // limb frequencies
-                        Mathf.Abs(cont[i+12]);                           // limb sideqays phases 
-                    // change vaues to neutral behavour
-                    cont[i] = -1;
-                    cont[i+12] = 0;
-                }
-            }
+            training.LinRewards["SimpleTrainingPenalties"] = 0;
 
-            else if (training.Config["Landing"])
+            // block and punish undesirable actions in training mode
+
+            // Leg Control
+            if (!training.Config["LegPhases"]) for (int i = 0; i<4; i++) {cont[i] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[i] + 1)/2;}
+            if (!training.Config["LegAmplitudes"]) for (int i=6;i<10;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
+            if (!training.Config["LegRotations"]) for (int i=12;i<16;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
+
+            // Spine Control
+            if (!training.Config["SpinePhases"]) for (int i=4;i<6;i++) {cont[i] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[i] + 1)/2;}
+            if (!training.Config["SpineAmplitudes"]) for (int i=10;i<12;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
+
+            // buoyancy
+            if (!training.Config["Buoyancy"])  {cont[16] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[16] + 1)/2;}
+
+            // Tail
+            if (!training.Config["Tail"]) for (int i=0;i<2;i++) {disc[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += disc[i]+1f;}
+
+
+            // block buoyancy for landing mode
+            if (training.Config["Landing"])
             {
                 // punish
-                training.LinRewards["SimpleTrainingPenalties"] = 
+                training.LinRewards["SimpleTrainingPenalties"] += 
                     cont[16] > 0? cont[16]: 0;
                 // block
                 cont[16] = Mathf.Clamp(cont[16], -1, 0.5f);
             }
-
-            else if (training.Config["SimpleWalking"])
-            {
-                training.LinRewards["simpleTrainingPenalties"] = 
-                    (buffers.ContinuousActions[4] + 1) /2        +   // spine pitch phase progression
-                    buffers.ContinuousActions[16]                +   // buoyancy increase
-                    ((buffers.DiscreteActions[0] != 1)? 1f: 0f)  +   // Tail amp
-                    ((buffers.DiscreteActions[1] != 1)? 1f: 0f)  ;   // tail freq
-                // set values to neutral
-                cont[4] = -1;
-                cont[16] = -1;
-                disc[0] = 0;    disc[1] = 0;
-            }
-
     
             // Debug.Log($"Agent Actons after processing: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
             // relay actions to CPG

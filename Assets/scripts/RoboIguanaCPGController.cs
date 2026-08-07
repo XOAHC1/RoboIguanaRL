@@ -156,6 +156,11 @@ namespace RoboIguanaRL
         private float convergence = 150;
 
         /// <summary>
+        /// Convergence rate for buoyancy toward target;
+        /// </summary>
+        private float convergenceB = 150;
+
+        /// <summary>
         /// Time step for CPG updates in seconds.
         /// </summary>
         private float TimeStep;
@@ -275,7 +280,8 @@ namespace RoboIguanaRL
         private float[] OrientationOffsetShifts;
 
         private Vector3 Buoyancy;
-        private float BuoyancyShift;
+
+        private float beta, BuoyancyShift, BuoyancyShift2;
 
         private int[] TailChanges = new int[2];
 
@@ -454,8 +460,9 @@ namespace RoboIguanaRL
         /// </summary>
         private void ResetBuoyancy()
         {
-            Buoyancy = new Vector3(0f, 2f, 0f);
+            Buoyancy = new Vector3(0f, 0f, 0f);
             BuoyancyShift = 0f;
+            UpdateBuoyancy();
         }
 
         /// <summary>
@@ -579,8 +586,11 @@ namespace RoboIguanaRL
         /// </summary>
         private void UpdateBuoyancy()
         {
-            Buoyancy.y = Mathf.Clamp(Buoyancy.y + BuoyancyShift * TimeStep, 0, maxBuoyancy * 1.8f);
-            
+            // use dfferential equation to stabelize buoyancy control
+            Buoyancy.y += BuoyancyShift * TimeStep;
+            BuoyancyShift += BuoyancyShift2 * TimeStep;
+            BuoyancyShift2 =  convergenceB * (convergenceB / 4 * (beta - Buoyancy.y) - BuoyancyShift);
+        
             BuoyancyForcePoint.ApplyWorldForce(Buoyancy);
         }
 

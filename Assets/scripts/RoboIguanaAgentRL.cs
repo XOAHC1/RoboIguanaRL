@@ -483,7 +483,7 @@ namespace RoboIguanaRL
                 // drection change
                 for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
                 
-                continuousActionsOut[continuousActionsOut.Length-1] = -1f;      // buoyancy
+                continuousActionsOut[continuousActionsOut.Length-1] = 0f;      // buoyancy
                 discreteActionsOut[0] = 1;                                      // tail amp
                 discreteActionsOut[1] = 0;                                      // tail freq
             }

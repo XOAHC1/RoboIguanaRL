@@ -1,0 +1,15 @@
+{
+    "e_xVel": 0,
+    "e_yVel": 0,
+    "e_yawRate": 0,
+    "e_pitchRate": 0,
+    "q_zVel": 0,
+    "q_rollRate": 0,
+    "q_work": 0,
+    "l_groundContact": 0,
+    "l_tailStatus": 0,
+    "l_baseReward": 0,
+    "l_crash": 0,
+    "l_simpleTrainingPenalties": 0,
+    "e_yPos": 1
+}

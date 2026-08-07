@@ -364,11 +364,11 @@ namespace RoboIguanaRL
 
             // generate target velocities, foreward and upward
             var vel = new Vector2(
-                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.6f): 0.4f,
+                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.4f): 0.3f,
                 training.Config["RandomYVelocity"] ? Random.Range(-0.2f, 0.3f): 0f
             );
             if (training.Config["Landing"]) vel.y = -0.1f;
-            TargetLinearVelocity = vel * (training.Config["Swimming"]? 1.5f: 1f);
+            TargetLinearVelocity = vel * (training.Config["Swimming"]? 0.66f: 1f);
             
             // generate target angular velocities
             TargetAngularVelocity = training.Config["RandomAngularVelocity"] ?
@@ -469,6 +469,8 @@ namespace RoboIguanaRL
             training.LinRewards["groundContact"] = ((locomotionType == 1) ? 1: -1) * (groundContact ? 1f : -1f);
             // Tail Status
             training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: -1);
+            // swimm height
+            training.ExpRewards["yPos"] = transform.position.y - higherPos.y;
 
             AddReward(training.GetReward());
         }
@@ -530,9 +532,9 @@ namespace RoboIguanaRL
             else
             {
                 // Phase shifts
-                for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0.2f;
+                for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0f;
                 // spine phase
-                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0.2f;
+                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0f;
                 // amplitude change
                 for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
                 // spine amplitudes
@@ -541,7 +543,7 @@ namespace RoboIguanaRL
                 // drection change
                 for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
                 
-                continuousActionsOut[continuousActionsOut.Length-1] = 0f;      // buoyancy
+                continuousActionsOut[continuousActionsOut.Length-1] = -1f;      // buoyancy
                 discreteActionsOut[0] = 1;                                      // tail amp
                 discreteActionsOut[1] = 0;                                      // tail freq
             }

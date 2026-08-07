@@ -86,7 +86,8 @@ namespace RoboIguanaRL
         /// <summary>
         /// Number of physics steps to wait at the begin of an episode, to let the robot settle.
         /// </summary>
-        private int waiting, waitSteps = 250;
+        private int waiting;
+        private readonly int waitSteps = 150;
 
         /// <summary>
         /// Number of agent decisions until new target inputs are generated.
@@ -160,10 +161,7 @@ namespace RoboIguanaRL
         public override void OnEpisodeBegin()
         {
             Debug.Log("Starting new Epsode");
-            ResetRobot();
-            ResetTarget();
-            training.NewEpisode();
-
+            // start waiting
             waiting = waitSteps;
             decisionRequester.DecisionPeriod = 99999;
 

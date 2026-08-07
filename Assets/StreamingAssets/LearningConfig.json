@@ -3,10 +3,11 @@
     "RandomXVelocity": false,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
-    "Swimming": true,
+    "Swimming": false,
     "Transition": false,
-    "SimpleWalking": false,
+    "SimpleWalking": true,
     "SimpleSwimming": true,
     "Landing": false,
-    "Analysis": false
+    "Analysis": false,
+    "2D" : true
 }

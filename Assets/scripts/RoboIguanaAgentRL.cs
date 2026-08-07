@@ -103,6 +103,8 @@ namespace RoboIguanaRL
             nextLocomotionmode = 2, 
             locomotionModeChange= 2;
 
+        private float fixedHeight;
+
         private bool firstEpisode;
 
         /// <summary>
@@ -119,7 +121,7 @@ namespace RoboIguanaRL
 
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
             ComponentABs = GetComponentsInChildren<ArticulationBody>().ToList();
-            ComponentABs.Add(Body);
+            ComponentABs.Add(Body);;
 
             training = new TrainingManager();
 
@@ -128,6 +130,7 @@ namespace RoboIguanaRL
             StartingPosition.y += 0.01f;
             higherPos = new Vector3(StartingPosition.x, StartingPosition.y+1, StartingPosition.z);
 
+            if (training.Config["2D"]) fixedHeight = training.Config["Swimming"]? higherPos.y: StartingPosition.y;
             firstEpisode = true;
 
             Debug.Log("Agent initialization over");
@@ -396,6 +399,11 @@ namespace RoboIguanaRL
         /// </summary>
         public void FixedUpdate()
         {
+            
+            if (training.Config["2D"]) {
+                var p= transform.position; p.y = fixedHeight; transform.position = p; 
+                var v= Body.linearVelocity; v.y = 0; Body.linearVelocity = v;
+                }
             // wait after reset
             if (waiting > 0)
             {

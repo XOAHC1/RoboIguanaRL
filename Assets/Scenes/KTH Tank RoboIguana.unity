@@ -2035,7 +2035,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 15000
+  MaxStep: 10000
   footFL: {fileID: 226582460}
   footFR: {fileID: 1337741628}
   footRL: {fileID: 1588934152}

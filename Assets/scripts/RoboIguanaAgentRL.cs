@@ -20,6 +20,11 @@ namespace RoboIguanaRL
         public ContactDetector footFL, footFR, footRL, footRR;
 
         /// <summary>
+        /// Point to observe robot position.
+        /// </summary>
+        public ArticulationBody obs;
+        
+        /// <summary>
         /// Contact detector for the back of the robot, to abort training in unsolvable postions.
         /// </summary> 
         public ContactDetector Back;
@@ -207,8 +212,7 @@ namespace RoboIguanaRL
         /// Observed are:
         ///     World State:
         ///         Locomotion type                 [0, 1]
-        ///         Target linear velocity          2D
-        ///         Linear Velocity                 3D
+        ///         Linear velocity error           2D
         ///         Target angular velocity         2D
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
@@ -223,23 +227,22 @@ namespace RoboIguanaRL
         ///         Spine pitch                     2D
         ///         Buoyancy                        2D
         ///         Tail State                      3D
-        /// For a total of 50 input dimensions.
+        /// For a total of 47 input dimensions.
         /// </remarks>
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
         {
             if (training.Config["Analysis"]){
                 Debug.Log($"Linear velocity: {transform.InverseTransformDirection(Body.linearVelocity)} \n Angular velocity: {transform.InverseTransformDirection(Body.angularVelocity)} \n Robot Position: {Body.transform.position}");}
-
             if (nextTargetSteps < 2) ResetTarget();
             else nextTargetSteps --;
 
             // position and velocity observations
             sensor.AddObservation(locomotionType);
-            sensor.AddObservation(TargetLinearVelocity);
-            sensor.AddObservation(transform.InverseTransformDirection(Body.linearVelocity));
+            sensor.AddObservation(TargetLinearVelocity.x - obs.transform.InverseTransformDirection(obs.linearVelocity).x);
+            sensor.AddObservation(TargetLinearVelocity.y - obs.transform.InverseTransformDirection(obs.linearVelocity).y);
             sensor.AddObservation(TargetAngularVelocity);
-            sensor.AddObservation(transform.InverseTransformDirection(Body.angularVelocity));
+            sensor.AddObservation(transform.InverseTransformDirection(obs.angularVelocity));
 
             // Contact Booleans
             sensor.AddObservation(footFR.IsTouchingGround);
@@ -451,8 +454,8 @@ namespace RoboIguanaRL
             bool groundContact = footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround;
 
             // precalculate velocites
-            var relVel = transform.InverseTransformDirection(Body.linearVelocity);
-            var angVel = transform.InverseTransformDirection(Body.angularVelocity);
+            var relVel = obs.transform.InverseTransformDirection(obs.linearVelocity);
+            var angVel = obs.transform.InverseTransformDirection(obs.angularVelocity);
 
             // linear velocity x
             training.ExpRewards["xVel"] = relVel.x - TargetLinearVelocity.x;

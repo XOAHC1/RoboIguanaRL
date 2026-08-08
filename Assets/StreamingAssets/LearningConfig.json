@@ -1,5 +1,5 @@
 {
-    "swim-straight": true,
+    "swim-straight": false,
     "RandomXVelocity": false,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
@@ -19,5 +19,5 @@
     "Buoyancy": false,
     "Tail": true,
 
-    "Analysis": false
+    "Analysis": true
 }

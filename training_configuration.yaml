@@ -22,7 +22,7 @@ behaviors:
 
     reward_signals:
       extrinsic:
-        gamma: 0.995
+        gamma: 0.99
         strength: 1.0
 
     max_steps: 2e6
@@ -40,6 +40,6 @@ engine_settings:
   no_graphics: true
 
 checkpoint_settings:
-  run_id: swim-straight
+  run_id: swim-straight+
   force: true
   resume: false

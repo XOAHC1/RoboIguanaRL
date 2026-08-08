@@ -1,5 +1,5 @@
 behaviors:
-  swim forward:
+  control_height:
     trainer_type: ppo
 
     hyperparameters:

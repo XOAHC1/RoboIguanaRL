@@ -17,5 +17,5 @@
     "Buoyancy": true,
     "Tail": true,
 
-    "Analysis": false
+    "Analysis": true
 }

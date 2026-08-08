@@ -35,7 +35,7 @@ ExportedObj/
 *.app
 
 Resources*
-# Executable*
+Executable*
 
 # Crashlytics generated file
 crashlytics-build.properties
@@ -61,7 +61,7 @@ Assets/TextMesh\ Pro/
 Assets/TextMesh\ Pro.meta
 Assets/msgbrowser_settings.asset*
 Assets/_Recovery
-Assets/scripts/behaviours/*
+# Assets/scripts/behaviours/*
 
 # ignore training results for now
 results
@@ -69,3 +69,4 @@ Assets/ML-Agents
 
 # Ignore all meta files
 *.meta
+Executable/SMARCUnityHDRP2_Data/ML-Agents/Timers/KTH Tank RoboIguana_timers.json

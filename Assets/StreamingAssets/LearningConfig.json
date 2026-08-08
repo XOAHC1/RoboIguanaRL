@@ -1,8 +1,9 @@
 {
-    "SwimmingAltControll1": false,
+    "AltControl3": true,
     "RandomXVelocity": false,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
+    "RandomStart": false,
 
     "Swimming": true,
     "Transition": false,
@@ -14,8 +15,9 @@
     "LegRotations": false,
     "SpinePhases": false,
     "SpineAmplitudes": false,
+    "SpinePitch": true,
     "Buoyancy": true,
     "Tail": true,
 
-    "Analysis": true
+    "Analysis": false
 }

@@ -213,16 +213,17 @@ namespace RoboIguanaRL
         ///         angular velocty                 3D
         ///         Ground contact booleans         4D
         ///     CPG State:
-        ///         Phases                          6D
-        ///         Phase shifts                    6D
-        ///         Amplitudes                      6D
-        ///         Ampltude shifts                 6D
+        ///         Phases                          5D
+        ///         Phase shifts                    5D
+        ///         Amplitudes                      5D
+        ///         Ampltude shifts                 5D
         ///         Orientation offsets             4D
         ///         Orientation offset shifts       4D
         ///     Others:
+        ///         Spine pitch                     2D
         ///         Buoyancy                        2D
         ///         Tail State                      3D
-        /// For a total of 52 input dimensions.
+        /// For a total of 50 input dimensions.
         /// </remarks>
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
@@ -253,10 +254,10 @@ namespace RoboIguanaRL
             sensor.AddObservation(CPG.GetAmplitudeShifts());
             sensor.AddObservation(CPG.GetOrientationOffsets());
             sensor.AddObservation(CPG.GetOrientationOffsetShifts());
+            sensor.AddObservation(CPG.GetSpinePitchState());
 
             // Buoyancy
-            sensor.AddObservation(CPG.GetBuoyancy());
-            sensor.AddObservation(CPG.GetBuoyancyShift());
+            sensor.AddObservation(CPG.GetBuoyancyState());
 
             // Tail
             sensor.AddObservation(CPG.GetTailState().Values.ToArray());
@@ -273,8 +274,9 @@ namespace RoboIguanaRL
         ///         change amplitude            4D
         ///         change orientation          4D
         ///     for the spine:
-        ///         change intrinsic frequency  2D
-        ///         change amplitude            2D
+        ///         change intrinsic frequency  1D
+        ///         change amplitude            1D
+        //          spine pitch target          1D
         ///     buoyancy:
         ///         change in buoyancy          1D
         ///   discrete:
@@ -282,7 +284,7 @@ namespace RoboIguanaRL
         ///         yaw amplitude               [0, 1, 2]   Will be translated to [-1, 0, 1] later on.
         ///         frequency                   [0, 1]      Tail off/on
         ///         
-        /// For a total of 19 action dimensions.
+        /// For a total of 18 action dimensions.
         /// </remarks>
         /// <param name="buffers">The action buffers containing the policy decisions.</param>
         public override void OnActionReceived(ActionBuffers buffers)
@@ -299,15 +301,16 @@ namespace RoboIguanaRL
 
             // Leg Control
             if (!training.Config["LegPhases"]) for (int i = 0; i<4; i++) {cont[i] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[i] + 1)/2;}
-            if (!training.Config["LegAmplitudes"]) for (int i=6;i<10;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
-            if (!training.Config["LegRotations"]) for (int i=12;i<16;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
+            if (!training.Config["LegAmplitudes"]) for (int i=5;i<9;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
+            if (!training.Config["LegRotations"]) for (int i=10;i<14;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
 
             // Spine Control
-            if (!training.Config["SpinePhases"]) for (int i=4;i<6;i++) {cont[i] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[i] + 1)/2;}
-            if (!training.Config["SpineAmplitudes"]) for (int i=10;i<12;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
+            if (!training.Config["SpinePhases"]) for (int i=4;i<5;i++) {cont[i] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[i] + 1)/2;}
+            if (!training.Config["SpineAmplitudes"]) for (int i=9;i<10;i++) {cont[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[i]);}
+            if (!training.Config["SpinePitch"]) {cont[14] = 0f; training.LinRewards["SimpleTrainingPenalties"] += Mathf.Abs(cont[14]);}
 
             // buoyancy
-            if (!training.Config["Buoyancy"])  {cont[16] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[16] + 1)/2;}
+            if (!training.Config["Buoyancy"])  {cont[15] = -1; training.LinRewards["SimpleTrainingPenalties"] += (cont[15] + 1)/2;}
 
             // Tail
             if (!training.Config["Tail"]) for (int i=0;i<2;i++) {disc[i] = 0; training.LinRewards["SimpleTrainingPenalties"] += disc[i]+1f;}
@@ -318,9 +321,9 @@ namespace RoboIguanaRL
             {
                 // punish
                 training.LinRewards["SimpleTrainingPenalties"] += 
-                    cont[16] > 0? cont[16]: 0;
+                    cont[15] > 0? cont[15]: 0;
                 // block
-                cont[16] = Mathf.Clamp(cont[16], -1, 0.5f);
+                cont[15] = Mathf.Clamp(cont[15], -1, 0.5f);
             }
     
             // Debug.Log($"Agent Actons after processing: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
@@ -494,15 +497,15 @@ namespace RoboIguanaRL
                 // Phase shifts
                 for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -1;
                 // spine phase
-                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -1;
+                for (int i = 4; i < 5; i++)                             continuousActionsOut[i] = -1;
                 // amplitude change
-                for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
-                // spine amplitudes
-                continuousActionsOut[10] = 0f;                                  // pitch
-                continuousActionsOut[11] = 0f;                                  // spine yaw
+                for (int i = 5; i < 9; i++)                            continuousActionsOut[i] = 0f;
+                // spine amplitude
+                continuousActionsOut[9] = 0f;                                  // spine yaw
                 // drection change
-                for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
+                for (int i = 10; i < 13; i++)                          continuousActionsOut[i] = 0f;
                 
+                continuousActionsOut[14] = -1;                                   // spine pitch
                 continuousActionsOut[continuousActionsOut.Length-1] = 0f;       // buoyancy
                 discreteActionsOut[0] = 2;                                      // tail amp
                 discreteActionsOut[1] = 1;                                      // tail freq
@@ -516,15 +519,15 @@ namespace RoboIguanaRL
                 // Phase shifts
                 for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0.2f;
                 // spine phase
-                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0.2f;
+                for (int i = 4; i < 5; i++)                             continuousActionsOut[i] = -0.2f;
                 // amplitude change
-                for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
+                for (int i = 5; i < 9; i++)                            continuousActionsOut[i] = 0f;
                 // spine amplitudes
-                continuousActionsOut[10] = -1f;                                 // pitch
-                continuousActionsOut[11] = 1f;                                  // yaw
+                continuousActionsOut[9] = 0f;                                 // yaw
                 // drection change
-                for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
+                for (int i = 10; i < 13; i++)                           continuousActionsOut[i] = 0f;
                 
+                continuousActionsOut[14] = 0;                                   // spine pitch
                 continuousActionsOut[continuousActionsOut.Length-1] = -1f;      // buoyancy
                 discreteActionsOut[0] = 0;                                      // tail amp
                 discreteActionsOut[1] = 1;                                      // tail freq
@@ -534,15 +537,15 @@ namespace RoboIguanaRL
                 // Phase shifts
                 for (int i = 0; i < 4; i++)                             continuousActionsOut[i] = -0f;
                 // spine phase
-                for (int i = 4; i < 6; i++)                             continuousActionsOut[i] = -0f;
+                for (int i = 4; i < 5; i++)                             continuousActionsOut[i] = -0f;
                 // amplitude change
-                for (int i = 6; i < 10; i++)                            continuousActionsOut[i] = 0f;
+                for (int i = 5; i < 9; i++)                            continuousActionsOut[i] = 0f;
                 // spine amplitudes
-                continuousActionsOut[10] = -1f;                                 // pitch
-                continuousActionsOut[11] = 1f;                                  // yaw
+                continuousActionsOut[9] = 1f;                                  // yaw
                 // drection change
-                for (int i = 12; i < 16; i++)                           continuousActionsOut[i] = 0f;
+                for (int i = 10; i < 13; i++)                           continuousActionsOut[i] = 0f;
                 
+                continuousActionsOut[14] = 0;                                   // spine pitch
                 continuousActionsOut[continuousActionsOut.Length-1] = -1f;      // buoyancy
                 discreteActionsOut[0] = 1;                                      // tail amp
                 discreteActionsOut[1] = 0;                                      // tail freq

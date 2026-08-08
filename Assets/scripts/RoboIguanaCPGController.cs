@@ -155,9 +155,14 @@ namespace RoboIguanaRL
         private float convergence = 150;
 
         /// <summary>
-        /// Convergence rate for buoyancy toward target;
+        /// Convergence rate for buoyancy toward Shift2;
         /// </summary>
-        private float convergenceB = 150;
+        private float convergenceB = 100;
+
+        /// <summary>
+        /// Convergence rate for Spine Pitch toward Shift2;
+        /// </summary>
+        private float convergenceS = 100;     
 
         /// <summary>
         /// Time step for CPG updates in seconds.
@@ -213,26 +218,26 @@ namespace RoboIguanaRL
         // =========================================================
 
         /// <summary>
-        /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine pitch, Spine yaw.
+        /// Initial CPG phases for legs and spine (Theta). Leg order: FL, FR, RL, RR, Spine yaw.
         /// </summary>
-        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f, 0f};
+        private readonly float[] initialPhases = {0f, Mathf.PI, Mathf.PI, 0f, 0f};
         /// <summary>
         /// Initial phase shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialPhaseShifts = {0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
-        /// Initial amplitude values for legs (4) and spine (2).
+        /// Initial amplitude values for legs (4) and spine (1).
         /// </summary>
-        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 1f, 2f};
+        private readonly float[] initialAmplitudes = {1.5f, 1.5f, 1.5f, 1.5f, 2f};
         /// <summary>
         /// Initial amplitude shift rates for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeShifts = {0f, 0f, 0f, 0f, 0f};
         /// <summary>
         /// Initial second derivative of amplitude shifts for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeTargets = {0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial orientation offsets for foot trajectories (Phi). Leg order: FL, FR, RL, RR.
@@ -263,11 +268,11 @@ namespace RoboIguanaRL
         /// <summary>
         /// Current second derivative of amplitude shifts (r''). Controlled via µ.
         /// </summary>
-        private float[] AmplitudeTargets;
+        private float[] AmplitudeShifts2;
         /// <summary>
         /// Amplitude controll parameters from the agent. Amplitude will converge to µ.
         /// </summary>
-        private float[] µ = {1.5f, 1.5f, 1.5f, 1.5f, 1f, 2f};
+        private float[] µ = {1.5f, 1.5f, 1.5f, 1.5f, 2f};
 
         /// <summary>
         /// Current orientation offsets for foot trajectories (Phi).
@@ -280,7 +285,12 @@ namespace RoboIguanaRL
 
         private Vector3 Buoyancy;
 
-        private float beta, BuoyancyShift, BuoyancyTarget;
+        private float beta, BuoyancyShift, BuoyancyShift2;
+
+        /// <summary>
+        /// Control parameters for spine pitch.
+        /// </summary>
+        private float alpha, SpinePitchShift = 0f, SpineShift2 = 0f, SpinePitchAngle = 0f;
 
         private int[] TailChanges = new int[2];
 
@@ -291,7 +301,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Starting index in Agent's actions for actions regarding this aspect.
         /// </summary>
-        private int ActionIdxAmp, ActionIdxOrientation, ActionIdxBuoyancy;
+        private int ActionIdxAmp, ActionIdxOrientation, ActionIdxSpine, ActionIdxBuoyancy;
 
 
         // =========================================================
@@ -319,12 +329,13 @@ namespace RoboIguanaRL
         public float[] GetOrientationOffsets() { return (float[])OrientationOffsets.Clone();}
         public float[] GetOrientationOffsetShifts() { return (float[])OrientationOffsetShifts.Clone();}
 
+        public float[] GetSpinePitchState() {return new float[] {SpinePitchAngle, SpinePitchShift};}
+
         /// <summary>
         /// Get current force added by the buoyancy module.
         /// </summary>
         /// <returns></returns>
-        public float GetBuoyancy() {return Buoyancy.y;}
-        public float GetBuoyancyShift() {return BuoyancyShift;} 
+        public float[] GetBuoyancyState() {return new float[] {Buoyancy.y, BuoyancyShift};}
 
         /// <summary>
         /// Contains tail state.
@@ -376,12 +387,14 @@ namespace RoboIguanaRL
             // Set up internal states
             InitializeAllJoints();
             ResetCPG();
+            ResetSpinePitch();
             ResetBuoyancy();
 
             // prepare indices for updates
             ActionIdxAmp = Phases.Length;
             ActionIdxOrientation = ActionIdxAmp + Amplitudes.Length;
-            ActionIdxBuoyancy = ActionIdxOrientation + OrientationOffsets.Length;
+            ActionIdxSpine = ActionIdxOrientation + OrientationOffsets.Length;
+            ActionIdxBuoyancy = ActionIdxSpine + 1;
 
             // Debug.Log("CPG Ready");
         }
@@ -404,10 +417,8 @@ namespace RoboIguanaRL
             }
 
             // Spine
-            for (int i = 0; i < spineRanges.Length; i++)
-            {
-                InitialiseJoint(spineLinks[i], spineHinges[i], GetSpineAngle(initialPhases[i+4], initialAmplitudes[i+4]) * spineRanges[i]);
-            }
+            InitialiseJoint(spine_link_yaw, spineYaw, GetSpineAngle(initialPhases[^1], initialAmplitudes[^1]) * spineRangeYaw);
+            InitialiseJoint(spine_link_pitch, spinePitch, SpinePitchAngle * spineRangePitch);
         }
 
         /// <summary>
@@ -443,6 +454,7 @@ namespace RoboIguanaRL
         public void DoReset(bool randomStart = false)
         {
             ResetBuoyancy(randomStart);
+            ResetSpinePitch(randomStart);
             ResetCPG(randomStart);
             UpdatePose();
             Tail.DoReset(randomStart);
@@ -461,7 +473,7 @@ namespace RoboIguanaRL
                     PhaseShifts[i] = Random.Range(0, maxPhaseShift);
                     Amplitudes[i] = Random.Range(1, 2);
                     AmplitudeShifts[i] = 0;
-                    AmplitudeTargets[i] = Random.Range(1,2);
+                    AmplitudeShifts2[i] = Random.Range(1,2);
                 }
                 for (int i = 0; i < initialOrientationOffsets.Length; i++)
                 {
@@ -475,7 +487,7 @@ namespace RoboIguanaRL
                 PhaseShifts = (float[])initialPhaseShifts.Clone();
                 Amplitudes = (float[])initialAmplitudes.Clone();
                 AmplitudeShifts = (float[])initialAmplitudeShifts.Clone();
-                AmplitudeTargets = (float[])initialAmplitudeTargets.Clone();
+                AmplitudeShifts2 = (float[])initialAmplitudeShifts2.Clone();
                 OrientationOffsets = (float[])initialOrientationOffsets.Clone();
                 OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();
             }
@@ -484,11 +496,22 @@ namespace RoboIguanaRL
         /// <summary>
         /// Resets tail control parameters to initial values.
         /// </summary>
+        private void ResetSpinePitch(bool randomStart = false)
+        {
+            SpinePitchAngle = 0f;
+            if (randomStart) {SpinePitchAngle = Random.Range(0, spineRangePitch);}
+            SpineShift2 = 0;
+            UpdateSpinePitch();
+        }
+
+        /// <summary>
+        /// Resets tail control parameters to initial values.
+        /// </summary>
         private void ResetBuoyancy(bool randomStart = false)
         {
             Buoyancy = new Vector3(0f, 0f, 0f);
-            if (randomStart) {Buoyancy.y = Random.Range(0, maxBuoyancy); BuoyancyTarget = Random.Range(0, maxBuoyancy);}
-            else BuoyancyTarget = 2;
+            if (randomStart) {Buoyancy.y = Random.Range(0, maxBuoyancy); BuoyancyShift2 = Random.Range(0, maxBuoyancy);}
+            else BuoyancyShift2 = 2;
             UpdateBuoyancy();
         }
 
@@ -516,11 +539,11 @@ namespace RoboIguanaRL
                 Phases[i] = (Phases[i] + PhaseShifts[i] * TimeStep) % (2 * Mathf.PI);
             }
 
-            for (int i = 0; i < AmplitudeTargets.Length; i++)
+            for (int i = 0; i < AmplitudeShifts2.Length; i++)
             {
                 Amplitudes[i] += AmplitudeShifts[i] * TimeStep;
-                AmplitudeShifts[i] += AmplitudeTargets[i] * TimeStep;
-                AmplitudeTargets[i] =  convergence * (convergence / 4 * (µ[i] - Amplitudes[i]) - AmplitudeShifts[i]);
+                AmplitudeShifts[i] += AmplitudeShifts2[i] * TimeStep;
+                AmplitudeShifts2[i] =  convergence * (convergence / 4 * (µ[i] - Amplitudes[i]) - AmplitudeShifts[i]);
             }
 
             for (int i = 0; i < OrientationOffsets.Length; i++)
@@ -544,11 +567,10 @@ namespace RoboIguanaRL
             ApplyAngles(yaws, hips, knees);
 
             // update spine position
-            float[] spineAngles = new float[2];
-            for (int i = 0; i < 2; i++) {
-                spineAngles[i] = GetSpineAngle(Phases[i + 4], Amplitudes[i + 4]);
-            }
-            ApplySpineAngle(spineAngles);
+            var yawAngle = GetSpineAngle(Phases[^1], Amplitudes[^1]);
+            ApplySpineAngle(yawAngle, spineRangeYaw, spineYaw);
+            
+            UpdateSpinePitch();
         }
 
         /// <summary>
@@ -557,10 +579,11 @@ namespace RoboIguanaRL
         /// <remark>
         ///     Assuming the action space is structured as follows:
         ///         continuous:
-        ///         0-5: Phase shifts (legs: 4, spine: 2).
-        ///        6-11: Amplitude shifts (legs: 4, spine: 2).
-        ///       12-15: Trajectory rotation shifts (legs: 4).
-        ///          16: Buoyancy shift.
+        ///         0-4: Phase shifts (legs: 4, spine: 1).
+        ///        5-9: Amplitude shifts (legs: 4, spine: 2).
+        ///       10-13: Trajectory rotation shifts (legs: 4).
+        ///          14: spinePitch
+        ///          15: Buoyancy shift.
         ///         discrete:
         ///          0: Amplitude parameter change for the Tail.
         ///          1: Frequency parameter change for the tail.
@@ -598,6 +621,8 @@ namespace RoboIguanaRL
                         * Mathf.PI*2;
             }
 
+            // Spine pitch
+            alpha = continuous[ActionIdxSpine];
             // Buoyancy module target
             beta = maxBuoyancy * 1.8f * (continuous[ActionIdxBuoyancy] + 1) / 2;
 
@@ -611,14 +636,26 @@ namespace RoboIguanaRL
         }
 
         /// <summary>
+        /// Updates pitch of the spne.
+        /// </summary>
+        private void UpdateSpinePitch()
+        {
+            // use dfferential equation to stabelize Spine pitch control
+            SpinePitchAngle += SpinePitchShift * TimeStep;
+            SpinePitchShift += SpineShift2 * TimeStep;
+            SpineShift2 =  convergenceB * (convergenceS / 4 * (alpha - SpinePitchAngle) - SpinePitchShift);
+        
+            ApplySpineAngle(SpinePitchAngle, spineRangePitch, spinePitch);  
+        }
+        /// <summary>
         /// Handles time step for buoyancy control module. Applies corresponding force.
         /// </summary>
         private void UpdateBuoyancy()
         {
             // use dfferential equation to stabelize buoyancy control
             Buoyancy.y += BuoyancyShift * TimeStep;
-            BuoyancyShift += BuoyancyTarget * TimeStep;
-            BuoyancyTarget =  convergenceB * (convergenceB / 4 * (beta - Buoyancy.y) - BuoyancyShift);
+            BuoyancyShift += BuoyancyShift2 * TimeStep;
+            BuoyancyShift2 =  convergenceB * (convergenceB / 4 * (beta - Buoyancy.y) - BuoyancyShift);
         
             BuoyancyForcePoint.ApplyWorldForce(Buoyancy);
         }
@@ -731,12 +768,12 @@ namespace RoboIguanaRL
         }
 
         /// <summary>
-        /// Applies the calculated angles to all spine joints.
+        /// Applies the calculated angles to a spine joint.
         /// </summary>
         /// <param name="angles">Array containing spine angles.</param>
-        private void ApplySpineAngle(float[] angles)
+        private void ApplySpineAngle(float angleFactor, float range, Hinge hinge)
         {
-            for (int i = 0; i < angles.Length; i++) spineHinges[i].SetAngle(angles[i] * spineRanges[i]);
+            hinge.SetAngle(angleFactor * range);
         }
 
 

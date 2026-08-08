@@ -88,8 +88,10 @@ namespace RoboIguanaRL
             if (LogHistory)
             {
                 LogPath = Path.Combine("results", run_id, "RewardHistory.csv");
-                WriteHead();
-                
+                if (!File.Exists(LogPath))
+                {
+                    WriteHead();
+                }
             }
         }
 
@@ -260,6 +262,7 @@ namespace RoboIguanaRL
         /// </summary>
         public void LogEpisode()
         {
+            Debug.Log("Logging Episode");
             using (var writer = new StreamWriter(LogPath, true))
             {
                 // Log last episode's rewards

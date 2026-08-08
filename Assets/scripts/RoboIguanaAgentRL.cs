@@ -172,7 +172,6 @@ namespace RoboIguanaRL
         public new void EndEpisode()
         {
             Debug.Log("Episode ended");
-            if (training.LogHistory) training.LogEpisode();
 
             base.EndEpisode();
         }
@@ -190,13 +189,14 @@ namespace RoboIguanaRL
             // set locomotion mode to start value
             if (training.Config["Transition"]) {training.Config["Swimming"] = true; training.Config["Landing"] = false;}
 
+            training.NewEpisode();
+            if (!firstEpisode) training.LogEpisode();
 
             ResetTarget();
             nextLocomotionmode = locomotionModeChange;
 
             ResetRobot();
 
-            training.NewEpisode();
             SetReward(0f);
         }
 
@@ -227,9 +227,9 @@ namespace RoboIguanaRL
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
         {
-            if (training.Config["Analysis"])
-                Debug.Log($"Linear velocity: {transform.InverseTransformDirection(Body.linearVelocity)} \n Angular velocity: {transform.InverseTransformDirection(Body.angularVelocity)}");
-            
+            if (training.Config["Analysis"]){
+                Debug.Log($"Linear velocity: {transform.InverseTransformDirection(Body.linearVelocity)} \n Angular velocity: {transform.InverseTransformDirection(Body.angularVelocity)} \n Robot Position: {Body.transform.position}");}
+
             if (nextTargetSteps < 2) ResetTarget();
             else nextTargetSteps --;
 

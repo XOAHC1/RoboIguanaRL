@@ -34,7 +34,7 @@ ExportedObj/
 *.unitypackage
 *.app
 
-# Resources*
+Resources*
 # Executable*
 
 # Crashlytics generated file
@@ -61,26 +61,12 @@ Assets/TextMesh\ Pro/
 Assets/TextMesh\ Pro.meta
 Assets/msgbrowser_settings.asset*
 Assets/_Recovery
-# Assets/scripts/behaviours/*
+Assets/scripts/behaviours/*
 
 # ignore training results for now
-results/*
-
-# keep results trained remotely
-!results/SimpleWalking/
-
-# keep results trained remotely
-!results/
-!results/SimpleWalking/
-
-# keep results trained remotely
-!results/
-!results/SimpleWalking/
-!results/SimpleWalking/**
+results
+Assets/ML-Agents
 
 # Ignore all meta files
-# *.meta
+*.meta
 Executable/SMARCUnityHDRP2_Data/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
-Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
-ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
-Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json.meta

@@ -195,7 +195,7 @@ namespace RoboIguanaRL
             if (training.Config["Transition"]) {training.Config["Swimming"] = true; training.Config["Landing"] = false;}
 
             training.NewEpisode();
-            if (!firstEpisode) training.LogEpisode();
+            if (!firstEpisode & training.LogHistory) training.LogEpisode();
 
             ResetTarget();
             nextLocomotionmode = locomotionModeChange;

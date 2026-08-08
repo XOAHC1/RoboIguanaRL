@@ -1,5 +1,5 @@
 {
-    "e_xVel": 0,
+    "e_xVel": 1,
     "e_yVel": 0,
     "e_yawRate": 0,
     "e_pitchRate": 0,
@@ -11,5 +11,5 @@
     "l_baseReward": 0,
     "l_crash": 0,
     "l_simpleTrainingPenalties": 0,
-    "e_yPos": 1
+    "e_yPos": 0
 }

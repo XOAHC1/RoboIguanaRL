@@ -84,10 +84,9 @@ namespace RoboIguanaRL
             ReadConfig();
             LoadWeights();
 
-
+            LogPath = Path.Combine("results", run_id, "RewardHistory.csv");
             if (LogHistory)
             {
-                LogPath = Path.Combine("results", run_id, "RewardHistory.csv");
                 if (!File.Exists(LogPath))
                 {
                     WriteHead();

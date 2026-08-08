@@ -1,22 +1,22 @@
 {
-    "AltControl3": true,
+    "swim-straight": true,
     "RandomXVelocity": false,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
-    "RandomStart": false,
+    "RandomStart": true,
 
     "Swimming": true,
     "Transition": false,
     "Landing": false,
-    "2D" : false,
+    "2D" : true,
 
     "LegPhases": false,
     "LegAmplitudes": false,
     "LegRotations": false,
     "SpinePhases": false,
     "SpineAmplitudes": false,
-    "SpinePitch": true,
-    "Buoyancy": true,
+    "SpinePitch": false,
+    "Buoyancy": false,
     "Tail": true,
 
     "Analysis": false

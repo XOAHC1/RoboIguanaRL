@@ -1,4 +1,3 @@
-using System;
 using Hinge = VehicleComponents.Actuators.Hinge;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
@@ -281,7 +280,7 @@ namespace RoboIguanaRL
 
         private Vector3 Buoyancy;
 
-        private float beta, BuoyancyShift, BuoyancyShift2;
+        private float beta, BuoyancyShift, BuoyancyTarget;
 
         private int[] TailChanges = new int[2];
 
@@ -431,37 +430,65 @@ namespace RoboIguanaRL
         }
 
         /// <summary>
-        /// Sets all CPG parameters to their initial values. Updates pose to apply new parameters.
+        /// Wrapper for Unity.
         /// </summary>
         public void Reset()
         {
-            ResetBuoyancy();
-            ResetCPG();
+            DoReset();
+        }
+        
+        /// <summary>
+        /// Sets all CPG parameters to their initial values. Updates pose to apply new parameters.
+        /// </summary>
+        public void DoReset(bool randomStart = false)
+        {
+            ResetBuoyancy(randomStart);
+            ResetCPG(randomStart);
             UpdatePose();
-            Tail.Reset();
+            Tail.DoReset(randomStart);
         }
 
         /// <summary>
         /// Resets CPG-related arrays to their initial values.
         /// </summary>
-        private void ResetCPG()
+        private void ResetCPG(bool randomStart = false)
         {
-            Phases = (float[])initialPhases.Clone();
-            PhaseShifts = (float[])initialPhaseShifts.Clone();
-            Amplitudes = (float[])initialAmplitudes.Clone();
-            AmplitudeShifts = (float[])initialAmplitudeShifts.Clone();
-            AmplitudeShifts2 = (float[])initialAmplitudeShifts2.Clone();
-            OrientationOffsets = (float[])initialOrientationOffsets.Clone();
-            OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();
+            if (randomStart)
+            {
+                for (int i = 0; i < initialPhases.Length; i++)
+                {
+                    Phases[i] = Random.Range(0, Mathf.PI*2);
+                    PhaseShifts[i] = Random.Range(0, maxPhaseShift);
+                    Amplitudes[i] = Random.Range(1, 2);
+                    AmplitudeShifts[i] = 0;
+                    AmplitudeTargets[i] = Random.Range(1,2);
+                }
+                for (int i = 0; i < initialOrientationOffsets.Length; i++)
+                {
+                    OrientationOffsets[i] = Random.Range(0, Mathf.PI*2);
+                    OrientationOffsetShifts[i] = Random.Range(-maxOrientationShift, maxOrientationShift);
+                }
+            }
+            else
+            {
+                Phases = (float[])initialPhases.Clone();
+                PhaseShifts = (float[])initialPhaseShifts.Clone();
+                Amplitudes = (float[])initialAmplitudes.Clone();
+                AmplitudeShifts = (float[])initialAmplitudeShifts.Clone();
+                AmplitudeTargets = (float[])initialAmplitudeTargets.Clone();
+                OrientationOffsets = (float[])initialOrientationOffsets.Clone();
+                OrientationOffsetShifts = (float[])initialOrientationOffsetShifts.Clone();
+            }
         }
 
         /// <summary>
         /// Resets tail control parameters to initial values.
         /// </summary>
-        private void ResetBuoyancy()
+        private void ResetBuoyancy(bool randomStart = false)
         {
             Buoyancy = new Vector3(0f, 0f, 0f);
-            BuoyancyTarget = 0f;
+            if (randomStart) {Buoyancy.y = Random.Range(0, maxBuoyancy); BuoyancyTarget = Random.Range(0, maxBuoyancy);}
+            else BuoyancyTarget = 2;
             UpdateBuoyancy();
         }
 
@@ -609,9 +636,9 @@ namespace RoboIguanaRL
         /// <returns>A tuple containing the x, y, z coordinates of the foot position.</returns>
         private (float x, float y, float z) GetFootPosition(float phase, float amplitude, float orientationOffset, int left)
         {
-            float x = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Cos(orientationOffset);
-            float y  = -h + (MathF.Sin(phase) > 0.0f ? gC : gP) * MathF.Sin(phase);
-            float z = -dStep * (amplitude - 1.0f) * MathF.Cos(phase) * MathF.Sin(orientationOffset) + left * 0.25f;
+            float x = -dStep * (amplitude - 1.0f) * Mathf.Cos(phase) * Mathf.Cos(orientationOffset);
+            float y  = -h + (Mathf.Sin(phase) > 0.0f ? gC : gP) * Mathf.Sin(phase);
+            float z = -dStep * (amplitude - 1.0f) * Mathf.Cos(phase) * Mathf.Sin(orientationOffset) + left * 0.25f;
 
             return (x, y, z);
         }
@@ -624,7 +651,7 @@ namespace RoboIguanaRL
         /// <returns>The angle for the spine/tail joint.</returns>
         private float GetSpineAngle(float phase, float amplitude)
         {
-            return MathF.Sin(phase) * (amplitude - 1f) * Mathf.Deg2Rad;
+            return Mathf.Sin(phase) * (amplitude - 1f) * Mathf.Deg2Rad;
         }
 
         // =========================================================
@@ -772,9 +799,9 @@ namespace RoboIguanaRL
         private (float OrientationOffsets, float amplitude) RecoverParameters(float x, float z, float phase)
         {
             Debug.Log("Parameter Recovery called");
-            float OrientationOffsets = MathF.Atan2(-z, -x);
-            float radius = MathF.Sqrt(x * x + z * z);
-            float amplitude = 1.0f + radius / (dStep * MathF.Abs(MathF.Cos(phase)));
+            float OrientationOffsets = Mathf.Atan2(-z, -x);
+            float radius = Mathf.Sqrt(x * x + z * z);
+            float amplitude = 1.0f + radius / (dStep * Mathf.Abs(Mathf.Cos(phase)));
 
 
             return (OrientationOffsets, amplitude);

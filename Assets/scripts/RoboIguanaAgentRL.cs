@@ -128,7 +128,7 @@ namespace RoboIguanaRL
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
             StartingPosition.y += 0.01f;
-            higherPos = new Vector3(StartingPosition.x, StartingPosition.y+1, StartingPosition.z);
+            higherPos = new Vector3(StartingPosition.x, StartingPosition.y+1.5f, StartingPosition.z);
 
             if (training.Config["2D"]) fixedHeight = training.Config["Swimming"]? higherPos.y: StartingPosition.y;
             firstEpisode = true;
@@ -146,7 +146,7 @@ namespace RoboIguanaRL
             waiting = waitSteps;
 
             // Reset Robot Position
-            CPG.Reset();
+            CPG.DoReset(training.Config["RandomStart"]);
 
             if (training.Config["Swimming"]) Body.TeleportRoot(higherPos, StartingOrientation);
 
@@ -470,7 +470,7 @@ namespace RoboIguanaRL
             // Tail Status
             training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: -1);
             // swimm height
-            training.ExpRewards["yPos"] = transform.position.y - higherPos.y;
+            training.ExpRewards["yPos"] = (Body.transform.position.y - higherPos.y)/(StartingPosition.y-higherPos.y);
 
             AddReward(training.GetReward());
         }

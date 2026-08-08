@@ -233,7 +233,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initial second derivative of amplitude shifts for legs and spine.
         /// </summary>
-        private readonly float[] initialAmplitudeShifts2 = {0f, 0f, 0f, 0f, 0f, 0f};
+        private readonly float[] initialAmplitudeTargets = {0f, 0f, 0f, 0f, 0f, 0f};
 
         /// <summary>
         /// Initial orientation offsets for foot trajectories (Phi). Leg order: FL, FR, RL, RR.
@@ -264,7 +264,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Current second derivative of amplitude shifts (r''). Controlled via µ.
         /// </summary>
-        private float[] AmplitudeShifts2;
+        private float[] AmplitudeTargets;
         /// <summary>
         /// Amplitude controll parameters from the agent. Amplitude will converge to µ.
         /// </summary>
@@ -461,7 +461,7 @@ namespace RoboIguanaRL
         private void ResetBuoyancy()
         {
             Buoyancy = new Vector3(0f, 0f, 0f);
-            BuoyancyShift = 0f;
+            BuoyancyTarget = 0f;
             UpdateBuoyancy();
         }
 
@@ -489,11 +489,11 @@ namespace RoboIguanaRL
                 Phases[i] = (Phases[i] + PhaseShifts[i] * TimeStep) % (2 * Mathf.PI);
             }
 
-            for (int i = 0; i < AmplitudeShifts2.Length; i++)
+            for (int i = 0; i < AmplitudeTargets.Length; i++)
             {
                 Amplitudes[i] += AmplitudeShifts[i] * TimeStep;
-                AmplitudeShifts[i] += AmplitudeShifts2[i] * TimeStep;
-                AmplitudeShifts2[i] =  convergence * (convergence / 4 * (µ[i] - Amplitudes[i]) - AmplitudeShifts[i]);
+                AmplitudeShifts[i] += AmplitudeTargets[i] * TimeStep;
+                AmplitudeTargets[i] =  convergence * (convergence / 4 * (µ[i] - Amplitudes[i]) - AmplitudeShifts[i]);
             }
 
             for (int i = 0; i < OrientationOffsets.Length; i++)
@@ -590,8 +590,8 @@ namespace RoboIguanaRL
         {
             // use dfferential equation to stabelize buoyancy control
             Buoyancy.y += BuoyancyShift * TimeStep;
-            BuoyancyShift += BuoyancyShift2 * TimeStep;
-            BuoyancyShift2 =  convergenceB * (convergenceB / 4 * (beta - Buoyancy.y) - BuoyancyShift);
+            BuoyancyShift += BuoyancyTarget * TimeStep;
+            BuoyancyTarget =  convergenceB * (convergenceB / 4 * (beta - Buoyancy.y) - BuoyancyShift);
         
             BuoyancyForcePoint.ApplyWorldForce(Buoyancy);
         }

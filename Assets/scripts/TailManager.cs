@@ -139,7 +139,7 @@ namespace RoboIguanaRL {
         public void DoReset(bool randomStart = false)
         {
             ParamIdcs = new int[] {0, 0};
-            if (randomStart) {for (int i = 0; i < ParamIdcs.Length; i++) ParamIdcs[i] = (int)Mathf.Round(Random.value * (possibleParameters[i].Length)-1);} // 0 and max value not same prob as others
+            if (randomStart) {for (int i = 0; i < ParamIdcs.Length; i++) ParamIdcs[i] = (int)Mathf.Round(Random.value * (possibleParameters[i].Length-1));} // 0 and max value not same prob as others
             Force = Vector3.zero;
             EnergyConsumption = 0f;
             phase = 0f;

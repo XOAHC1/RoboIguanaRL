@@ -1,23 +1,23 @@
 {
-    "swim-straight": false,
-    "RandomXVelocity": false,
+    "SimpleWalking": true,
+    "RandomXVelocity": true,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
     "RandomStart": true,
 
-    "Swimming": true,
+    "Swimming": false,
     "Transition": false,
     "Landing": false,
-    "2D" : true,
+    "2D" : false,
 
-    "LegPhases": false,
-    "LegAmplitudes": false,
-    "LegRotations": false,
-    "SpinePhases": false,
-    "SpineAmplitudes": false,
+    "LegPhases": true,
+    "LegAmplitudes": true,
+    "LegRotations": true,
+    "SpinePhases": true,
+    "SpineAmplitudes": true,
     "SpinePitch": false,
     "Buoyancy": false,
-    "Tail": true,
+    "Tail": false,
 
-    "Analysis": true
+    "Analysis": false
 }

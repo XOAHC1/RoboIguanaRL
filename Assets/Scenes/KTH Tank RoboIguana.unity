@@ -311,7 +311,6 @@ MonoBehaviour:
   kneeRR: {fileID: 1812005740}
   Spinejoint: {fileID: 864638642}
   printEvery: 10
-  _counter: 0
 --- !u!114 &33066901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -467,7 +466,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!4 &47294999 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3567068247855063146, guid: 78d04dcbae40bc646a35e455b2c6fc2b,
@@ -1000,7 +998,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!1 &226582454
 GameObject:
   m_ObjectHideFlags: 0
@@ -1122,7 +1119,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!114 &226582460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1311,7 +1307,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!1 &271306186
 GameObject:
   m_ObjectHideFlags: 0
@@ -1923,7 +1918,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!1 &339924523
 GameObject:
   m_ObjectHideFlags: 0
@@ -2020,7 +2014,7 @@ MonoBehaviour:
   m_Model: {fileID: 5022602860645237092, guid: bbe6060fd17e7ea42b57bb8222cb6c33, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: swim-straight
+  m_BehaviorName: SimpleWalking
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -2038,21 +2032,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18892df27c6dad7428d3bec365f3aad3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  m_PolicyFactory: {fileID: 0}
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 10000
-  m_Reward: 0
-  m_GroupReward: 0
-  m_CumulativeReward: 0
-  m_RequestAction: 0
-  m_RequestDecision: 0
-  m_StepCount: 0
-  m_CompletedEpisodes: 0
-  m_EpisodeId: 0
-  m_Initialized: 0
-  m_GroupId: 0
   footFL: {fileID: 226582460}
   footFR: {fileID: 1337741628}
   footRL: {fileID: 1588934152}
@@ -2060,23 +2043,6 @@ MonoBehaviour:
   obs: {fileID: 1363190118}
   Back: {fileID: 33066901}
   Body: {fileID: 33066898}
-  CPG: {fileID: 0}
-  EnergyEstimator: {fileID: 0}
-  decisionRequester: {fileID: 0}
-  TargetAngularVelocity: {x: 0, y: 0}
-  TargetLinearVelocity: {x: 0, y: 0}
-  locomotionType: 0
-  higherPos: {x: 0, y: 0, z: 0}
-  StartingPosition: {x: 0, y: 0, z: 0}
-  StartingOrientation: {x: 0, y: 0, z: 0, w: 0}
-  ComponentABs: []
-  waiting: 0
-  nextTargetSteps: 0
-  nextTargetFreq: 100
-  nextLocomotionmode: 2
-  locomotionModeChange: 2
-  fixedHeight: 0
-  firstEpisode: 0
 --- !u!114 &346296844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2118,7 +2084,6 @@ MonoBehaviour:
   kRR_Link: {fileID: 1812005740}
   spine_link_pitch: {fileID: 486339488}
   spine_link_yaw: {fileID: 864638642}
-  Tail: {fileID: 0}
   a: 0.116
   b: 0.09
   c: 0.172
@@ -2135,60 +2100,6 @@ MonoBehaviour:
   maxBuoyancyShift: 1
   maxPhaseShift: 0.6
   maxOrientationShift: 1.5
-  convergence: 150
-  convergenceB: 100
-  convergenceS: 100
-  TimeStep: 0
-  yaws:
-  - 0
-  - 0
-  - 0
-  - 0
-  hips:
-  - 0
-  - 0
-  - 0
-  - 0
-  knees:
-  - 0
-  - 0
-  - 0
-  - 0
-  hipYawLinks: []
-  hipPitchLinks: []
-  kneeLinks: []
-  spineLinks: []
-  hipYawHinges: []
-  hipPitchHinges: []
-  kneeHinges: []
-  spineHinges: []
-  spineRanges: []
-  Phases: []
-  PhaseShifts: []
-  Amplitudes: []
-  AmplitudeShifts: []
-  AmplitudeShifts2: []
-  "\xB5":
-  - 1.5
-  - 1.5
-  - 1.5
-  - 1.5
-  - 2
-  OrientationOffsets: []
-  OrientationOffsetShifts: []
-  Buoyancy: {x: 0, y: 0, z: 0}
-  beta: 0
-  BuoyancyShift: 0
-  BuoyancyShift2: 0
-  alpha: 0
-  SpinePitchShift: 0
-  SpineShift2: 0
-  SpinePitchAngle: 0
-  TailChanges: 0000000000000000
-  ActionIdxAmp: 0
-  ActionIdxOrientation: 0
-  ActionIdxSpine: 0
-  ActionIdxBuoyancy: 0
 --- !u!114 &346296845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2216,8 +2127,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 675a1e8b077807a488cb0a744ce65d7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  Estimators: []
-  Tail: {fileID: 0}
   CurrentEnergy: 0
   CumulatedEnergy: 0
 --- !u!114 &346296847
@@ -2249,10 +2158,7 @@ MonoBehaviour:
   Force: {x: 0, y: 0, z: 0}
   EnergyConsumption: 0
   parameters: []
-  DataPath: Assets/TailForcePhaseCycleData/
   phase: 0
-  ParamIdcs: 
-  TimeStep: 0
 --- !u!1 &363100052
 GameObject:
   m_ObjectHideFlags: 0
@@ -2396,7 +2302,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!1 &387685259
 GameObject:
   m_ObjectHideFlags: 0
@@ -2641,7 +2546,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!65 &397588908
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3446,7 +3350,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!1 &532248541 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5935641589257227575, guid: 3a014debc3b3e05449edaee2fa65ba19,
@@ -4474,7 +4377,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!4 &881004084 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5935641589257227572, guid: 3a014debc3b3e05449edaee2fa65ba19,
@@ -5827,7 +5729,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!114 &1337741628
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6633,7 +6534,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!1 &1562589696
 GameObject:
   m_ObjectHideFlags: 0
@@ -7018,7 +6918,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!114 &1588934152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7603,7 +7502,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!114 &1812005742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8074,8 +7972,6 @@ MonoBehaviour:
   offsetZ: 0
   centerAroundZero: 1
   generateOnStart: 1
-  terrainComp: {fileID: 0}
-  terrainData: {fileID: 0}
 --- !u!154 &1947155836
 TerrainCollider:
   m_ObjectHideFlags: 0
@@ -10448,7 +10344,6 @@ MonoBehaviour:
   targetAngleRad: 0
   stiffness: 0
   damping: 0
-  joint: {fileID: 0}
 --- !u!1 &2130136000
 GameObject:
   m_ObjectHideFlags: 0

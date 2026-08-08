@@ -1,5 +1,5 @@
 behaviors:
-  swim-straight:
+  SimpleWalking:
     trainer_type: ppo
 
     hyperparameters:
@@ -40,6 +40,6 @@ engine_settings:
   no_graphics: true
 
 checkpoint_settings:
-  run_id: swim-with-height
+  run_id: SimpleWalking
   force: true
   resume: false

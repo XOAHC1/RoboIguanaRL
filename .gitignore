@@ -35,7 +35,7 @@ ExportedObj/
 *.app
 
 Resources*
-# Executable*
+Executable*
 
 # Crashlytics generated file
 crashlytics-build.properties

@@ -461,17 +461,17 @@ namespace RoboIguanaRL
             var angVel = obs.transform.InverseTransformDirection(obs.angularVelocity);
 
             // linear velocity x
-            training.ExpRewards["xVel"] = relVel.x - TargetLinearVelocity.x;
+            training.ExpRewards["xVel"] = (relVel.x - TargetLinearVelocity.x) / TargetLinearVelocity.x;
             // linear velocity y
-            training.ExpRewards["yVel"] = relVel.y - TargetLinearVelocity.y;
+            training.ExpRewards["yVel"] = (relVel.y - TargetLinearVelocity.y) / TargetLinearVelocity.y;
             // linear velocity z
             training.QuadPenalties["zVel"] = relVel.z;
             // angular velocity roll
             training.QuadPenalties["rollRate"] = angVel.x;
             // angular velocity yaw
-            training.ExpRewards["yawRate"] = angVel.y - TargetAngularVelocity.x;
+            training.ExpRewards["yawRate"] = (angVel.y - TargetAngularVelocity.x ) / TargetAngularVelocity.x;
             // angular velocity pitch
-            training.ExpRewards["pitchRate"] = angVel.z - TargetAngularVelocity.y;
+            training.ExpRewards["pitchRate"] = (angVel.z - TargetAngularVelocity.y) / TargetAngularVelocity.y;
             // Work
             training.QuadPenalties["work"] = EnergyEstimator.CurrentEnergy;
             // ground contact

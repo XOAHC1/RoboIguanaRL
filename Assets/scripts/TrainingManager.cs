@@ -200,7 +200,7 @@ namespace RoboIguanaRL
                 var val = 
                     Mathf.Pow(Mathf.Abs(ExpRewards[key]), 2);
                 var partialReward = 
-                    Mathf.Exp(-(val / 0.2f)) * RewardWeights[key] * Time.fixedDeltaTime;
+                    Mathf.Exp(-(val / 0.25f)) * RewardWeights[key] * Time.fixedDeltaTime;
 
                 Rewards[key].Add(partialReward);
                 stepReward += partialReward;

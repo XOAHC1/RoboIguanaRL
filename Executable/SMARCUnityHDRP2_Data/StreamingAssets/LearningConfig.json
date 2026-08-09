@@ -3,7 +3,7 @@
     "RandomXVelocity": true,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
-    "RandomStart": false,
+    "RandomStart": true,
     "LongEpisodes": false,
 
     "Swimming": false,

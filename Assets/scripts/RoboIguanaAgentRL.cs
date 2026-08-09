@@ -135,6 +135,8 @@ namespace RoboIguanaRL
             StartingPosition.y += 0.01f;
             higherPos = new Vector3(StartingPosition.x, StartingPosition.y+1.5f, StartingPosition.z);
 
+            // apply settings
+            MaxStep = training.Config["LongEpisodes"]? 20000: 10000;
             if (training.Config["2D"]) fixedHeight = training.Config["Swimming"]? higherPos.y: StartingPosition.y;
             firstEpisode = true;
 
@@ -153,7 +155,7 @@ namespace RoboIguanaRL
             // Reset Robot Position
             CPG.DoReset(training.Config["RandomStart"]);
 
-            if (training.Config["Swimming"]) Body.TeleportRoot(higherPos, StartingOrientation);
+            if (training.Config["Swimming"] | training.Config["Landing"]) Body.TeleportRoot(higherPos, StartingOrientation);
 
             foreach (ArticulationBody ab in ComponentABs)
             {
@@ -366,7 +368,7 @@ namespace RoboIguanaRL
             }
 
             // settle locomotion type
-            locomotionType = training.Config["Swimming"]? 0: 1;
+            locomotionType = training.Config["Swimming"]? 0: training.Config["Landing"]? 2: 1;
 
             // generate target velocities, foreward and upward
             var vel = new Vector2(
@@ -382,7 +384,8 @@ namespace RoboIguanaRL
                 new Vector2 (
                     Random.Range(-0.3f, 0.3f),
                     (locomotionType == 0) ? 
-                        Random.Range(-0.2f, 0.2f) :
+                        Random.Range(-0.2f, 0.2f):
+                        (locomotionType == 2)? -0.1f :
                         0f
                 ): 
                 // default values
@@ -472,7 +475,7 @@ namespace RoboIguanaRL
             // Work
             training.QuadPenalties["work"] = EnergyEstimator.CurrentEnergy;
             // ground contact
-            training.LinRewards["groundContact"] = ((locomotionType == 1) ? 1: -1) * (groundContact ? 1f : -1f);
+            training.LinRewards["groundContact"] = ((locomotionType == 1) ? 1: (locomotionType == 2)? 0: -1) * (groundContact ? 1f : -1f);
             // Tail Status
             training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: -1);
             // swimm height

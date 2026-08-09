@@ -16,7 +16,7 @@
     "SpinePhases": false,
     "SpineAmplitudes": false,
     "SpinePitch": false,
-    "Buoyancy": false,
+    "Buoyancy": true,
     "Tail": true,
 
     "Analysis": true

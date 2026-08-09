@@ -34,8 +34,8 @@ ExportedObj/
 *.unitypackage
 *.app
 
-Resources*
-Executable*
+# Resources*
+# Executable*
 
 # Crashlytics generated file
 crashlytics-build.properties
@@ -65,8 +65,9 @@ Assets/scripts/behaviours/*
 
 # ignore training results for now
 results
-Assets/ML-Agents
+# Assets/ML-Agents
 
 # Ignore all meta files
 *.meta
 Executable/SMARCUnityHDRP2_Data/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
+Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json

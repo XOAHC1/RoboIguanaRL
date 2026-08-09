@@ -61,7 +61,7 @@ Assets/TextMesh\ Pro/
 Assets/TextMesh\ Pro.meta
 Assets/msgbrowser_settings.asset*
 Assets/_Recovery
-Assets/scripts/behaviours/*
+# Assets/scripts/behaviours/*
 
 # ignore training results for now
 results

@@ -73,16 +73,6 @@ results/*
 !results/
 !results/SimpleWalking/
 
-# keep results trained remotely
-!results/
-!results/SimpleWalking/
-!results/SimpleWalking/**
-
-# keep results trained remotely
-!results/
-!results/SimpleWalking/
-!results/SimpleWalking/**
-
 # Ignore all meta files
 # *.meta
 Executable/SMARCUnityHDRP2_Data/ML-Agents/Timers/KTH Tank RoboIguana_timers.json

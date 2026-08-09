@@ -35,7 +35,7 @@ ExportedObj/
 *.app
 
 Resources*
-# Executable*
+Executable*
 
 # Crashlytics generated file
 crashlytics-build.properties
@@ -64,7 +64,7 @@ Assets/_Recovery
 Assets/scripts/behaviours/*
 
 # ignore training results for now
-# results
+results
 Assets/ML-Agents
 
 # Ignore all meta files

@@ -245,6 +245,7 @@ namespace RoboIguanaRL
             sensor.AddObservation(TargetLinearVelocity.y - obs.transform.InverseTransformDirection(obs.linearVelocity).y);
             sensor.AddObservation(TargetAngularVelocity);
             sensor.AddObservation(transform.InverseTransformDirection(obs.angularVelocity));
+            sensor.AddObservation(obs.transform.up);
 
             // Contact Booleans
             sensor.AddObservation(footFR.verticalForce);
@@ -480,6 +481,8 @@ namespace RoboIguanaRL
             training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: -1);
             // swimm height
             training.ExpRewards["yPos"] = (Body.transform.position.y - higherPos.y)/(StartingPosition.y-higherPos.y);
+            // orientation of the robot
+            training.ExpRewards["orientaton"] = (obs.transform.up - Vector3.up).magnitude / 2;
 
             AddReward(training.GetReward());
         }

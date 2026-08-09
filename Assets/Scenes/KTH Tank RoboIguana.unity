@@ -2005,7 +2005,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 47
+    VectorObservationSize: 50
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 16
@@ -2017,7 +2017,7 @@ MonoBehaviour:
   m_Model: {fileID: 5022602860645237092, guid: bbe6060fd17e7ea42b57bb8222cb6c33, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: SimpleWalking
+  m_BehaviorName: Base behaviour
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1

@@ -1,6 +1,6 @@
 {
-    "e_xVel": 0.5,
-    "e_yVel": 1,
+    "e_xVel": 0,
+    "e_yVel": 0,
     "e_yawRate": 0,
     "e_pitchRate": 0,
     "q_zVel": 0,
@@ -11,5 +11,6 @@
     "l_baseReward": 0,
     "l_crash": 0,
     "l_simpleTrainingPenalties": 0,
-    "e_yPos": 0
+    "e_yPos": 0,
+    "e_orientation": 0
 }

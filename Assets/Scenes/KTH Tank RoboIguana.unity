@@ -1128,10 +1128,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 226582454}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Script: {fileID: 11500000, guid: ea6e8cd0475e3bb42a5fb197d4bb9ec9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
+  m_EditorClassIdentifier: Assembly-CSharp::FootForceSensor
+  groundReactionForce: {x: 0, y: 0, z: 0}
+  verticalForce: 0
+  totalForceMagnitude: 0
+  contact: 0
 --- !u!1 &229087276
 GameObject:
   m_ObjectHideFlags: 0
@@ -5738,10 +5741,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1337741623}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Script: {fileID: 11500000, guid: ea6e8cd0475e3bb42a5fb197d4bb9ec9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
+  m_EditorClassIdentifier: Assembly-CSharp::FootForceSensor
+  groundReactionForce: {x: 0, y: 0, z: 0}
+  verticalForce: 0
+  totalForceMagnitude: 0
+  contact: 0
 --- !u!1 &1344569511
 GameObject:
   m_ObjectHideFlags: 0
@@ -6927,10 +6933,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1588934148}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Script: {fileID: 11500000, guid: ea6e8cd0475e3bb42a5fb197d4bb9ec9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
+  m_EditorClassIdentifier: Assembly-CSharp::FootForceSensor
+  groundReactionForce: {x: 0, y: 0, z: 0}
+  verticalForce: 0
+  totalForceMagnitude: 0
+  contact: 0
 --- !u!1 &1615696144
 GameObject:
   m_ObjectHideFlags: 0
@@ -7511,10 +7520,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812005738}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39421de32ffa8ad4ab866be49b46caec, type: 3}
+  m_Script: {fileID: 11500000, guid: ea6e8cd0475e3bb42a5fb197d4bb9ec9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ContactDetector
-  IsTouchingGround: 0
+  m_EditorClassIdentifier: Assembly-CSharp::FootForceSensor
+  groundReactionForce: {x: 0, y: 0, z: 0}
+  verticalForce: 0
+  totalForceMagnitude: 0
+  contact: 0
 --- !u!1 &1826013491
 GameObject:
   m_ObjectHideFlags: 0

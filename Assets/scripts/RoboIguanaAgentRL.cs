@@ -17,7 +17,7 @@ namespace RoboIguanaRL
         /// Contact detector for the foot.
         /// </summary>
         [Header("Contact Sensors")]
-        public ContactDetector footFL, footFR, footRL, footRR;
+        public FootForceSensor footFL, footFR, footRL, footRR;
 
         /// <summary>
         /// Point to observe robot position.
@@ -245,10 +245,10 @@ namespace RoboIguanaRL
             sensor.AddObservation(transform.InverseTransformDirection(obs.angularVelocity));
 
             // Contact Booleans
-            sensor.AddObservation(footFR.IsTouchingGround);
-            sensor.AddObservation(footFL.IsTouchingGround);
-            sensor.AddObservation(footRL.IsTouchingGround);
-            sensor.AddObservation(footRR.IsTouchingGround);
+            sensor.AddObservation(footFR.verticalForce);
+            sensor.AddObservation(footFL.verticalForce);
+            sensor.AddObservation(footRL.verticalForce);
+            sensor.AddObservation(footRR.verticalForce);
 
             // internal state
             sensor.AddObservation(CPG.GetPhases());
@@ -451,7 +451,7 @@ namespace RoboIguanaRL
         private void GiveReward()
         {
             // Any foot touching the ground?
-            bool groundContact = footFL.IsTouchingGround || footFR.IsTouchingGround || footRL.IsTouchingGround || footRR.IsTouchingGround;
+            bool groundContact = footFL.contact || footFR.contact || footRL.contact || footRR.contact;
 
             // precalculate velocites
             var relVel = obs.transform.InverseTransformDirection(obs.linearVelocity);

@@ -72,7 +72,6 @@ results/*
 # keep results trained remotely
 !results/
 !results/SimpleWalking/
-!results/SimpleWalking/**
 
 # Ignore all meta files
 # *.meta

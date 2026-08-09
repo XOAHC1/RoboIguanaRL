@@ -6,7 +6,13 @@ public class FootForceSensor : MonoBehaviour
     public Vector3 groundReactionForce;
     public float verticalForce;
     public float totalForceMagnitude;
+    public bool contact;
 
+    public void Reset()
+    {
+        OnCollisionExit(null);
+    }
+    
     void OnCollisionStay(Collision collision)
     {
         // Only measure ground layer if needed
@@ -19,6 +25,7 @@ public class FootForceSensor : MonoBehaviour
 
         verticalForce = groundReactionForce.y;
         totalForceMagnitude = groundReactionForce.magnitude;
+        contact = true;
     }
 
     void OnCollisionExit(Collision collision)
@@ -26,5 +33,6 @@ public class FootForceSensor : MonoBehaviour
         groundReactionForce = Vector3.zero;
         verticalForce = 0f;
         totalForceMagnitude = 0f;
+        contact = false;
     }
 }

@@ -78,5 +78,4 @@ results/*
 # *.meta
 Executable/SMARCUnityHDRP2_Data/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
 Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
-Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
 ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json

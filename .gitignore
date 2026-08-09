@@ -34,7 +34,7 @@ ExportedObj/
 *.unitypackage
 *.app
 
-Resources*
+# Resources*
 # Executable*
 
 # Crashlytics generated file

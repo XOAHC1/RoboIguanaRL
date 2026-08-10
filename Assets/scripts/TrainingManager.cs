@@ -195,6 +195,7 @@ namespace RoboIguanaRL
         public float GetReward()
         {
             var stepReward = 0f;
+            var RewardDebug = "Step rewards:\n";
             foreach (var key in expKeys)
             {
                 var val = 
@@ -204,6 +205,7 @@ namespace RoboIguanaRL
 
                 Rewards[key].Add(partialReward);
                 stepReward += partialReward;
+                if (RewardWeights[key] != 0) RewardDebug = RewardDebug + $"{key}: {partialReward} \n";
             }
             foreach (var key in linKeys) 
             {
@@ -211,6 +213,7 @@ namespace RoboIguanaRL
                 LinRewards[key] * RewardWeights[key] * Time.fixedDeltaTime;
                 Rewards[key].Add(partialReward);
                 stepReward += partialReward;
+                if (RewardWeights[key] != 0) RewardDebug = RewardDebug + $"{key}: {partialReward} \n";
             }
             foreach (var key in quadKeys) 
             {
@@ -218,8 +221,10 @@ namespace RoboIguanaRL
                 - Mathf.Pow(QuadPenalties[key], 2) * RewardWeights[key] * Time.fixedDeltaTime;
                 Rewards[key].Add(partialReward);
                 stepReward += partialReward;
+                if (RewardWeights[key] != 0) RewardDebug = RewardDebug + $"{key}: {partialReward} \n";
             }
 
+            if (Config["Analysis"]) Debug.Log(RewardDebug);
             return stepReward;            
         }
 

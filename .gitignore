@@ -65,25 +65,11 @@ Assets/_Recovery
 
 # ignore training results for now
 results/*
-
-# keep results trained remotely
 !results/SimpleWalking/
-
-# keep results trained remotely
-!results/
-!results/SimpleWalking/
-
-# keep results trained remotely
-!results/
-!results/SimpleWalking/
-!results/SimpleWalking/**
 
 # Ignore all meta files
 # *.meta
 Executable/SMARCUnityHDRP2_Data/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
 Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
-Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
 ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
 Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json.meta
-Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
-ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json

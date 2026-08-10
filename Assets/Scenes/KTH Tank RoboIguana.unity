@@ -2017,7 +2017,7 @@ MonoBehaviour:
   m_Model: {fileID: 5022602860645237092, guid: bbe6060fd17e7ea42b57bb8222cb6c33, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: SimpleWalking
+  m_BehaviorName: SimpleWalking2
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1

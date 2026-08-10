@@ -1,5 +1,5 @@
 behaviors:
-  SimpleWalking:
+  SimpleWalking2:
     trainer_type: ppo
 
     hyperparameters:
@@ -25,7 +25,7 @@ behaviors:
         gamma: 0.99
         strength: 1.0
 
-    max_steps: 15e6
+    max_steps: 10e6
     time_horizon: 512
     summary_freq: 10000
 
@@ -40,6 +40,6 @@ engine_settings:
   no_graphics: true
 
 checkpoint_settings:
-  run_id: SimpleWalking
+  run_id: SimpleWalking2
   force: true
   resume: false

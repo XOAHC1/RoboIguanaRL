@@ -1,5 +1,5 @@
 {
-    "SimpleWalking": true,
+    "SimpleWalking2": true,
     "RandomXVelocity": true,
     "RandomYVelocity": false,
     "RandomAngularVelocity": false,
@@ -12,10 +12,10 @@
     "2D" : false,
 
     "LegPhases": true,
-    "LegAmplitudes": true,
-    "LegRotations": true,
+    "LegAmplitudes": false,
+    "LegRotations": false,
     "SpinePhases": true,
-    "SpineAmplitudes": true,
+    "SpineAmplitudes": false,
     "SpinePitch": false,
     "Buoyancy": false,
     "Tail": false,

@@ -484,8 +484,6 @@ namespace RoboIguanaRL
             // orientation of the robot
             training.ExpRewards["orientation"] = (obs.transform.up - Vector3.up).magnitude / 2;
 
-            Debug.Log($"Up: {obs.transform.up - Vector3.up}, {(obs.transform.up - Vector3.up).magnitude / 2}");
-
             AddReward(training.GetReward());
         }
 

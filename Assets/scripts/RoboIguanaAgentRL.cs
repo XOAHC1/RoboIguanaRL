@@ -462,17 +462,17 @@ namespace RoboIguanaRL
             var angVel = obs.transform.InverseTransformDirection(obs.angularVelocity);
 
             // linear velocity x
-            training.ExpRewards["xVel"] = (relVel.x - TargetLinearVelocity.x) / TargetLinearVelocity.x;
+            training.ExpRewards["xVel"] = (relVel.x - TargetLinearVelocity.x) / Mathf.Clamp(TargetLinearVelocity.x, 0.01f, 1);
             // linear velocity y
-            training.ExpRewards["yVel"] = (relVel.y - TargetLinearVelocity.y) / TargetLinearVelocity.y;
+            training.ExpRewards["yVel"] = (relVel.y - TargetLinearVelocity.y) / Mathf.Clamp(TargetLinearVelocity.y, 0.01f, 1);
             // linear velocity z
             training.QuadPenalties["zVel"] = relVel.z;
             // angular velocity roll
             training.QuadPenalties["rollRate"] = angVel.x;
             // angular velocity yaw
-            training.ExpRewards["yawRate"] = (angVel.y - TargetAngularVelocity.x ) / TargetAngularVelocity.x;
+            training.ExpRewards["yawRate"] = (angVel.y - TargetAngularVelocity.x ) / Mathf.Clamp(TargetAngularVelocity.x, 0.01f, 1);
             // angular velocity pitch
-            training.ExpRewards["pitchRate"] = (angVel.z - TargetAngularVelocity.y) / TargetAngularVelocity.y;
+            training.ExpRewards["pitchRate"] = (angVel.z - TargetAngularVelocity.y) / Mathf.Clamp(TargetAngularVelocity.x, 0.01f, 1);
             // Work
             training.QuadPenalties["work"] = EnergyEstimator.CurrentEnergy;
             // ground contact
@@ -482,7 +482,9 @@ namespace RoboIguanaRL
             // swimm height
             training.ExpRewards["yPos"] = (Body.transform.position.y - higherPos.y)/(StartingPosition.y-higherPos.y);
             // orientation of the robot
-            training.ExpRewards["orientaton"] = (obs.transform.up - Vector3.up).magnitude / 2;
+            training.ExpRewards["orientation"] = (obs.transform.up - Vector3.up).magnitude / 2;
+
+            Debug.Log($"Up: {obs.transform.up - Vector3.up}, {(obs.transform.up - Vector3.up).magnitude / 2}");
 
             AddReward(training.GetReward());
         }

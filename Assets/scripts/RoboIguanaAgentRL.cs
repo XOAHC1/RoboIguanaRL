@@ -5,6 +5,7 @@ using Unity.MLAgents.Sensors;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 namespace RoboIguanaRL
 {
@@ -235,7 +236,7 @@ namespace RoboIguanaRL
         public override void CollectObservations(VectorSensor sensor)
         {
             if (training.Config["Analysis"]){
-                Debug.Log($"Linear velocity: {obs.linearVelocity} \n Angular velocity: {obs.transform.InverseTransformDirection(obs.angularVelocity)} \n Robot Position: {obs.transform.position}");
+                Debug.Log($"Linear velocity: {obs.linearVelocity.y - 0.14f} \n Angular velocity: {obs.transform.InverseTransformDirection(obs.angularVelocity)} \n Robot Position: {obs.transform.position}");
                 }
             if (nextTargetSteps < 2) ResetTarget();
             else nextTargetSteps --;
@@ -245,12 +246,13 @@ namespace RoboIguanaRL
 
             // Debug.Log($"Test: {TargetLinearVelocity.y}");
             var relTarget = obs.transform.InverseTransformDirection(TargetLinearVelocity);
-            var relObserv = obs.transform.InverseTransformDirection(obs.linearVelocity);
+            var actVel = obs.linearVelocity; actVel.y -= 0.14f;
+            var relObserv = obs.transform.InverseTransformDirection(actVel);
 
             // position and velocity observations
             sensor.AddObservation(locomotionType);
             sensor.AddObservation(relTarget.x - relObserv.x);
-            sensor.AddObservation(obs.linearVelocity.y - TargetLinearVelocity.y);
+            sensor.AddObservation(actVel.y - TargetLinearVelocity.y);
             sensor.AddObservation(TargetAngularVelocity);
             sensor.AddObservation(transform.InverseTransformDirection(obs.angularVelocity));
             sensor.AddObservation(obs.transform.up);
@@ -381,10 +383,9 @@ namespace RoboIguanaRL
 
             // generate target velocities, foreward and upward
             var vel = new Vector2(
-                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.4f): 0.1f,
+                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.4f): 0.2f,
                 training.Config["RandomYVelocity"] && training.Config["Swimming"]? Random.Range(-0.2f, 0.2f): 0f
             );
-            // if (training.Config["Landing"]) vel.y = Mathf.Clamp(vel.y, -0.15f, 0);
             TargetLinearVelocity = vel * (training.Config["Swimming"]? 0.66f: 1f);
             
             // generate target angular velocities

@@ -1,5 +1,5 @@
 behaviors:
-  landing:
+  landing_:
     trainer_type: ppo
 
     hyperparameters:
@@ -25,9 +25,9 @@ behaviors:
         gamma: 0.99
         strength: 1.0
 
-    max_steps: 6e6
+    max_steps: 8e6
     time_horizon: 128
-    summary_freq: 10000
+    summary_freq: 50000
 
     keep_checkpoints: 10
     checkpoint_interval: 500000
@@ -35,11 +35,11 @@ behaviors:
     init_path: results\landing\landing\checkpoint.pt
 
 env_settings:
-  env_path: Executable\SMARCUnityHDRP2.exe
-  num_envs: 5
+  env_path: ..\Executable\SMARCUnityHDRP2.exe
+  num_envs: 4
 
 engine_settings:
   no_graphics: true
 
 checkpoint_settings:
-  run_id: landing2
+  run_id: landing_1

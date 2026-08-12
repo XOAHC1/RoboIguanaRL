@@ -1,5 +1,5 @@
 {
-    "landing2": false,
+    "landing_1": true,
     "RandomXVelocity": true,
     "RandomYVelocity": true,
     "RandomAngularVelocity": false,
@@ -11,7 +11,7 @@
     "Landing": true,
     "2D" : false,
 
-    "LegPhases": true,
+    "LegPhases": false,
     "LegAmplitudes": false,
     "LegRotations": false,
     "SpinePhases": true,

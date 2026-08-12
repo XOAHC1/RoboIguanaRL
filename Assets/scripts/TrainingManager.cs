@@ -224,7 +224,7 @@ namespace RoboIguanaRL
                 if (RewardWeights[key] != 0) RewardDebug = RewardDebug + $"{key}: {partialReward} \n";
             }
 
-            if (Config["Analysis"]) Debug.Log(RewardDebug);
+            // if (Config["Analysis"]) Debug.Log(RewardDebug);
             return stepReward;            
         }
 

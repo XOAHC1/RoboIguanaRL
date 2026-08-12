@@ -65,7 +65,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Target velocity in meters per second.
         /// </summary> <remarks>
-        /// Relative to the robot, x,y
+        /// X is relative to the robot, whereas y is in absolute coordinates.
         /// </remarks>
         private Vector2 TargetLinearVelocity = Vector2.zero;
 
@@ -99,7 +99,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Number of agent decisions until new target inputs are generated.
         /// </summary>
-        private int nextTargetSteps, nextTargetFreq = 100;
+        private int nextTargetSteps, nextTargetFreq = 250;
 
         /// <summary>
         /// Number of target resets until locomotion mode is changed when landing.
@@ -155,7 +155,7 @@ namespace RoboIguanaRL
             // Reset Robot Position
             CPG.DoReset(training.Config["RandomStart"]);
 
-            if (training.Config["Swimming"] | training.Config["Landing"]) Body.TeleportRoot(higherPos, StartingOrientation);
+            if (training.Config["Swimming"] || training.Config["Landing"]) Body.TeleportRoot(higherPos, StartingOrientation);
 
             foreach (ArticulationBody ab in ComponentABs)
             {
@@ -197,7 +197,7 @@ namespace RoboIguanaRL
             if (training.Config["Transition"]) {training.Config["Swimming"] = true; training.Config["Landing"] = false;}
 
             training.NewEpisode();
-            if (!firstEpisode & training.LogHistory) training.LogEpisode();
+            if (!firstEpisode && training.LogHistory) training.LogEpisode();
 
             ResetTarget();
             nextLocomotionmode = locomotionModeChange;
@@ -235,14 +235,22 @@ namespace RoboIguanaRL
         public override void CollectObservations(VectorSensor sensor)
         {
             if (training.Config["Analysis"]){
-                Debug.Log($"Linear velocity: {transform.InverseTransformDirection(Body.linearVelocity)} \n Angular velocity: {transform.InverseTransformDirection(Body.angularVelocity)} \n Robot Position: {Body.transform.position}");}
+                Debug.Log($"Linear velocity: {obs.linearVelocity} \n Angular velocity: {obs.transform.InverseTransformDirection(obs.angularVelocity)} \n Robot Position: {obs.transform.position}");
+                }
             if (nextTargetSteps < 2) ResetTarget();
             else nextTargetSteps --;
 
+            if (!training.Config["Swimming"])
+                TargetLinearVelocity.y = Mathf.Pow((obs.transform.position.y - StartingPosition.y) / (higherPos.y-StartingPosition.y), 2) * (-0.5f);
+
+            // Debug.Log($"Test: {TargetLinearVelocity.y}");
+            var relTarget = obs.transform.InverseTransformDirection(TargetLinearVelocity);
+            var relObserv = obs.transform.InverseTransformDirection(obs.linearVelocity);
+
             // position and velocity observations
             sensor.AddObservation(locomotionType);
-            sensor.AddObservation(TargetLinearVelocity.x - obs.transform.InverseTransformDirection(obs.linearVelocity).x);
-            sensor.AddObservation(TargetLinearVelocity.y - obs.transform.InverseTransformDirection(obs.linearVelocity).y);
+            sensor.AddObservation(relTarget.x - relObserv.x);
+            sensor.AddObservation(obs.linearVelocity.y - TargetLinearVelocity.y);
             sensor.AddObservation(TargetAngularVelocity);
             sensor.AddObservation(transform.InverseTransformDirection(obs.angularVelocity));
             sensor.AddObservation(obs.transform.up);
@@ -329,7 +337,7 @@ namespace RoboIguanaRL
                 training.LinRewards["SimpleTrainingPenalties"] += 
                     cont[15] > 0? cont[15]: 0;
                 // block
-                cont[15] = Mathf.Clamp(cont[15], -1, 0.5f);
+                // cont[15] = Mathf.Clamp(cont[15], -1, 0.5f);
             }
     
             // Debug.Log($"Agent Actons after processing: Continuous=[{string.Join(", ", buffers.ContinuousActions.ToArray())}], Discrete=[{string.Join(", ", buffers.DiscreteActions.ToArray())}]");
@@ -347,20 +355,20 @@ namespace RoboIguanaRL
             nextTargetSteps = nextTargetFreq;
 
             // update locomotion mode
-            if(training.Config["Transition"] & (training.Config["Swimming"] | training.Config["Landing"]))
+            if(training.Config["Transition"] && (training.Config["Swimming"] || training.Config["Landing"]))
             {
-                Debug.Log($"modeCounter: {nextLocomotionmode}");
+                // Debug.Log($"modeCounter: {nextLocomotionmode}");
                 if (nextLocomotionmode == 0)
                 {
                     if (training.Config["Swimming"])
                     {
-                        if (training.Config["Analysis"]) Debug.Log("Start landing");
+                        Debug.Log("Start landing");
                         training.Config["Swimming"] = false;
                         training.Config["Landing"] = true;
                     }
                     else if (training.Config["Landing"])
                     {
-                        if (training.Config["Analysis"]) Debug.Log("Finished landing");
+                        Debug.Log("Finished landing");
                         training.Config["Landing"] = false;
                     }
                     nextLocomotionmode = locomotionModeChange;
@@ -373,10 +381,10 @@ namespace RoboIguanaRL
 
             // generate target velocities, foreward and upward
             var vel = new Vector2(
-                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.4f): 0.3f,
-                training.Config["RandomYVelocity"] ? Random.Range(-0.2f, 0.3f): 0f
+                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.4f): 0.1f,
+                training.Config["RandomYVelocity"] && training.Config["Swimming"]? Random.Range(-0.2f, 0.2f): 0f
             );
-            if (training.Config["Landing"]) vel.y = -0.1f;
+            // if (training.Config["Landing"]) vel.y = Mathf.Clamp(vel.y, -0.15f, 0);
             TargetLinearVelocity = vel * (training.Config["Swimming"]? 0.66f: 1f);
             
             // generate target angular velocities
@@ -395,7 +403,8 @@ namespace RoboIguanaRL
                     0f
                 );
             
-            if (training.Config["Analysis"]) Debug.Log($"New Target: \n LinVel: {TargetLinearVelocity} \n AngVel: {TargetAngularVelocity}");
+            if (training.Config["Analysis"]) 
+                Debug.Log($"New Target: \n LinVel: {TargetLinearVelocity} \n AngVel: {TargetAngularVelocity}");
         }
 
         /// <summary>
@@ -458,21 +467,22 @@ namespace RoboIguanaRL
             bool groundContact = footFL.contact || footFR.contact || footRL.contact || footRR.contact;
 
             // precalculate velocites
+            var relTarLinVel = obs.transform.InverseTransformDirection(TargetLinearVelocity);
             var relVel = obs.transform.InverseTransformDirection(obs.linearVelocity);
-            var angVel = obs.transform.InverseTransformDirection(obs.angularVelocity);
+            var relAngVel = obs.transform.InverseTransformDirection(obs.angularVelocity);
 
             // linear velocity x
-            training.ExpRewards["xVel"] = (relVel.x - TargetLinearVelocity.x) / Mathf.Clamp(TargetLinearVelocity.x, 0.01f, 1);
+            training.ExpRewards["xVel"] = (relVel.x - relTarLinVel.x) / ((relTarLinVel.x != 0)? Mathf.Abs(relTarLinVel.x): 0.01f);
             // linear velocity y
-            training.ExpRewards["yVel"] = (relVel.y - TargetLinearVelocity.y) / Mathf.Clamp(TargetLinearVelocity.y, 0.01f, 1);
+            training.ExpRewards["yVel"] = (obs.linearVelocity.y - TargetLinearVelocity.y) / ((TargetLinearVelocity.y != 0)? Mathf.Abs(TargetLinearVelocity.y): 0.01f);
             // linear velocity z
             training.QuadPenalties["zVel"] = relVel.z;
             // angular velocity roll
-            training.QuadPenalties["rollRate"] = angVel.x;
+            training.QuadPenalties["rollRate"] = relAngVel.x;
             // angular velocity yaw
-            training.ExpRewards["yawRate"] = (angVel.y - TargetAngularVelocity.x ) / Mathf.Clamp(TargetAngularVelocity.x, 0.01f, 1);
+            training.ExpRewards["yawRate"] = (relAngVel.y - TargetAngularVelocity.x ) / ((TargetAngularVelocity.x != 0)? Mathf.Abs(TargetAngularVelocity.x): 0.01f);
             // angular velocity pitch
-            training.ExpRewards["pitchRate"] = (angVel.z - TargetAngularVelocity.y) / Mathf.Clamp(TargetAngularVelocity.x, 0.01f, 1);
+            training.ExpRewards["pitchRate"] = (relAngVel.z - TargetAngularVelocity.y) /((TargetAngularVelocity.y != 0)? Mathf.Abs(TargetAngularVelocity.y): 0.01f);
             // Work
             training.QuadPenalties["work"] = EnergyEstimator.CurrentEnergy;
             // ground contact

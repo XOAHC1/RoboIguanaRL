@@ -465,6 +465,7 @@ namespace RoboIguanaRL
         /// </summary>
         private void ResetCPG(bool randomStart = false)
         {
+            var randOrientation = false;
             if (randomStart)
             {
                 for (int i = 0; i < initialPhases.Length; i++)
@@ -477,8 +478,8 @@ namespace RoboIguanaRL
                 }
                 for (int i = 0; i < initialOrientationOffsets.Length; i++)
                 {
-                    OrientationOffsets[i] = Random.Range(0, Mathf.PI*2);
-                    OrientationOffsetShifts[i] = Random.Range(-maxOrientationShift, maxOrientationShift);
+                    OrientationOffsets[i] = randOrientation? Random.Range(0, Mathf.PI*2): 0;
+                    OrientationOffsetShifts[i] = randOrientation? Random.Range(-maxOrientationShift, maxOrientationShift): 0;
                 }
             }
             else

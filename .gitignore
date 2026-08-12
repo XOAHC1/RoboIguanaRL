@@ -68,6 +68,9 @@ results/*
 
 # keep results trained remotely
 !results/SimpleWalking/
+!results/keepBalance/
+results/*/run_logs/*
+*.log
 
 # keep results trained remotely
 !results/
@@ -80,3 +83,4 @@ Executable/SMARCUnityHDRP2_Data/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
 Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json
 ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
 Assets/ML-Agents/Timers/KTH Tank RoboIguana_timers.json.meta
+

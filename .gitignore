@@ -72,6 +72,8 @@ results/*
 results/*/run_logs/*
 *.log
 
+Executable
+
 # keep results trained remotely
 !results/
 !results/SimpleWalking/

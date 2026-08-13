@@ -249,6 +249,8 @@ namespace RoboIguanaRL
             var actVel = obs.linearVelocity; actVel.y -= 0.14f;
             var relObserv = obs.transform.InverseTransformDirection(actVel);
 
+            // Debug.Log($"Target: {TargetLinearVelocity}, ObsVel: {obs.linearVelocity}, act_vel {actVel}");
+
             // Debug.Log($"Test: {TargetLinearVelocity}, actual: {actVel}");
 
             // position and velocity observations
@@ -384,11 +386,10 @@ namespace RoboIguanaRL
             locomotionType = training.Config["Swimming"]? 0: training.Config["Landing"]? 2: 1;
 
             // generate target velocities, foreward and upward
-            var vel = new Vector2(
+            TargetLinearVelocity = new Vector2(
                 training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.2f): 0.1f,
                 training.Config["RandomYVelocity"] && training.Config["Swimming"]? Random.Range(-0.2f, 0.2f): 0f
             );
-            // TargetLinearVelocity = vel * (training.Config["Swimming"]? 0.66f: 1f);
             
             // generate target angular velocities
             TargetAngularVelocity = training.Config["RandomAngularVelocity"] ?

@@ -2017,7 +2017,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: landing_
+  m_BehaviorName: kb+height_
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1

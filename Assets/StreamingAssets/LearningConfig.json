@@ -1,14 +1,14 @@
 {
-    "landing_1": true,
+    "kb+height_": true,
     "RandomXVelocity": true,
     "RandomYVelocity": true,
     "RandomAngularVelocity": false,
     "RandomStart": true,
-    "LongEpisodes": true,
+    "LongEpisodes": false,
 
-    "Swimming": false,
+    "Swimming": true,
     "Transition": false,
-    "Landing": true,
+    "Landing": false,
     "2D" : false,
 
     "LegPhases": false,

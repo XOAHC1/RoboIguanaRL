@@ -134,7 +134,8 @@ namespace RoboIguanaRL
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
             StartingPosition.y += 0.01f;
-            higherPos = new Vector3(StartingPosition.x, StartingPosition.y+1.5f, StartingPosition.z);
+            var startHeight = training.Config["Swimming"]? 1.5f: 0.5f;
+            higherPos = new Vector3(StartingPosition.x, StartingPosition.y+startHeight, StartingPosition.z);
 
             // apply settings
             MaxStep = training.Config["LongEpisodes"]? 20000: 10000;
@@ -242,12 +243,13 @@ namespace RoboIguanaRL
             else nextTargetSteps --;
 
             if (!training.Config["Swimming"])
-                TargetLinearVelocity.y = Mathf.Pow((obs.transform.position.y - StartingPosition.y) / (higherPos.y-StartingPosition.y), 2) * (-0.5f);
+                TargetLinearVelocity.y = Mathf.Clamp(-Mathf.Pow((obs.transform.position.y - StartingPosition.y) / (higherPos.y-StartingPosition.y), 2), -0.2f, 0);
 
-            // Debug.Log($"Test: {TargetLinearVelocity.y}");
             var relTarget = obs.transform.InverseTransformDirection(TargetLinearVelocity);
             var actVel = obs.linearVelocity; actVel.y -= 0.14f;
             var relObserv = obs.transform.InverseTransformDirection(actVel);
+
+            // Debug.Log($"Test: {TargetLinearVelocity}, actual: {actVel}");
 
             // position and velocity observations
             sensor.AddObservation(locomotionType);
@@ -383,10 +385,10 @@ namespace RoboIguanaRL
 
             // generate target velocities, foreward and upward
             var vel = new Vector2(
-                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.4f): 0.2f,
+                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.2f): 0.1f,
                 training.Config["RandomYVelocity"] && training.Config["Swimming"]? Random.Range(-0.2f, 0.2f): 0f
             );
-            TargetLinearVelocity = vel * (training.Config["Swimming"]? 0.66f: 1f);
+            // TargetLinearVelocity = vel * (training.Config["Swimming"]? 0.66f: 1f);
             
             // generate target angular velocities
             TargetAngularVelocity = training.Config["RandomAngularVelocity"] ?

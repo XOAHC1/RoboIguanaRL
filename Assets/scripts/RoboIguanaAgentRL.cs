@@ -243,7 +243,8 @@ namespace RoboIguanaRL
             else nextTargetSteps --;
 
             if (!training.Config["Swimming"])
-                TargetLinearVelocity.y = Mathf.Clamp(-Mathf.Pow((obs.transform.position.y - StartingPosition.y) / (higherPos.y-StartingPosition.y), 2), -0.2f, 0);
+                // TargetLinearVelocity.y = Mathf.Clamp(-Mathf.Pow((obs.transform.position.y - StartingPosition.y) / (higherPos.y-StartingPosition.y), 2), -0.2f, 0);
+                TargetLinearVelocity.y = Mathf.Clamp(-(obs.transform.position.y - StartingPosition.y) * 1.5f, -0.2f, -0.005f);
 
             var relTarget = obs.transform.InverseTransformDirection(TargetLinearVelocity);
             var actVel = obs.linearVelocity; actVel.y -= 0.14f;
@@ -251,11 +252,11 @@ namespace RoboIguanaRL
 
             // Debug.Log($"Target: {TargetLinearVelocity}, ObsVel: {obs.linearVelocity}, act_vel {actVel}");
 
-            // Debug.Log($"Test: {TargetLinearVelocity}, actual: {actVel}");
+            Debug.Log($"Target: ({TargetLinearVelocity.x}, {TargetLinearVelocity.y}), actual: {actVel}");
 
             // position and velocity observations
             sensor.AddObservation(locomotionType);
-            sensor.AddObservation(relTarget.x - relObserv.x);
+            sensor.AddObservation(TargetLinearVelocity.x - relObserv.x);
             sensor.AddObservation(actVel.y - TargetLinearVelocity.y);
             sensor.AddObservation(TargetAngularVelocity);
             sensor.AddObservation(transform.InverseTransformDirection(obs.angularVelocity));
@@ -387,7 +388,7 @@ namespace RoboIguanaRL
 
             // generate target velocities, foreward and upward
             TargetLinearVelocity = new Vector2(
-                training.Config["RandomXVelocity"] ? Random.Range(0.0f, 0.2f): 0.1f,
+                training.Config["RandomXVelocity"] ? Random.Range(0.02f, 0.25f): 0.15f,
                 training.Config["RandomYVelocity"] && training.Config["Swimming"]? Random.Range(-0.2f, 0.2f): 0f
             );
             
@@ -476,7 +477,7 @@ namespace RoboIguanaRL
             var relAngVel = obs.transform.InverseTransformDirection(obs.angularVelocity);
 
             // linear velocity x
-            training.ExpRewards["xVel"] = (relVel.x - relTarLinVel.x) / ((relTarLinVel.x != 0)? Mathf.Abs(relTarLinVel.x): 0.01f);
+            training.ExpRewards["xVel"] = (relVel.x - TargetLinearVelocity.x) / ((TargetLinearVelocity.x != 0)? Mathf.Abs(TargetLinearVelocity.x): 0.01f);
             // linear velocity y
             training.ExpRewards["yVel"] = (obs.linearVelocity.y - TargetLinearVelocity.y) / ((TargetLinearVelocity.y != 0)? Mathf.Abs(TargetLinearVelocity.y): 0.01f);
             // linear velocity z

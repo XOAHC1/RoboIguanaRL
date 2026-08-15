@@ -5,8 +5,6 @@ using Unity.MLAgents.Sensors;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using Unity.VisualScripting;
-using UnityEngine.Rendering;
 using MathNet.Numerics.Statistics;
 
 namespace RoboIguanaRL
@@ -209,7 +207,8 @@ namespace RoboIguanaRL
             decisionRequester.DecisionPeriod = 99999;
 
             // set locomotion mode to start value
-            if (training.Config["Transition"]) {training.Config["Swimming"] = true; training.Config["Landing"] = false;}
+            // if (training.Config["Transition"]) {training.Config["Swimming"] = true; training.Config["Landing"] = false;}
+            if (training.Config["Transition"]) {training.Config["Landing"] = true;}
 
             training.NewEpisode();
             if (!firstEpisode) {
@@ -375,6 +374,9 @@ namespace RoboIguanaRL
 
         private void LogObservations()
         {
+            if (!training.Config["GaitAnalysis"])
+                return;
+            Analysis.AnalysisState["mode"]  =   locomotionType;
             Analysis.AnalysisState["xT"]    =   TargetLinearVelocity.x;
             Analysis.AnalysisState["yT"]    =   TargetLinearVelocity.y;
             Analysis.AnalysisState["vx"]    =   obs.linearVelocity.x;
@@ -387,6 +389,8 @@ namespace RoboIguanaRL
             Analysis.AnalysisState["C_RL"]  =   footRL.verticalForce;
             Analysis.AnalysisState["C_RR"]  =   footRR.verticalForce;
             CPG.LogState();
+
+            Analysis.DoUpdate();
         }
 
         /// <summary>
@@ -475,11 +479,8 @@ namespace RoboIguanaRL
             CPG.Step();
             EnergyEstimator.Step();
 
-            if (training.Config["GaitAnalysis"])
-            {
-                LogObservations();
-                Analysis.DoUpdate();
-            }
+            LogObservations();
+
             // evaluate step
             // TerminateIfNecessary();
             GiveReward();

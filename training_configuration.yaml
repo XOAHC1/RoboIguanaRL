@@ -1,5 +1,5 @@
 behaviors:
-  kb+height_+land_walk+:
+  kb+height_+land_walk++transit:
     trainer_type: ppo
 
     hyperparameters:
@@ -25,14 +25,14 @@ behaviors:
         gamma: 0.99
         strength: 1.0
 
-    max_steps: 1.5e6
+    max_steps: 10e6
     time_horizon: 128
     summary_freq: 50000
 
     keep_checkpoints: 10
     checkpoint_interval: 500000
 
-    init_path: results\kb+height_+land_walk+\kb+height_+land_walk+\checkpoint.pt
+    init_path: results\kb+height_+land_walk++\kb+height_+land_walk+\checkpoint.pt
 
 env_settings:
   env_path: ..\Executable\SMARCUnityHDRP2.exe
@@ -42,4 +42,4 @@ engine_settings:
   no_graphics: true
 
 checkpoint_settings:
-  run_id: kb+height_+land_walk++
+  run_id: kb+height_+land_walk++transit

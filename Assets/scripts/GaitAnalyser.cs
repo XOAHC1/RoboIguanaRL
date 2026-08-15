@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 public class GaitAnalyser
 {
@@ -20,11 +21,12 @@ public class GaitAnalyser
         AnalysisParameters = new List<Dictionary<string, float>>();
         AnalysisState = new Dictionary<string, float>();
 
-        LogPath = Path.Combine("Analysis", "Gait_data", $"{this.run_id}_GaitAnalysis.csv");
+        LogPath = Path.Combine("Analysis", "Gait_data", $"{this.run_id}-gait_data.csv");
     }
 
     public void DoUpdate()
     {
+        if (active)
         AnalysisParameters.Add(new Dictionary<string, float>(AnalysisState));
     }
 
@@ -42,7 +44,7 @@ public class GaitAnalyser
             using (var writer = new StreamWriter(LogPath, false))
             {
                 writer.Write("Episode");
-                foreach(var k in AnalysisParameters[0].Keys)
+                foreach(var k in AnalysisParameters.First().Keys)
                 {
                     writer.Write($",{k}");
                 }
@@ -54,6 +56,7 @@ public class GaitAnalyser
 
     public void LogEpisode()
     {
+        if (!active) return;
         if (first) {WriteHead(); first=false;}
 
         using (var writer = new StreamWriter(LogPath, true))

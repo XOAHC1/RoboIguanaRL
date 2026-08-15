@@ -1,13 +1,13 @@
 {
-    "kb+height_+land_walk+": false,
+    "kb+height_+land_walk++transit": true,
     "RandomXVelocity": true,
     "RandomYVelocity": true,
     "RandomAngularVelocity": false,
     "RandomStart": true,
-    "LongEpisodes": false,
+    "LongEpisodes": true,
 
     "Swimming": false,
-    "Transition": false,
+    "Transition": true,
     "Landing": true,
     "2D" : false,
 

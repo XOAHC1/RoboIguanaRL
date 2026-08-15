@@ -32,7 +32,7 @@ behaviors:
     keep_checkpoints: 10
     checkpoint_interval: 500000
 
-    init_path: results\kb+height_+land_walk\kb+height_+land_walk\checkpoint.pt
+    init_path: results\kb+height_+land_walk+\kb+height_+land_walk+\checkpoint.pt
 
 env_settings:
   env_path: ..\Executable\SMARCUnityHDRP2.exe
@@ -42,4 +42,4 @@ engine_settings:
   no_graphics: true
 
 checkpoint_settings:
-  run_id: kb+height_+land_walk+
+  run_id: kb+height_+land_walk++

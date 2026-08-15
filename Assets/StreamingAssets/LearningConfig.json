@@ -1,5 +1,5 @@
 {
-    "kb+height_+land_": true,
+    "kb+height_+land_walk": true,
     "RandomXVelocity": true,
     "RandomYVelocity": true,
     "RandomAngularVelocity": false,
@@ -12,7 +12,7 @@
     "2D" : false,
 
     "LegPhases": true,
-    "LegAmplitudes": false,
+    "LegAmplitudes": true,
     "LegRotations": false,
     "SpinePhases": true,
     "SpineAmplitudes": true,

@@ -6,6 +6,8 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
+using UnityEngine.Rendering;
+using MathNet.Numerics.Statistics;
 
 namespace RoboIguanaRL
 {
@@ -113,6 +115,9 @@ namespace RoboIguanaRL
 
         private bool firstEpisode;
 
+        private float yVel, lastPos;
+        private float[] velHist;
+
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
         /// </summary>
@@ -120,6 +125,9 @@ namespace RoboIguanaRL
         {
             Debug.Log("RoboIguanaAgentRL: Initialize");
             decisionRequester = GetComponent<DecisionRequester>();
+
+            yVel = 0f;
+            velHist = new float[] {0, 0, 0};
 
             // Get components
             CPG = GetComponent<RoboIguanaCPGController>();
@@ -236,9 +244,6 @@ namespace RoboIguanaRL
         /// <param name="sensor">The vector sensor to add observations to.</param>
         public override void CollectObservations(VectorSensor sensor)
         {
-            if (training.Config["Analysis"]){
-                Debug.Log($"Linear velocity: {obs.linearVelocity.y - 0.14f} \n Angular velocity: {obs.transform.InverseTransformDirection(obs.angularVelocity)} \n Robot Position: {obs.transform.position}");
-                }
             if (nextTargetSteps < 2) ResetTarget();
             else nextTargetSteps --;
 
@@ -246,13 +251,18 @@ namespace RoboIguanaRL
                 // TargetLinearVelocity.y = Mathf.Clamp(-Mathf.Pow((obs.transform.position.y - StartingPosition.y) / (higherPos.y-StartingPosition.y), 2), -0.2f, 0);
                 TargetLinearVelocity.y = Mathf.Clamp(-(obs.transform.position.y - StartingPosition.y) * 1.5f, -0.2f, -0.005f);
 
-            var relTarget = obs.transform.InverseTransformDirection(TargetLinearVelocity);
-            var actVel = obs.linearVelocity; actVel.y -= 0.14f;
+            // var relTarget = obs.transform.InverseTransformDirection(TargetLinearVelocity);
+            var actVel = obs.linearVelocity; actVel.y = yVel;
             var relObserv = obs.transform.InverseTransformDirection(actVel);
 
-            // Debug.Log($"Target: {TargetLinearVelocity}, ObsVel: {obs.linearVelocity}, act_vel {actVel}");
 
-            Debug.Log($"Target: ({TargetLinearVelocity.x}, {TargetLinearVelocity.y}), actual: {actVel}");
+            if (training.Config["Analysis"]){
+                Debug.Log($"Linear velocity: {actVel} \n Angular velocity: {obs.transform.InverseTransformDirection(obs.angularVelocity)} \n Robot Position: {obs.transform.position}");
+                }
+
+            // Debug.Log($"Target: {TargetLinearVelocity}, ObsVel: {obs.linearVelocity}, act_vel {actVel}");
+            // Debug.Log($"pos: {obs.transform.position}");
+            // Debug.Log($"Target: ({TargetLinearVelocity.x}, {TargetLinearVelocity.y}), actual: {actVel}");
 
             // position and velocity observations
             sensor.AddObservation(locomotionType);
@@ -431,6 +441,9 @@ namespace RoboIguanaRL
                 return;
             }
 
+            // keep y velocity up to date
+            GetVelocity();
+
             // update Robot
             CPG.Step();
             EnergyEstimator.Step();
@@ -463,6 +476,22 @@ namespace RoboIguanaRL
             EndEpisode();
         }
         
+        private void GetVelocity()
+        {
+            for (int i = 0; i < velHist.Length-1; i++)
+            {
+                velHist[i] = velHist[i+1];
+            }
+
+            velHist[^1] = (obs.transform.position.y - lastPos) / Time.fixedDeltaTime;
+            lastPos = obs.transform.position.y;
+
+            yVel = (float) velHist.Mean();
+
+            // Debug.Log($"Pos: {obs.transform.position.y}, lastPos: {lastPos}, velHist: ({velHist[0]}, {velHist[1]}, {velHist[2]}) , vel: {yVel}");
+        }
+
+
         /// <summary>
         /// Gives reward measures to <c>training</c> and applies reward to the agent.
         /// </summary>
@@ -473,13 +502,14 @@ namespace RoboIguanaRL
 
             // precalculate velocites
             var relTarLinVel = obs.transform.InverseTransformDirection(TargetLinearVelocity);
-            var relVel = obs.transform.InverseTransformDirection(obs.linearVelocity);
+            var actVel = obs.linearVelocity; actVel.y = yVel;
+            var relVel = obs.transform.InverseTransformDirection(actVel);
             var relAngVel = obs.transform.InverseTransformDirection(obs.angularVelocity);
 
             // linear velocity x
             training.ExpRewards["xVel"] = (relVel.x - TargetLinearVelocity.x) / ((TargetLinearVelocity.x != 0)? Mathf.Abs(TargetLinearVelocity.x): 0.01f);
             // linear velocity y
-            training.ExpRewards["yVel"] = (obs.linearVelocity.y - TargetLinearVelocity.y) / ((TargetLinearVelocity.y != 0)? Mathf.Abs(TargetLinearVelocity.y): 0.01f);
+            training.ExpRewards["yVel"] = (actVel.y - TargetLinearVelocity.y) / ((TargetLinearVelocity.y != 0)? Mathf.Abs(TargetLinearVelocity.y): 0.01f);
             // linear velocity z
             training.QuadPenalties["zVel"] = relVel.z;
             // angular velocity roll

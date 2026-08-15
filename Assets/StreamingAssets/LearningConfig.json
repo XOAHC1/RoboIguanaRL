@@ -1,10 +1,10 @@
 {
-    "kb+height_+land_walk+": true,
+    "kb+height_+land_walk+": false,
     "RandomXVelocity": true,
     "RandomYVelocity": true,
     "RandomAngularVelocity": false,
     "RandomStart": true,
-    "LongEpisodes": true,
+    "LongEpisodes": false,
 
     "Swimming": false,
     "Transition": false,
@@ -20,5 +20,6 @@
     "Buoyancy": true,
     "Tail": true,
 
-    "Analysis": false
+    "Analysis": false,
+    "GaitAnalysis": false
 }

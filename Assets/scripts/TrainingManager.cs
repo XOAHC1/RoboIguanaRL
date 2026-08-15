@@ -70,7 +70,7 @@ namespace RoboIguanaRL
         /// <summary>
         /// Run id parameter of the mlagents learning process.
         /// </summary>
-        private string run_id;
+        public string run_id;
 
         public bool LogHistory;
 

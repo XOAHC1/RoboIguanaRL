@@ -342,6 +342,8 @@ namespace RoboIguanaRL
         /// </summary>
         Dictionary<string, float> TailState = new Dictionary<string, float>();
 
+        private GaitAnalyser Analysis;
+
         /// <summary>
         /// Returns the current state of the tail.
         /// </summary>
@@ -362,9 +364,11 @@ namespace RoboIguanaRL
         /// <summary>
         /// Initializes the CPG controller by reseting all parameters and initializing all joints.
         /// </summary>
-        public void Initialize()
+        public void Initialize(GaitAnalyser Analysis)
         {
+            this.Analysis = Analysis;
             Debug.Log("Initialze CPG");
+
             // get components
             Tail = GetComponent<TailManager>();
             Tail.Initialize();
@@ -776,6 +780,37 @@ namespace RoboIguanaRL
         {
             hinge.SetAngle(angleFactor * range);
         }
+
+        public void LogState()
+        {
+            if (Analysis == null || Analysis.AnalysisState == null)
+                return;
+
+            var state = Analysis.AnalysisState;
+
+            state["p_FL"] = Phases[0];
+            state["p_FR"] = Phases[1];
+            state["p_RL"] = Phases[2];
+            state["p_RR"] = Phases[3];
+            state["p_S"] = Phases[^1];
+            state["p_T"] = Tail != null ? Tail.phase : 0f;
+
+            state["r_FL"] = Amplitudes[0];
+            state["r_FR"] = Amplitudes[1];
+            state["r_RL"] = Amplitudes[2];
+            state["r_RR"] = Amplitudes[3];
+            state["r_S"] = Amplitudes[^1];
+            state["r_T"] = Tail != null ? Tail.parameters[0] : 0f;
+
+            state["o_FL"] = OrientationOffsets[0];
+            state["o_FR"] = OrientationOffsets[1];
+            state["o_RL"] = OrientationOffsets[2];
+            state["o_RR"] = OrientationOffsets[3];
+
+            state["a"] = SpinePitchAngle;
+            state["b"] = Buoyancy.y;
+        }
+
 
 
         // =========================================================

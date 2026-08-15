@@ -118,6 +118,8 @@ namespace RoboIguanaRL
         private float yVel, lastPos;
         private float[] velHist;
 
+        private GaitAnalyser Analysis;
+
         /// <summary>
         /// Initializes the agent by setting up the CPG controller and resetting the target.
         /// </summary>
@@ -126,18 +128,19 @@ namespace RoboIguanaRL
             Debug.Log("RoboIguanaAgentRL: Initialize");
             decisionRequester = GetComponent<DecisionRequester>();
 
+            training = new TrainingManager();
+            Analysis = new GaitAnalyser(training.Config["GaitAnalysis"], training.run_id);
+
             yVel = 0f;
             velHist = new float[] {0, 0, 0};
 
             // Get components
             CPG = GetComponent<RoboIguanaCPGController>();
-            CPG.Initialize();
+            CPG.Initialize(Analysis);
 
             EnergyEstimator = GetComponent<RobotEnergyEstimator>();
             ComponentABs = GetComponentsInChildren<ArticulationBody>().ToList();
             ComponentABs.Add(Body);;
-
-            training = new TrainingManager();
 
             // save starting parameters
             transform.GetPositionAndRotation(out StartingPosition, out StartingOrientation);
@@ -150,6 +153,8 @@ namespace RoboIguanaRL
             if (training.Config["2D"]) fixedHeight = training.Config["Swimming"]? higherPos.y: StartingPosition.y;
             firstEpisode = true;
 
+            LogObservations();
+            
             Debug.Log("Agent initialization over");
         }
 
@@ -207,7 +212,10 @@ namespace RoboIguanaRL
             if (training.Config["Transition"]) {training.Config["Swimming"] = true; training.Config["Landing"] = false;}
 
             training.NewEpisode();
-            if (!firstEpisode && training.LogHistory) training.LogEpisode();
+            if (!firstEpisode) {
+                if (training.LogHistory) training.LogEpisode();
+                Analysis.LogEpisode();
+                }
 
             ResetTarget();
             nextLocomotionmode = locomotionModeChange;
@@ -265,11 +273,14 @@ namespace RoboIguanaRL
             // Debug.Log($"Target: ({TargetLinearVelocity.x}, {TargetLinearVelocity.y}), actual: {actVel}");
 
             // position and velocity observations
+            var xError = TargetLinearVelocity.x - relObserv.x;
+            var yError = actVel.y - TargetLinearVelocity.y;
+            var angVel = transform.InverseTransformDirection(obs.angularVelocity);
             sensor.AddObservation(locomotionType);
-            sensor.AddObservation(TargetLinearVelocity.x - relObserv.x);
-            sensor.AddObservation(actVel.y - TargetLinearVelocity.y);
+            sensor.AddObservation(xError);
+            sensor.AddObservation(yError);
             sensor.AddObservation(TargetAngularVelocity);
-            sensor.AddObservation(transform.InverseTransformDirection(obs.angularVelocity));
+            sensor.AddObservation(angVel);
             sensor.AddObservation(obs.transform.up);
 
             // Contact Booleans
@@ -362,6 +373,22 @@ namespace RoboIguanaRL
             CPG.ApplyActions(buffers);
         }
 
+        private void LogObservations()
+        {
+            Analysis.AnalysisState["xT"]    =   TargetLinearVelocity.x;
+            Analysis.AnalysisState["yT"]    =   TargetLinearVelocity.y;
+            Analysis.AnalysisState["vx"]    =   obs.linearVelocity.x;
+            Analysis.AnalysisState["vy"]    =   yVel;
+            Analysis.AnalysisState["x"]     =   obs.transform.position.x;
+            Analysis.AnalysisState["y"]     =   obs.transform.position.y;
+            Analysis.AnalysisState["z"]     =   obs.transform.position.z;
+            Analysis.AnalysisState["C_FL"]  =   footFL.verticalForce;
+            Analysis.AnalysisState["C_FR"]  =   footFR.verticalForce;
+            Analysis.AnalysisState["C_RL"]  =   footRL.verticalForce;
+            Analysis.AnalysisState["C_RR"]  =   footRR.verticalForce;
+            CPG.LogState();
+        }
+
         /// <summary>
         /// Selects new locomotion targets.
         /// </summary> <remark> 
@@ -448,6 +475,11 @@ namespace RoboIguanaRL
             CPG.Step();
             EnergyEstimator.Step();
 
+            if (training.Config["GaitAnalysis"])
+            {
+                LogObservations();
+                Analysis.DoUpdate();
+            }
             // evaluate step
             // TerminateIfNecessary();
             GiveReward();

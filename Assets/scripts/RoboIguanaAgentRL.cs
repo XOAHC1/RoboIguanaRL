@@ -249,7 +249,7 @@ namespace RoboIguanaRL
 
             if (!training.Config["Swimming"])
                 // TargetLinearVelocity.y = Mathf.Clamp(-Mathf.Pow((obs.transform.position.y - StartingPosition.y) / (higherPos.y-StartingPosition.y), 2), -0.2f, 0);
-                TargetLinearVelocity.y = Mathf.Clamp(-(obs.transform.position.y - StartingPosition.y) * 1.5f, -0.2f, -0.005f);
+                TargetLinearVelocity.y = Mathf.Clamp(-(obs.transform.position.y - (StartingPosition.y - 0.05f)), -0.2f, 0);
 
             // var relTarget = obs.transform.InverseTransformDirection(TargetLinearVelocity);
             var actVel = obs.linearVelocity; actVel.y = yVel;
@@ -261,7 +261,7 @@ namespace RoboIguanaRL
                 }
 
             // Debug.Log($"Target: {TargetLinearVelocity}, ObsVel: {obs.linearVelocity}, act_vel {actVel}");
-            // Debug.Log($"pos: {obs.transform.position}");
+            // Debug.Log($"pos: {obs.transform.position}, startPos: {StartingPosition}");
             // Debug.Log($"Target: ({TargetLinearVelocity.x}, {TargetLinearVelocity.y}), actual: {actVel}");
 
             // position and velocity observations
@@ -497,8 +497,8 @@ namespace RoboIguanaRL
         /// </summary>
         private void GiveReward()
         {
-            // Any foot touching the ground?
-            bool groundContact = footFL.contact || footFR.contact || footRL.contact || footRR.contact;
+            // fore and hind leg touching the ground?
+            bool groundContact = (footFL.contact || footFR.contact ) &&  (footRL.contact || footRR.contact);
 
             // precalculate velocites
             var relTarLinVel = obs.transform.InverseTransformDirection(TargetLinearVelocity);
@@ -521,9 +521,9 @@ namespace RoboIguanaRL
             // Work
             training.QuadPenalties["work"] = EnergyEstimator.CurrentEnergy;
             // ground contact
-            training.LinRewards["groundContact"] = ((locomotionType == 1) ? 1: (locomotionType == 2)? 0: -1) * (groundContact ? 1f : -1f);
+            training.LinRewards["groundContact"] = (!(locomotionType == 0) ? 1: -1) * (groundContact ? 1f : 0f);
             // Tail Status
-            training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * (CPG.GetTailState()["frequency"] == 0? 0: -1);
+            training.LinRewards["tailStatus"] = ((locomotionType == 1) ? 1: 0) * -CPG.GetTailState()["yaw amplitude"] / 40;
             // swimm height
             training.ExpRewards["yPos"] = (Body.transform.position.y - higherPos.y)/(StartingPosition.y-higherPos.y);
             // orientation of the robot

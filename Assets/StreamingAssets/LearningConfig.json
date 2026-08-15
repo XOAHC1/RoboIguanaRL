@@ -1,24 +1,25 @@
 {
-    "landing": false,
-    "RandomXVelocity": false,
-    "RandomYVelocity": false,
+    "kb+height_+land_walk+": false,
+    "RandomXVelocity": true,
+    "RandomYVelocity": true,
     "RandomAngularVelocity": false,
-    "RandomStart": false,
+    "RandomStart": true,
     "LongEpisodes": false,
 
-    "Swimming": true,
+    "Swimming": false,
     "Transition": false,
-    "Landing": false,
+    "Landing": true,
     "2D" : false,
 
-    "LegPhases": false,
-    "LegAmplitudes": false,
+    "LegPhases": true,
+    "LegAmplitudes": true,
     "LegRotations": false,
-    "SpinePhases": false,
-    "SpineAmplitudes": false,
-    "SpinePitch": false,
-    "Buoyancy": false,
-    "Tail": false,
+    "SpinePhases": true,
+    "SpineAmplitudes": true,
+    "SpinePitch": true,
+    "Buoyancy": true,
+    "Tail": true,
 
-    "Analysis": false
+    "Analysis": false,
+    "GaitAnalysis": false
 }

@@ -1,6 +1,5 @@
 import math
 
-
 class Test:
     def __init__(self):
         self.a = 0.116
@@ -13,7 +12,7 @@ class Test:
         # =========================================================
         self.dStep = 0.15
         self.gC = 0.04
-        self.gP = 0.03
+        self.gP = 0.01
         self.h = 0.18
 
         self.spineRange = 20.0
@@ -22,8 +21,8 @@ class Test:
         # =========================================================
         # Convergence Parameters
         # =========================================================
-        self.convergence = 0.1
-        self.TimeStep = 0.01
+        self.convergence = 150
+        self.TimeStep = 0.005
 
         # =========================================================
         # CPG PARAMETERS
@@ -51,13 +50,13 @@ class Test:
 
 
     def get_foot_position(self, phase, amplitude, orientation_offset):
-        x = -self.dStep * (amplitude - 1.0) * math.cos(phase) * math.cos(orientation_offset)
-        y = -self.h + (self.gC if math.sin(phase) > 0.0 else self.gP) * math.sin(phase)
-        z = -self.dStep * (amplitude - 1.0) * math.cos(phase) * math.sin(orientation_offset)
+        x = -self.dStep * (amplitude - 1.0) * math.sin(phase) * math.cos(orientation_offset)
+        y = -self.h + (self.gC if math.cos(phase) > 0.0 else self.gP) * math.cos(phase)
+        z = -self.dStep * (amplitude - 1.0) * math.sin(phase) * math.sin(orientation_offset)
 
-        print(
-            f"Foot Position - Phase: {phase}, Amplitude: {amplitude}, OrientationOffset: {orientation_offset}, Position: ({x}, {y}, {z})"
-        )
+        # print(
+            # f"Foot Position - Phase: {phase}, Amplitude: {amplitude}, OrientationOffset: {orientation_offset}, Position: ({x}, {y}, {z})"
+        # )
         return x, y, z
 
     def inverse_foot_position(self, phase, position, tolerance=1e-6):
@@ -84,11 +83,3 @@ class Test:
         return amplitude, orientation_offset
 
     
-
-
-T = Test()
-
-for i in range(4):
-    # T.get_foot_position(T.initialPhases[i], T.initialAmplitudes[i], T.initialOrientationOffset[i])
-
-    print(f"{T.inverse_foot_position(T.initialPhases[i], T.FootPositions[i])}")

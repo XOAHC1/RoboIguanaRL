@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Define parameters
 gait_data_dir = Path(__file__).parent / "Gait_data"
@@ -14,8 +15,10 @@ def load_data():
 
     for csv_file in gait_data_dir.glob("*.csv"):
         file_name = csv_file.stem
-        behaviour_name = file_name.split("_")[0]
+        behaviour_name = file_name[:-10]
+        print(behaviour_name)
         gait_files[behaviour_name] = pd.read_csv(csv_file)
+        
 
     return gait_files
 
@@ -37,7 +40,7 @@ def plot_phases(behaviour="test"):
     for col in phase_columns:
         # Use only the XY part, e.g. p_FL -> FL
         label = col[2:]
-        plt.plot(df[col], label=label)
+        plt.plot(np.sin(df[col]), label=label)
 
     plt.xlabel("Time")
     plt.ylabel("Phase")
@@ -110,7 +113,9 @@ def plot_everything(behaviour="test"):
         ("Foot trajectory rotations",   ["o_FL", "o_RL", "o_RR", "o_FR"]),
         ("Spine and tail phases",       ["p_S", "p_T"]),
         ("Spine and Tail amplitudes",   ["r_S", "r_T"]),
-        ("SPine pitch and buoyancy",    ["a", "b"]),
+        ("Spine pitch and buoyancy",    ["a", "b"]),
+        ("Target values",               ["xT", "yT"]),
+        ("Velocities",                  ["vx", "vy"])
     ]
 
     fig, axes = plt.subplots(
@@ -123,7 +128,7 @@ def plot_everything(behaviour="test"):
 
         for col in columns:
             if col in df.columns:
-                ax.plot(df[col], label=col)
+                ax.plot(df[col][50:], label=col)
 
         ax.set_title(title)
         ax.set_ylabel("Value")

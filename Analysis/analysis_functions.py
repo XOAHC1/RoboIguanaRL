@@ -11,11 +11,12 @@ gait_files = {}
 drop_start_idcs = 20
 drop_end_idcs = 0
 
-start = 1000
-stop = 8000
+start = 0
+stop = 10000
 idx = np.arange(start, stop)
 time = idx / 200
 
+switch = 7462
 
 def split_episodes(df):
     """Split a dataframe at rows marked with 'New episode' in the Episode column."""
@@ -32,9 +33,19 @@ def split_episodes(df):
             last_index = idx + 1
 
     if last_index < len(df):
-        episodes.append(df.iloc[last_index+drop_start_idcs:stop].copy())
+        episodes.append(df.iloc[last_index+drop_start_idcs:].copy())
 
     return episodes if episodes else [df]
+
+
+def find_mode_change_indices(df):
+    """Return the row indices where the 'mode' column changes value."""
+    if df.empty or "mode" not in df.columns:
+        return []
+
+    mode = df["mode"]
+    change_idx = np.flatnonzero(mode.ne(mode.shift(fill_value=mode.iloc[0])))
+    return change_idx.tolist()
 
 
 def get_behaviour_df(behaviour, episode_index=0):
@@ -47,8 +58,10 @@ def get_behaviour_df(behaviour, episode_index=0):
         if episode_index < 0:
             episode_index = len(data) + episode_index
         episode_index = max(0, min(episode_index, len(data) - 1))
-        return data[episode_index]
-
+        ed = data[episode_index]
+        switch = find_mode_change_indices(ed)
+        print(f"switch: {switch}")
+        return ed
 
     return
 
@@ -100,7 +113,42 @@ def plot_swimming(behaviour = "test"):
 
     df = get_behaviour_df(behaviour)
 
-    fig, axes = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+
+    # Plot a and r_S in another plot
+    if "a" in df.columns:
+        axes[1].plot(time, (df["a"][start:stop])/20, label=r"$a$")    
+    if "b" in df.columns:
+        axes[1].plot(time, (df["b"][start:stop])/20, label=r"$b$")
+    axes[1].set_title("Spine Pitch and Buoyancy")
+    axes[1].set_ylabel("Value relative to max")
+    axes[1].set_xlabel("Time")
+    ticks = np.arange(start, stop, 200) / 200
+    axes[1].set_xticks(ticks)
+    axes[1].legend()
+    axes[1].grid(True)
+
+    mark_mode_switch(axes[0])
+    mark_mode_switch(axes[1])
+
+
+    # Plot r_T and r_S in separate plot
+    if "p_T" in df.columns:
+        plot_phase(axes[0], df["p_T"], r"$\sin$ Tail phase")
+    if "r_T" in df.columns:
+        axes[0].plot(time, df["r_T"][start:stop]/40, label=r"$r_T$")
+    axes[0].set_title("Tail Activity")
+    axes[0].set_ylabel("Phase and relative amplitude")
+    axes[0].legend()
+    axes[0].grid(True)
+
+    fig.tight_layout()
+    fig.show()
+
+    fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+
+    mark_mode_switch(axes[0])
+    mark_mode_switch(axes[1])
 
     # Plot sin(p_S) and sin(p_T) in one plot
     if "p_S" in df.columns:
@@ -112,28 +160,18 @@ def plot_swimming(behaviour = "test"):
     axes[0].legend()
     axes[0].grid(True)
 
-    # Plot r_T and r_S in separate plot
-    if "p_T" in df.columns:
-        plot_phase(axes[1], df["p_T"], r"$\sin$ Tail phase")
-    if "r_T" in df.columns:
-        axes[1].plot(time, df["r_T"][start:stop]/40, label=r"$r_T$")
-    axes[1].set_title("Tail Activity")
-    axes[1].set_ylabel("Phase and relative amplitude")
+    if "pitch" in df.columns:
+        axes[1].plot(time, (df["pitch"][start:stop]), label="pitch")
+    if "roll" in df.columns:
+        axes[1].plot(time, (df["roll"][start:stop]), label="roll")
+        axes[0].set_title("Spine Pitch and Buoyancy")
+
+    axes[1].set_ylabel("Angle")
+    axes[1].set_xlabel("Time")
+    ticks1= np.arange(start, stop, 200) / 200
+    axes[1].set_xticks(ticks)
     axes[1].legend()
     axes[1].grid(True)
-
-    # Plot a and r_S in another plot
-    if "a" in df.columns:
-        axes[2].plot(time, (df["a"][start:stop])/20, label=r"$a$")    
-    if "b" in df.columns:
-        axes[2].plot(time, (df["b"][start:stop])/20, label=r"$b$")
-    axes[2].set_title("Spine Pitch and Buoyancy")
-    axes[2].set_ylabel("Value relative to max")
-    axes[2].set_xlabel("Time")
-    ticks = np.arange(start, stop, 200) / 200
-    axes[2].set_xticks(ticks)
-    axes[2].legend()
-    axes[2].grid(True)
 
 
 
@@ -167,7 +205,8 @@ def plot_walking(behaviour = "test"):
     )
 
     for ax, (title, label, columns) in zip(axes, groups):
- 
+
+        mark_mode_switch(ax)
         for col in columns:
             if title=="Phases":
                 plot_phase(ax, df[col], rf"{label}_{col[2:]}")
@@ -306,3 +345,6 @@ def plot_target_errors(behaviour="test"):
 
     fig.tight_layout()
     plt.show()
+
+def mark_mode_switch(ax):
+    ax.vlines(time[switch], 0, 1, label="mode switch")

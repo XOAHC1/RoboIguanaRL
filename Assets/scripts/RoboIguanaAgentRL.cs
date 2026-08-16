@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using MathNet.Numerics.Statistics;
+using Unity.VisualScripting;
 
 namespace RoboIguanaRL
 {
@@ -388,8 +389,10 @@ namespace RoboIguanaRL
             Analysis.AnalysisState["C_FR"]  =   footFR.verticalForce;
             Analysis.AnalysisState["C_RL"]  =   footRL.verticalForce;
             Analysis.AnalysisState["C_RR"]  =   footRR.verticalForce;
-            Analysis.AnalysisState["roll"]  =   (obs.transform.up-Vector3.up).z;
-            Analysis.AnalysisState["pitch"] =   (obs.transform.up-Vector3.up).x;
+            var r_ang = new Vector3(0, 0, obs.transform.up.z);
+            var p_ang = new Vector3(obs.transform.up.x, 0, 0);
+            Analysis.AnalysisState["roll"]  =   Vector3.Angle(r_ang, Vector3.up);
+            Analysis.AnalysisState["pitch"] =   Vector3.Angle(p_ang, Vector3.up);
             
             CPG.LogState();
 

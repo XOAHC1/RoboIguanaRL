@@ -23,19 +23,20 @@ def load_data():
     return gait_files
 
 
-def plot_phases(behaviour="test"):
+def plot_phases(behaviour="test", tail=False):
     """Plot all phase (p_XY) fields for the selected behaviour."""
 
     df = gait_files[behaviour]
 
     # Select columns whose names start with "p_"
     phase_columns = [col for col in df.columns if col.startswith("p_")]
+    if (not tail): phase_columns=phase_columns[:-1]
 
     if not phase_columns:
         print(f"No phase fields found for behaviour '{behaviour}'.")
         return
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, len(phase_columns)))
 
     for col in phase_columns:
         # Use only the XY part, e.g. p_FL -> FL

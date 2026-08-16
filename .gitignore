@@ -73,6 +73,7 @@ results/*/run_logs/*
 *.log
 
 Executable
+Analysis/__pycache__
 
 # keep results trained remotely
 !results/

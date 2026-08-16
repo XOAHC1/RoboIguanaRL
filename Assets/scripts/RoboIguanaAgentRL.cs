@@ -388,6 +388,9 @@ namespace RoboIguanaRL
             Analysis.AnalysisState["C_FR"]  =   footFR.verticalForce;
             Analysis.AnalysisState["C_RL"]  =   footRL.verticalForce;
             Analysis.AnalysisState["C_RR"]  =   footRR.verticalForce;
+            Analysis.AnalysisState["roll"]  =   (obs.transform.up-Vector3.up).z;
+            Analysis.AnalysisState["pitch"] =   (obs.transform.up-Vector3.up).x;
+            
             CPG.LogState();
 
             Analysis.DoUpdate();
